@@ -1,7 +1,9 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include "console.h"
 
 int main(void)
 {
-    printf("Test");
-    return 0;
+    set_console_information();
+    return EXIT_SUCCESS;
 }
