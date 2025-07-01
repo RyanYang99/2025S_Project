@@ -7,30 +7,24 @@
 #include "console.h"
 
 //임시 테스트용
-bool has_movement = false;
-
-static void movement(const wchar_t character)
+static int movement(void)
 {
-    if (character == L'w')
-    {
+    if (!_kbhit())
+        return 0;
+
+    const char character = (char)_getch();
+    if (character == 'w')
         --player.y;
-        has_movement = true;
-    }
-    else if (character == L'a')
-    {
+    else if (character == 'a')
         --player.x;
-        has_movement = true;
-    }
-    else if (character == L's')
-    {
+    else if (character == 's')
         ++player.y;
-        has_movement = true;
-    }
-    else if (character == L'd')
-    {
+    else if (character == 'd')
         ++player.x;
-        has_movement = true;
-    }
+    else if (character == 'q')
+        return 2;
+
+    return 1;
 }
 
 static void render(void)
@@ -46,7 +40,7 @@ int main(void)
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-    initialize_console(true, movement);
+    initialize_console(true);
     
     //map.h의 map 전역 변수로 현재 사용중인 맵 접근
     map = create_map();
@@ -57,15 +51,16 @@ int main(void)
     {
         update_console();
 
-        if (has_movement)
-        {
-            has_movement = false;
+        const int result = movement();
+        if (result == 1)
             clear();
-        }
+        else if (result == 2)
+            break;
 
         render();
     }
 
     destroy_map();
+    destroy_console();
     return EXIT_SUCCESS;
 }
