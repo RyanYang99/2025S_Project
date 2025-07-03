@@ -6,7 +6,7 @@
 #include "map.h"
 #include "console.h"
 
-//임시 테스트용
+//임시 테스트 용
 static int movement(void)
 {
     if (!_kbhit())
@@ -23,6 +23,10 @@ static int movement(void)
         ++player.x;
     else if (character == 'q')
         return 2;
+    else if (character == 'x')
+        resize(10);
+    else if (character == 'z')
+        resize(-10);
 
     return 1;
 }
@@ -33,6 +37,11 @@ static void render(void)
     //debug_render_map();
 }
 
+static void update_player_offset(void)
+{
+    player.x += map.offset_x;
+}
+
 int main(void)
 {
 #if _DEBUG
@@ -41,10 +50,8 @@ int main(void)
 #endif
 
     initialize_console(true);
-    
-    //map.h의 map 전역 변수로 현재 사용중인 맵 접근
-    map = create_map();
-    generate_map();
+    create_map();
+    subscribe_to_offset_change(update_player_offset);
 
     clear();
     while (true)

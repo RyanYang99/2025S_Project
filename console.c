@@ -56,10 +56,26 @@ const static COORD get_console_size(const HANDLE size_handle)
     return console_size;
 }
 
-void initialize_console(bool use_double_buffering)
+static void switch_font(void)
+{
+    CONSOLE_FONT_INFOEX cfi =
+    {
+        .cbSize = sizeof(cfi),
+        .nFont = 0,
+        .dwFontSize = { 8, 8 },
+        .FontFamily = FF_DONTCARE,
+        .FontWeight = FW_NORMAL,
+        .FaceName = TEXT("Terminal")
+    };
+    SetCurrentConsoleFontEx(handle, FALSE, &cfi);
+}
+
+void initialize_console(const bool use_double_buffering)
 {
     handle = GetStdHandle(STD_OUTPUT_HANDLE);
     console.size = get_console_size(handle);
+
+    switch_font();
 
     use_double_buffer = use_double_buffering;
     if (use_double_buffer)

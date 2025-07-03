@@ -1,13 +1,18 @@
-﻿#include "leak.h"
+﻿//TODO: Correct X and Y.
+
+#include "leak.h"
 
 #if _DEBUG
 #include <stdio.h>
 #endif
 
+#include <time.h>
 #include <stdbool.h>
 #include "map.h"
+#include "perlin.h"
 
-POINT player = { CHUNK_X / 2, 8 };
+int total_offsets = 0;
+POINT player = { 0 };
 map_t map = { 0 };
 
 const color_tchar_t pBlock_textures[BLOCKS][TEXTURE_SIZE][TEXTURE_SIZE] =
@@ -58,35 +63,93 @@ const color_tchar_t pBlock_textures[BLOCKS][TEXTURE_SIZE][TEXTURE_SIZE] =
     }
 };
 
-map_t create_map(void)
+static void allocate_map(void)
 {
-    map_t new_map = { 0 };
-    new_map.size.x = CHUNK_X;
-    new_map.size.y = CHUNK_Y;
+    const int y_size = sizeof(block_t *) * map.size.y;
 
-    new_map.ppBlocks = malloc(sizeof(block_t *) * new_map.size.y);
-    for (int y = 0; y < new_map.size.y; ++y)
-        new_map.ppBlocks[y] = malloc(sizeof(block_t) * new_map.size.x);
+    if (!map.ppBlocks)
+    {
+        map.ppBlocks = malloc(y_size);
+        memset(map.ppBlocks, 0, y_size);
+    }
+    else
+        map.ppBlocks = realloc(map.ppBlocks, y_size);
 
-    return new_map;
+    const int x_size = sizeof(block_t) * map.size.x;
+    for (int y = 0; y < map.size.y; ++y)
+        if (!map.ppBlocks[y])
+            map.ppBlocks[y] = malloc(x_size);
+        else
+            map.ppBlocks[y] = realloc(map.ppBlocks[y], x_size);
 }
 
-void generate_map(void)
+//map.ppBlocks가 map.size에 맞게 조정되었음을 가정함
+static void generate_map(const int old_width, const bool right)
 {
+    const int start_x = right ? old_width : 0;
+    int end_x = map.size.x;
+    if (!right)
+        end_x -= old_width;
+
     for (int y = 0; y < map.size.y; ++y)
-        for (int x = 0; x < map.size.x; ++x)
-        {
-            block_t block = BLOCK_AIR;
-            if (y > 9)
-                block = BLOCK_GRASS;
-            if (y > 10)
-                block = BLOCK_DIRT;
+        for (int x = start_x; x < end_x; ++x)
+            map.ppBlocks[y][x] = BLOCK_AIR;
 
-            if (y == 0 || y == map.size.y - 1 || x == 0 || x == map.size.x - 1)
-                block = BLOCK_STONE;
+    for (int x = start_x; x < end_x; ++x)
+    {
+        const float noise = perlin_noise(((float)x - total_offsets) * 0.01f);
+        const int height = (int)(map.size.y * ((noise + 1.0f) / 2.0f));
 
-            map.ppBlocks[y][x] = block;
-        }
+        for (int y = map.size.y - 1; y > height; --y)
+            map.ppBlocks[y][x] = BLOCK_DIRT;
+    }
+}
+
+static void update_offset(const int offset)
+{
+    map.offset_x = offset;
+    total_offsets += offset;
+
+    for (int i = 0; i < map.offset_callback_count; ++i)
+        if (map.pOffset_callbacks[i] != NULL)
+            map.pOffset_callbacks[i]();
+}
+
+//width가 음수일 경우 맵을 왼쪽으로 늘림, 양수일 경우 오른쪽
+static void resize_map(const int width)
+{
+    if (!width)
+        return;
+
+    const int old = map.size.x, absolute_width = abs(width);
+    map.size.x += absolute_width;
+
+    allocate_map();
+
+    const bool is_negative = width < 0;
+    if (is_negative)
+    {
+        update_offset(absolute_width);
+
+        for (int y = 0; y < map.size.y; ++y)
+            memmove(&map.ppBlocks[y][absolute_width], &map.ppBlocks[y][0], sizeof(block_t) * old);
+    }
+
+    generate_map(old, !is_negative);
+}
+
+void create_map(void)
+{
+    fill_table(time(NULL));
+
+    map.size.y = MAP_MAX_Y;
+    player.y = map.size.y / 2;
+
+    map.pOffset_callbacks = NULL;
+
+    const int x_size = 10;
+    resize_map(x_size);
+    player.x = x_size / 2;
 }
 
 void destroy_map(void)
@@ -115,7 +178,7 @@ static COORD render_block(const POINT map_position, const COORD console_position
             size.X = (SHORT)tx + 1;
             size.Y = (SHORT)ty + 1;
 
-            print_color_tchar(pBlock_textures[map.ppBlocks[map_position.y][map_position.x] - 1]
+            print_color_tchar(pBlock_textures[map.ppBlocks[map_position.y][map_position.x]]
                                              [utd ? ty : (TEXTURE_SIZE - ty - 1)][ltr ? tx : (TEXTURE_SIZE - tx - 1)],
                               position);
         }
@@ -170,9 +233,34 @@ void render_map(void)
     render_aft_or_forward(console_position_half, console_position, false);
 }
 
+void subscribe_to_offset_change(const offset_changed_callback_t callback)
+{
+    if (!map.pOffset_callbacks)
+        map.pOffset_callbacks = malloc(sizeof(offset_changed_callback_t));
+    else
+        map.pOffset_callbacks = realloc(map.pOffset_callbacks, sizeof(offset_changed_callback_t) * (map.offset_callback_count + 1));
+
+    map.pOffset_callbacks[map.offset_callback_count++] = callback;
+}
+
+void unsubscribe_from_offset_change(const offset_changed_callback_t callback)
+{
+    if (!map.pOffset_callbacks)
+        return;
+
+    for (int i = 0; i < map.offset_callback_count; ++i)
+        if (map.pOffset_callbacks[i] == callback)
+        {
+            map.pOffset_callbacks[i] = NULL;
+            --map.offset_callback_count;
+        }
+}
+
 #if _DEBUG
 void debug_render_map(void)
 {
+    clear();
+
     for (int y = 0; y < map.size.y; ++y)
     {
         for (int x = 0; x < map.size.x; ++x)
@@ -201,6 +289,11 @@ void debug_render_map(void)
         putchar('\n');
     }
 
-    system("pause");
+    //system("pause");
+}
+
+void resize(const int width)
+{
+    resize_map(width);
 }
 #endif
