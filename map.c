@@ -1,6 +1,4 @@
-﻿//TODO: Correct X and Y.
-
-#include "leak.h"
+﻿#include "leak.h"
 
 #if _DEBUG
 #include <stdio.h>
@@ -140,7 +138,7 @@ static void resize_map(const int width)
 
 void create_map(void)
 {
-    fill_table(time(NULL));
+    fill_table((int)time(NULL));
 
     map.size.y = MAP_MAX_Y;
     player.y = map.size.y / 2;
@@ -229,8 +227,13 @@ void render_map(void)
     const COORD console_position_half = { console.size.X / 2, console.size.Y / 2 };
 
     COORD console_position = render_aft_or_forward(console_position_half, console_position_half, true);
+    if (console_position.X != console.size.X)
+        resize_map(1);
+
     console_position.X = console_position_half.X - 1;
-    render_aft_or_forward(console_position_half, console_position, false);
+    console_position = render_aft_or_forward(console_position_half, console_position, false);
+    if (console_position.X != -1)
+        resize_map(-1);
 }
 
 void subscribe_to_offset_change(const offset_changed_callback_t callback)
