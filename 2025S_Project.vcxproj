@@ -75,11 +75,13 @@
     <ClCompile Include="console.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="map.c" />
+    <ClCompile Include="perlin.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="console.h" />
     <ClInclude Include="leak.h" />
     <ClInclude Include="map.h" />
+    <ClInclude Include="perlin.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

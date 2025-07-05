@@ -3,8 +3,6 @@
 #include <stdbool.h>
 #include <Windows.h>
 
-typedef void (* console_key_hit_callback_t)(const wchar_t character);
-
 //https://stackoverflow.com/a/17125539
 #define X_color_t(X) \
 typedef enum \
@@ -44,7 +42,7 @@ typedef struct
 
 extern console_t console;
 
-void initialize_console(bool use_double_buffering, console_key_hit_callback_t key_hit_callback);
+void initialize_console(const bool use_double_buffering);
 void update_console(void);
 void write(const COORD position, const TCHAR character, const WORD attribute);
 void clear(void);
