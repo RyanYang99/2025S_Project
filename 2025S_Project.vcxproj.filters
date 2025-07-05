@@ -27,6 +27,9 @@
     <ClCompile Include="perlin.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="player.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="console.h">
@@ -39,6 +42,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="perlin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

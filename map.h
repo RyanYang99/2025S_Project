@@ -27,7 +27,7 @@ typedef struct
 } map_t;
 
 //임시 테스트 용
-extern POINT player;
+//extern POINT player;
 
 extern map_t map;
 extern const color_tchar_t pBlock_textures[BLOCKS][TEXTURE_SIZE][TEXTURE_SIZE];

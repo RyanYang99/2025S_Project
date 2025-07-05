@@ -8,9 +8,11 @@
 #include <stdbool.h>
 #include "map.h"
 #include "perlin.h"
+#include "player.h"
 
 int total_offsets = 0;
-POINT player = { 0 };
+//player.h 에서 위치값 지정
+//POINT player = { 0 };
 map_t map = { 0 };
 
 const color_tchar_t pBlock_textures[BLOCKS][TEXTURE_SIZE][TEXTURE_SIZE] =
