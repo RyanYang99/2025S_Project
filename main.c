@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include "map.h"
 #include "console.h"
+#include "player.h"
 
 //임시 테스트 용
 static int movement(void)
@@ -34,6 +35,7 @@ static int movement(void)
 static void render(void)
 {
     render_map();
+    render_player();
     //debug_render_map();
 }
 
@@ -51,6 +53,9 @@ int main(void)
 
     initialize_console(true);
     create_map();
+
+    player_init(map.size.x / 2, map.size.y / 2);
+
     subscribe_to_offset_change(update_player_offset);
 
     clear();
