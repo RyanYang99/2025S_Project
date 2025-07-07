@@ -1,4 +1,4 @@
-//https://gpfault.net/posts/perlin-noise.txt.html
+﻿//https://gpfault.net/posts/perlin-noise.txt.html
 #include "perlin.h"
 
 #include <math.h>
