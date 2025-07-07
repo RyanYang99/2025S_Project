@@ -1,4 +1,5 @@
 ﻿#include "leak.h"
+#include "map.h"
 
 #if _DEBUG
 #include <stdio.h>
@@ -6,13 +7,10 @@
 
 #include <time.h>
 #include <stdbool.h>
-#include "map.h"
 #include "perlin.h"
 #include "player.h"
 
 int total_offsets = 0;
-//player.h 에서 위치값 지정
-//POINT player = { 0 };
 map_t map = { 0 };
 
 const color_tchar_t pBlock_textures[BLOCKS][TEXTURE_SIZE][TEXTURE_SIZE] =
@@ -158,6 +156,11 @@ void destroy_map(void)
         free(map.ppBlocks[y]);
 
     free(map.ppBlocks);
+    map.ppBlocks = NULL;
+
+    free(map.pOffset_callbacks);
+    map.pOffset_callbacks = NULL;
+    map.offset_callback_count = 0;
 }
 
 static COORD render_block(const POINT map_position, const COORD console_position, const bool ltr, const bool utd)
@@ -238,17 +241,17 @@ void render_map(void)
         resize_map(-1);
 }
 
-void subscribe_to_offset_change(const offset_changed_callback_t callback)
+void subscribe_offset_change(const offset_changed_t callback)
 {
     if (!map.pOffset_callbacks)
-        map.pOffset_callbacks = malloc(sizeof(offset_changed_callback_t));
+        map.pOffset_callbacks = malloc(sizeof(offset_changed_t));
     else
-        map.pOffset_callbacks = realloc(map.pOffset_callbacks, sizeof(offset_changed_callback_t) * (map.offset_callback_count + 1));
+        map.pOffset_callbacks = realloc(map.pOffset_callbacks, sizeof(offset_changed_t) * (map.offset_callback_count + 1));
 
     map.pOffset_callbacks[map.offset_callback_count++] = callback;
 }
 
-void unsubscribe_from_offset_change(const offset_changed_callback_t callback)
+void unsubscribe_offset_change(const offset_changed_t callback)
 {
     if (!map.pOffset_callbacks)
         return;
@@ -295,10 +298,5 @@ void debug_render_map(void)
     }
 
     //system("pause");
-}
-
-void resize(const int width)
-{
-    resize_map(width);
 }
 #endif

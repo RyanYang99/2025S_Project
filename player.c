@@ -1,13 +1,35 @@
+#include "leak.h"
 #include "player.h"
+
+#include "map.h"
+#include "input.h"
 #include "console.h"
 #include <stdio.h> // swprintf 사용하기위해
 
 player_t player = { 0, 0, 100 }; // 초기 위치 및 체력
 
+static void movement(const char character) {
+    if (character == 'w')
+        --player.y;
+    else if (character == 'a')
+        --player.x;
+    else if (character == 's')
+        ++player.y;
+    else if (character == 'd')
+        ++player.x;
+}
+
+static void update_player_offset(void) {
+    player.x += map.offset_x;
+}
+
 void player_init(int x, int y) {
     player.x = x;
     player.y = y;
     player.hp = 100; // 초기 체력
+
+    subscribe_keyhit(movement);
+    subscribe_offset_change(update_player_offset);
 }
 
 void player_move(int dx, int dy) {
@@ -29,7 +51,7 @@ void render_player(void) {
     if (hp_pos.Y > 0) hp_pos.Y -= 1; // 머리 위 한 칸 위로
     for (int i = 0; hp_str[i] != L'\0'; ++i) {
         COORD char_pos = hp_pos;
-        char_pos.X += i - (wcslen(hp_str) / 2); // 중앙 정렬
+        char_pos.X += (SHORT)i - (SHORT)(wcslen(hp_str) / 2); // 중앙 정렬
         print_color_tchar((color_tchar_t) { hp_str[i], BACKGROUND_T_BLACK, FOREGROUND_T_RED }, char_pos);
     }
 
