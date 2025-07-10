@@ -1,23 +1,23 @@
-#pragma once
+ï»¿#pragma once
 
 #include <windows.h>
 #include "console.h"
 
-// ÇÃ·¹ÀÌ¾î »óÅÂ ±¸Á¶Ã¼
+// í”Œë ˆì´ì–´ ìƒíƒœ êµ¬ì¡°ì²´
 typedef struct {
-    int x, y; // ¸Ê »óÀÇ À§Ä¡
-    int hp;   // Ã¼·Â µî Ãß°¡ °¡´É
-    // ±âÅ¸ ÇÃ·¹ÀÌ¾î ¼Ó¼º
+    int x, y; // ë§µ ìƒì˜ ìœ„ì¹˜
+    int hp;   // ì²´ë ¥ ë“± ì¶”ê°€ ê°€ëŠ¥
+    // ê¸°íƒ€ í”Œë ˆì´ì–´ ì†ì„±
 } player_t;
 
-// Àü¿ª ÇÃ·¹ÀÌ¾î °´Ã¼
+// ì „ì—­ í”Œë ˆì´ì–´ ê°ì²´
 extern player_t player;
 
-// ÇÃ·¹ÀÌ¾î ÃÊ±âÈ­
+// í”Œë ˆì´ì–´ ì´ˆê¸°í™”
 void player_init(int x, int y);
 
-// ÇÃ·¹ÀÌ¾î ÀÌµ¿
+// í”Œë ˆì´ì–´ ì´ë™
 void player_move(int dx, int dy);
 
-// ÇÃ·¹ÀÌ¾î ·»´õ¸µ
+// í”Œë ˆì´ì–´ ë Œë”ë§
 void render_player(void);

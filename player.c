@@ -1,39 +1,61 @@
+ï»¿#include "leak.h"
 #include "player.h"
-#include "console.h"
-#include <stdio.h> // swprintf »ç¿ëÇÏ±âÀ§ÇØ
 
-player_t player = { 0, 0, 100 }; // ÃÊ±â À§Ä¡ ¹× Ã¼·Â
+#include "map.h"
+#include "input.h"
+#include "console.h"
+#include <stdio.h> // swprintf ì‚¬ìš©í•˜ê¸°ìœ„í•´
+
+player_t player = { 0, 0, 100 }; // ì´ˆê¸° ìœ„ì¹˜ ë° ì²´ë ¥
+
+static void movement(const char character) {
+    if (character == 'w')
+        --player.y;
+    else if (character == 'a')
+        --player.x;
+    else if (character == 's')
+        ++player.y;
+    else if (character == 'd')
+        ++player.x;
+}
+
+static void update_player_offset(void) {
+    player.x += map.offset_x;
+}
 
 void player_init(int x, int y) {
     player.x = x;
     player.y = y;
-    player.hp = 100; // ÃÊ±â Ã¼·Â
+    player.hp = 100; // ì´ˆê¸° ì²´ë ¥
+
+    subscribe_keyhit(movement);
+    subscribe_offset_change(update_player_offset);
 }
 
 void player_move(int dx, int dy) {
     player.x += dx;
     player.y += dy;
-    // °æ°è Ã¼Å© µî Ãß°¡ °¡´É
+    // ê²½ê³„ ì²´í¬ ë“± ì¶”ê°€ ê°€ëŠ¥
 }
 
 void render_player(void) {
-    // ÇÃ·¹ÀÌ¾î ÄÜ¼Ö À§Ä¡ (È­¸é Áß¾Ó)
+    // í”Œë ˆì´ì–´ ì½˜ì†” ìœ„ì¹˜ (í™”ë©´ ì¤‘ì•™)
     COORD pos = { console.size.X / 2, console.size.Y / 2 };
 
-    // Ã¼·Â ¹®ÀÚ¿­ ÁØºñ
+    // ì²´ë ¥ ë¬¸ìì—´ ì¤€ë¹„
     wchar_t hp_str[16];
     swprintf(hp_str, 16, L"HP: %d", player.hp);
 
-    // Ã¼·Â ¹®ÀÚ¿­À» ÇÃ·¹ÀÌ¾î ¸Ó¸® À§¿¡ Ãâ·Â
+    // ì²´ë ¥ ë¬¸ìì—´ì„ í”Œë ˆì´ì–´ ë¨¸ë¦¬ ìœ„ì— ì¶œë ¥
     COORD hp_pos = pos;
-    if (hp_pos.Y > 0) hp_pos.Y -= 1; // ¸Ó¸® À§ ÇÑ Ä­ À§·Î
+    if (hp_pos.Y > 0) hp_pos.Y -= 1; // ë¨¸ë¦¬ ìœ„ í•œ ì¹¸ ìœ„ë¡œ
     for (int i = 0; hp_str[i] != L'\0'; ++i) {
         COORD char_pos = hp_pos;
-        char_pos.X += i - (wcslen(hp_str) / 2); // Áß¾Ó Á¤·Ä
+        char_pos.X += (SHORT)i - (SHORT)(wcslen(hp_str) / 2); // ì¤‘ì•™ ì •ë ¬
         print_color_tchar((color_tchar_t) { hp_str[i], BACKGROUND_T_BLACK, FOREGROUND_T_RED }, char_pos);
     }
 
-    // ÇÃ·¹ÀÌ¾î ±×¸®±â
+    // í”Œë ˆì´ì–´ ê·¸ë¦¬ê¸°
     color_tchar_t player_char = {
         '@',
         BACKGROUND_T_BLACK,

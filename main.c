@@ -4,44 +4,15 @@
 #include <conio.h>
 #include <stdbool.h>
 #include "map.h"
-#include "console.h"
+#include "input.h"
 #include "player.h"
-
-//임시 테스트 용
-static int movement(void)
-{
-    if (!_kbhit())
-        return 0;
-
-    const char character = (char)_getch();
-    if (character == 'w')
-        --player.y;
-    else if (character == 'a')
-        --player.x;
-    else if (character == 's')
-        ++player.y;
-    else if (character == 'd')
-        ++player.x;
-    else if (character == 'q')
-        return 2;
-    else if (character == 'x')
-        resize(10);
-    else if (character == 'z')
-        resize(-10);
-
-    return 1;
-}
+#include "console.h"
 
 static void render(void)
 {
     render_map();
     render_player();
     //debug_render_map();
-}
-
-static void update_player_offset(void)
-{
-    player.x += map.offset_x;
 }
 
 int main(void)
@@ -52,27 +23,20 @@ int main(void)
 #endif
 
     initialize_console(true);
+    initialize_input_handler();
     create_map();
-
     player_init(map.size.x / 2, map.size.y / 2);
-
-    subscribe_to_offset_change(update_player_offset);
 
     clear();
     while (true)
     {
         update_console();
-
-        const int result = movement();
-        if (result == 1)
-            clear();
-        else if (result == 2)
-            break;
-
+        handle_input_event();
         render();
     }
 
     destroy_map();
+    destroy_input_handler();
     destroy_console();
     return EXIT_SUCCESS;
 }
