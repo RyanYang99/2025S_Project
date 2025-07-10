@@ -10,53 +10,78 @@
 #include "perlin.h"
 #include "player.h"
 
-int total_offsets = 0;
 map_t map = { 0 };
+
+int total_offsets = 0;
+int offset_callback_count = 0;
+offset_changed_t *pOffset_callbacks = NULL;
 
 const color_tchar_t pBlock_textures[BLOCKS][TEXTURE_SIZE][TEXTURE_SIZE] =
 {
     {
         {
-            { '.' , FOREGROUND_T_WHITE, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_WHITE, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_WHITE, BACKGROUND_T_BLUE }
+            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }
         },
         {
-            { ' ' , FOREGROUND_T_WHITE, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_WHITE, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_WHITE, BACKGROUND_T_BLUE }
+            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }
         },
         {
-            { ' ' , FOREGROUND_T_WHITE, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_WHITE, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_WHITE, BACKGROUND_T_BLUE }
+            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }
         }
     },
     {
         {
-            { ':' , FOREGROUND_T_GREEN, BACKGROUND_T_BLACK }, { ':', FOREGROUND_T_GREEN, BACKGROUND_T_BLACK }, { ':', FOREGROUND_T_GREEN, BACKGROUND_T_BLACK }
+            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }
         },
         {
-            { '|' , FOREGROUND_T_GREEN, BACKGROUND_T_BLACK }, { '|', FOREGROUND_T_GREEN, BACKGROUND_T_BLACK }, { '|', FOREGROUND_T_GREEN, BACKGROUND_T_BLACK }
+            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }
         },
         {
-            { '=' , FOREGROUND_T_DARKYELLOW, BACKGROUND_T_BLACK }, { '=', FOREGROUND_T_DARKYELLOW, BACKGROUND_T_BLACK }, { '=', FOREGROUND_T_DARKYELLOW, BACKGROUND_T_BLACK }
+            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }
         }
     },
     {
         {
-            { '=' , FOREGROUND_T_DARKYELLOW, BACKGROUND_T_BLACK }, { '=', FOREGROUND_T_DARKYELLOW, BACKGROUND_T_BLACK }, { '=', FOREGROUND_T_DARKYELLOW, BACKGROUND_T_BLACK }
+            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }
         },
         {
-            { '=' , FOREGROUND_T_DARKYELLOW, BACKGROUND_T_BLACK }, { '=', FOREGROUND_T_DARKYELLOW, BACKGROUND_T_BLACK }, { '=', FOREGROUND_T_DARKYELLOW, BACKGROUND_T_BLACK }
+            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }
         },
         {
-            { '=' , FOREGROUND_T_DARKYELLOW, BACKGROUND_T_BLACK }, { '=', FOREGROUND_T_DARKYELLOW, BACKGROUND_T_BLACK }, { '=', FOREGROUND_T_DARKYELLOW, BACKGROUND_T_BLACK }
+            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }
         }
     },
     {
         {
-            { 'E' , FOREGROUND_T_GRAY, BACKGROUND_T_BLACK }, { 'E' , FOREGROUND_T_GRAY, BACKGROUND_T_BLACK }, { 'E' , FOREGROUND_T_GRAY, BACKGROUND_T_BLACK }
+            { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { '#' , BACKGROUND_T_GRAY, BACKGROUND_T_BLACK }
         },
         {
-            { 'E' , FOREGROUND_T_GRAY, BACKGROUND_T_BLACK }, { 'E' , FOREGROUND_T_GRAY, BACKGROUND_T_BLACK }, { 'E' , FOREGROUND_T_GRAY, BACKGROUND_T_BLACK }
+            { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { '#' , BACKGROUND_T_GRAY, BACKGROUND_T_BLACK }
         },
         {
-            { 'E' , FOREGROUND_T_GRAY, BACKGROUND_T_BLACK }, { 'E' , FOREGROUND_T_GRAY, BACKGROUND_T_BLACK }, { 'E' , FOREGROUND_T_GRAY, BACKGROUND_T_BLACK }
+            { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }
+        }
+    },
+    {
+        {
+            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ' , BACKGROUND_T_GRAY, BACKGROUND_T_BLACK }
+        },
+        {
+            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ' , BACKGROUND_T_GRAY, BACKGROUND_T_BLACK }
+        },
+        {
+            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }
+        }
+    },
+    {
+        {
+            { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }, { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }, { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }
+        },
+        {
+            { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }, { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }, { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }
+        },
+        {
+            { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }, { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }, { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }
         }
     }
 };
@@ -98,9 +123,27 @@ static void generate_map(const int old_width, const bool right)
         const float noise = perlin_noise(((float)x - total_offsets) * 0.01f);
         const int height = (int)(map.size.y * ((noise + 1.0f) / 2.0f));
 
-        for (int y = map.size.y - 1; y > height; --y)
+        map.ppBlocks[map.size.y - 1][x] = BLOCK_BEDROCK;
+
+        for (int y = map.size.y - 2; y > height + 7; --y)
+            map.ppBlocks[y][x] = BLOCK_STONE;
+
+        for (int y = height + 7; y > height; --y)
             map.ppBlocks[y][x] = BLOCK_DIRT;
+
+        map.ppBlocks[height][x] = BLOCK_GRASS;
     }
+
+    for (int x = start_x; x < end_x; ++x)
+        //철광석을 20% 확률로 생성
+        if (rand() % 100 >= 80)
+        {
+            //철광석을 120~129 사이에 생성
+            const int iron_y = (rand() % 10) + 120;
+
+            if (map.ppBlocks[iron_y][x] == BLOCK_STONE)
+                map.ppBlocks[iron_y][x] = BLOCK_IRON_ORE;
+        }
 }
 
 static void update_offset(const int offset)
@@ -108,9 +151,9 @@ static void update_offset(const int offset)
     map.offset_x = offset;
     total_offsets += offset;
 
-    for (int i = 0; i < map.offset_callback_count; ++i)
-        if (map.pOffset_callbacks[i] != NULL)
-            map.pOffset_callbacks[i]();
+    for (int i = 0; i < offset_callback_count; ++i)
+        if (pOffset_callbacks[i] != NULL)
+            pOffset_callbacks[i]();
 }
 
 //width가 음수일 경우 맵을 왼쪽으로 늘림, 양수일 경우 오른쪽
@@ -143,8 +186,6 @@ void create_map(void)
     map.size.y = MAP_MAX_Y;
     player.y = map.size.y / 2;
 
-    map.pOffset_callbacks = NULL;
-
     const int x_size = 10;
     resize_map(x_size);
     player.x = x_size / 2;
@@ -158,9 +199,9 @@ void destroy_map(void)
     free(map.ppBlocks);
     map.ppBlocks = NULL;
 
-    free(map.pOffset_callbacks);
-    map.pOffset_callbacks = NULL;
-    map.offset_callback_count = 0;
+    free(pOffset_callbacks);
+    pOffset_callbacks = NULL;
+    offset_callback_count = 0;
 }
 
 static COORD render_block(const POINT map_position, const COORD console_position, const bool ltr, const bool utd)
@@ -243,29 +284,29 @@ void render_map(void)
 
 void subscribe_offset_change(const offset_changed_t callback)
 {
-    if (!map.pOffset_callbacks)
-        map.pOffset_callbacks = malloc(sizeof(offset_changed_t));
+    if (!pOffset_callbacks)
+        pOffset_callbacks = malloc(sizeof(offset_changed_t));
     else
-        map.pOffset_callbacks = realloc(map.pOffset_callbacks, sizeof(offset_changed_t) * (map.offset_callback_count + 1));
+        pOffset_callbacks = realloc(pOffset_callbacks, sizeof(offset_changed_t) * (offset_callback_count + 1));
 
-    map.pOffset_callbacks[map.offset_callback_count++] = callback;
+    pOffset_callbacks[offset_callback_count++] = callback;
 }
 
 void unsubscribe_offset_change(const offset_changed_t callback)
 {
-    if (!map.pOffset_callbacks)
+    if (!pOffset_callbacks)
         return;
 
-    for (int i = 0; i < map.offset_callback_count; ++i)
-        if (map.pOffset_callbacks[i] == callback)
+    for (int i = 0; i < offset_callback_count; ++i)
+        if (pOffset_callbacks[i] == callback)
         {
-            map.pOffset_callbacks[i] = NULL;
-            --map.offset_callback_count;
+            pOffset_callbacks[i] = NULL;
+            --offset_callback_count;
         }
 }
 
 #if _DEBUG
-void debug_render_map(void)
+void debug_render_map(const bool pause)
 {
     clear();
 
@@ -289,6 +330,18 @@ void debug_render_map(void)
                 case BLOCK_DIRT:
                     character = 'D';
                     break;
+
+                case BLOCK_STONE:
+                    character = 'S';
+                    break;
+
+                case BLOCK_BEDROCK:
+                    character = 'B';
+                    break;
+
+                case BLOCK_IRON_ORE:
+                    character = 'I';
+                    break;
             }
 
             putchar(character);
@@ -297,6 +350,7 @@ void debug_render_map(void)
         putchar('\n');
     }
 
-    //system("pause");
+    if (pause)
+        system("pause");
 }
 #endif

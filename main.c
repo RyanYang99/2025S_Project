@@ -12,7 +12,7 @@ static void render(void)
 {
     render_map();
     render_player();
-    //debug_render_map();
+    //debug_render_map(true);
 }
 
 int main(void)
