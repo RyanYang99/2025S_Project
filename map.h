@@ -2,7 +2,7 @@
 
 #include "console.h"
 
-#define BLOCKS 6
+#define BLOCKS 8
 #define TEXTURE_SIZE 3
 #define MAP_MAX_Y 200
 
@@ -15,7 +15,9 @@ typedef enum
     BLOCK_DIRT,
     BLOCK_BEDROCK, //뚫을 수 없는 블록
     BLOCK_STONE,
-    BLOCK_IRON_ORE
+    BLOCK_IRON_ORE,
+    BLOCK_LOG,
+    BLOCK_LEAF
 }
 block_t;
 
@@ -23,7 +25,7 @@ typedef struct
 {
     int offset_x;
     POINT size;
-    block_t** ppBlocks;
+    block_t **ppBlocks;
 }
 map_t;
 
