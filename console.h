@@ -23,7 +23,8 @@ typedef enum \
     X##_T_MAGENTA = X##_INTENSITY | X##_RED | X##_BLUE, \
     X##_T_YELLOW = X##_INTENSITY | X##_RED | X##_GREEN, \
     X##_T_WHITE = X##_INTENSITY | X##_RED | X##_GREEN | X##_BLUE \
-} X##_color_t
+} \
+X##_color_t
 
 X_color_t(BACKGROUND);
 X_color_t(FOREGROUND);
@@ -33,12 +34,14 @@ typedef struct
     TCHAR character;
     BACKGROUND_color_t background;
     FOREGROUND_color_t foreground;
-} color_tchar_t;
+}
+color_tchar_t;
 
 typedef struct
 {
     COORD size;
-} console_t;
+}
+console_t;
 
 extern console_t console;
 

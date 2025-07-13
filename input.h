@@ -1,4 +1,6 @@
-﻿/*
+﻿#pragma once
+
+/*
     input.h 사용법:
         키보드:
             subscribe_keyhit 함수는 char을 인자로 받는 함수 (keyhit_t) 포인터를 인자로 받는다.
@@ -15,8 +17,6 @@
                 내용 위와 동일 (mouse_position_t)
                 handle_input_event -> 마우스 위치 감지 -> subscribe_mouse_position을 통해 구독된 모든 함수 포인터 호출 -> 마우스 위치 사용
 */
-
-#pragma once
 
 #include <stdbool.h>
 #include <Windows.h>
