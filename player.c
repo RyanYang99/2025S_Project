@@ -6,7 +6,7 @@
 #include "console.h"
 #include <stdio.h> // swprintf 사용하기위해
 
-player_t player = { 0, 0, 100 }; // 초기 위치 및 체력
+player_t player = { 0, 0, 1000 }; // 초기 위치 및 체력
 
 static void movement(const char character) {
     if (character == 'w')
@@ -26,7 +26,7 @@ static void update_player_offset(void) {
 void player_init(int x, int y) {
     player.x = x;
     player.y = y;
-    player.hp = 100; // 초기 체력
+    player.hp = 1000; // 초기 체력
 
     subscribe_keyhit(movement);
     subscribe_offset_change(update_player_offset);
