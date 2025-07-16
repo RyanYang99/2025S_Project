@@ -7,11 +7,13 @@
 #include "input.h"
 #include "player.h"
 #include "console.h"
+#include "Mob.h"
 
 static void render(void)
 {
     render_map();
     render_player();
+    Mob_render();
     //debug_render_map(true);
 }
 
@@ -26,6 +28,8 @@ int main(void)
     initialize_input_handler();
     create_map();
     player_init(map.size.x / 2, map.size.y / 2);
+   
+
 
     clear();
     while (true)
@@ -33,6 +37,7 @@ int main(void)
         update_console();
         handle_input_event();
         render();
+        Mob_Spawn_Time();
     }
 
     destroy_map();
