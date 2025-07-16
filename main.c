@@ -7,11 +7,13 @@
 #include "input.h"
 #include "player.h"
 #include "console.h"
+#include "BlockCtrl.h"
 
 static void render(void)
 {
     render_map();
     render_player();
+    render_virtual_cursor();
     //debug_render_map(true);
 }
 
@@ -26,6 +28,8 @@ int main(void)
     initialize_input_handler();
     create_map();
     player_init(map.size.x / 2, map.size.y / 2);
+    BlockControl_Init();
+
 
     clear();
     while (true)
@@ -35,6 +39,7 @@ int main(void)
         render();
     }
 
+    BlockControl_Destroy();
     destroy_map();
     destroy_input_handler();
     destroy_console();
