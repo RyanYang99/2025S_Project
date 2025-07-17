@@ -140,7 +140,7 @@ static void generate_map(const int old_width, const bool right)
 
     for (int x = start_x; x < end_x; ++x)
     {
-        const float noise = perlin_noise(((float)x - total_offsets) * 0.01f);
+        const float spikiness = 0.003f, noise = perlin_noise(((float)x - total_offsets) * spikiness);
         const int height = (int)(map.size.y * ((noise + 1.0f) / 2.0f));
 
         map.ppBlocks[map.size.y - 1][x] = BLOCK_BEDROCK;
