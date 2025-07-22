@@ -2,7 +2,7 @@
 
 #include "console.h"
 
-#define BLOCKS 8
+#define BLOCKS 9
 #define TEXTURE_SIZE 3
 #define MAP_MAX_Y 200
 
@@ -17,7 +17,8 @@ typedef enum
     BLOCK_STONE,
     BLOCK_IRON_ORE,
     BLOCK_LOG,
-    BLOCK_LEAF
+    BLOCK_LEAF,
+    BLOCK_SNOW
 } block_t;
 
 // ✅ 블록 정보 구조체: 종류 + 체력 포함
