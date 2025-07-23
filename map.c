@@ -22,7 +22,7 @@ map_t map = { 0 };
 
 int total_offsets = 0;
 int offset_callback_count = 0;
-offset_changed_t *pOffset_callbacks = NULL;
+offset_changed_t* pOffset_callbacks = NULL;
 
 const color_tchar_t pBlock_textures[BLOCKS][TEXTURE_SIZE][TEXTURE_SIZE] =
 {
@@ -130,25 +130,25 @@ const color_tchar_t pBlock_textures[BLOCKS][TEXTURE_SIZE][TEXTURE_SIZE] =
 // 블록 기본 체력 설정
 static int get_block_max_health(block_t type)
 {
-    switch (type) //주먹=3데미지? 나무 곡=10 돌곡=17 철곡=30 
+    switch (type) //주먹=3데미지? 나무 곡=10 돌곡=17 철곡=30
     {
-    case BLOCK_AIR:       return 0;
-    case BLOCK_DIRT:      return 5;
-    case BLOCK_STONE:     return 20;
-    case BLOCK_IRON_ORE:  return 30;
-    case BLOCK_GRASS:     return 3;
-    case BLOCK_LOG:       return 9;
-    case BLOCK_LEAF:      return 3;
-    case BLOCK_SNOW:      return 3;
-    case BLOCK_BEDROCK:   return -1;
-    default:              return 1;
+    case BLOCK_AIR:         return 0;
+    case BLOCK_DIRT:        return 5;
+    case BLOCK_STONE:       return 20;
+    case BLOCK_IRON_ORE:    return 30;
+    case BLOCK_GRASS:       return 3;
+    case BLOCK_LOG:         return 9;
+    case BLOCK_LEAF:        return 3;
+    case BLOCK_SNOW:        return 3;
+    case BLOCK_BEDROCK:     return -1;
+    default:                return 1;
     }
 }
 
 
 block_info_t get_block_info_at(int x, int y)
 {
-    if (x < 0 || x >= map.size.x || y < 0 || y >= map.size.y) 
+    if (x < 0 || x >= map.size.x || y < 0 || y >= map.size.y)
     {
         block_info_t air = { BLOCK_AIR, 0 };
         return air; // 범위 밖이면 공기 반환
@@ -158,7 +158,7 @@ block_info_t get_block_info_at(int x, int y)
 
 void set_block_at(int x, int y, block_t type)
 {
-    if (x < 0 || x >= map.size.x || y < 0 || y >= map.size.y) 
+    if (x < 0 || x >= map.size.x || y < 0 || y >= map.size.y)
         return;
 
     initialize_block(&map.ppBlocks[y][x], type); // 타입 설정 및 체력 초기화
@@ -204,7 +204,6 @@ static void allocate_map(void)
             map.ppBlocks[y] = realloc(map.ppBlocks[y], x_size);
 }
 
-
 // 블록 초기화 함수
 static void initialize_block(block_info_t* block, block_t type)
 {
@@ -218,7 +217,6 @@ static int find_top(const int x)
         return -1;
 
     for (int y = 0; y < map.size.y; ++y)
-
         if (map.ppBlocks[y][x].type != BLOCK_AIR)
             return y;
 
@@ -229,19 +227,6 @@ static void generate_strip(const int x, const biome_t biome, const bool override
 {
     for (int y = 0; y < map.size.y; ++y)
         initialize_block(&map.ppBlocks[y][x], BLOCK_AIR);
-
-
-        if (map.ppBlocks[y][x] != BLOCK_AIR)
-            return y;
-    
-    return -1;
-}
- 
-static void generate_strip(const int x, const biome_t biome, const bool override_height, const int height_to_use)
-{
-    for (int y = 0; y < map.size.y; ++y)
-        map.ppBlocks[y][x] = BLOCK_AIR;
-
 
     int height = height_to_use;
     if (!override_height)
@@ -254,7 +239,6 @@ static void generate_strip(const int x, const biome_t biome, const bool override
         }
 
         const float px = (float)x - total_offsets,
-
             noise = perlin_noise(px * f1) +
             perlin_noise(px * f2) * a;
         height = (int)(map.size.y * ((noise + 1.0f) / 2.0f));
@@ -287,40 +271,6 @@ static void generate_strip(const int x, const biome_t biome, const bool override
 
         if (map.ppBlocks[iron_y][x].type == BLOCK_STONE)
             initialize_block(&map.ppBlocks[iron_y][x], BLOCK_IRON_ORE);
-
-                    noise = perlin_noise(px * f1) +
-                            perlin_noise(px * f2) * a;
-        height = (int)(map.size.y * ((noise + 1.0f) / 2.0f));
-    }
-
-    const int dirt_height = 7, snow_height = 3;
-
-    map.ppBlocks[map.size.y - 1][x] = BLOCK_BEDROCK;
-
-    if (height == map.size.y)
-        return;
-
-    for (int y = map.size.y - 2; y > height + dirt_height; --y)
-        map.ppBlocks[y][x] = BLOCK_STONE;
-
-    for (int y = height + dirt_height; y > height; --y)
-        map.ppBlocks[y][x] = BLOCK_DIRT;
-
-    if (biome == BIOME_PLAINS)
-        map.ppBlocks[height][x] = BLOCK_GRASS;
-    else if (biome == BIOME_SNOWY_MOUNTAINS)
-        for (int y = height + snow_height; y >= height; --y)
-            map.ppBlocks[y][x] = BLOCK_SNOW;
-
-    //철광석을 20% 확률로 생성
-    if (rand() % 100 >= 80)
-    {
-        //철광석을 120~179 사이에 생성
-        const int iron_y = (rand() % 60) + 120;
-
-        if (map.ppBlocks[iron_y][x] == BLOCK_STONE)
-            map.ppBlocks[iron_y][x] = BLOCK_IRON_ORE;
-
     }
 }
 
@@ -342,7 +292,6 @@ static biome_t generate_map(const int old_width, const bool right)
         generate_strip(x, biome, false, 0);
 
     const int blend_width = 10,
-
         target_1 = find_top(right ? start_x - 1 : difference),
         target_2 = find_top(right ? start_x + blend_width : end_x - blend_width);
     if (target_1 != -1 && target_2 != -1)
@@ -352,18 +301,9 @@ static biome_t generate_map(const int old_width, const bool right)
                 true,
                 (int)round(lerp((float)(right ? target_1 : target_2), (float)(right ? target_2 : target_1), (float)i / blend_width)));
 
-              target_1 = find_top(right ? start_x - 1 : difference),
-              target_2 = find_top(right ? start_x + blend_width : end_x - blend_width);
-    if (target_1 != -1 && target_2 != -1)
-        for (int x = right ? start_x : end_x - blend_width, i = 0; x <= (right ? start_x + blend_width : end_x); ++x, ++i)
-            generate_strip(x,
-                           biome,
-                           true,
-                           (int)round(lerp((float)(right ? target_1 : target_2), (float)(right ? target_2 : target_1), (float)i / blend_width)));
-
-
     return biome;
 }
+
 
 static void update_offset(const int offset)
 {
@@ -412,11 +352,11 @@ static void place_tree(const int x, const int y, const int width_to_sides, const
 static void generate_trees(const int start, const int end)
 {
     const int minimum_tree_width_side = 2,
-              variable_tree_width_side = 2,
-              maximum_tree_width_side = minimum_tree_width_side + variable_tree_width_side,
-              minimum_tree_height = 3,
-              variable_tree_height = 3,
-              maximum_tree_height = minimum_tree_height + variable_tree_height;
+        variable_tree_width_side = 2,
+        maximum_tree_width_side = minimum_tree_width_side + variable_tree_width_side,
+        minimum_tree_height = 3,
+        variable_tree_height = 3,
+        maximum_tree_height = minimum_tree_height + variable_tree_height;
 
     for (int x = start + maximum_tree_width_side; x <= end - maximum_tree_width_side; ++x)
     {
@@ -428,8 +368,8 @@ static void generate_trees(const int start, const int end)
             continue;
 
         const int tree_width_side = rand() % (variable_tree_width_side + 1) + minimum_tree_width_side,
-                  tree_height = rand() % (variable_tree_height + 1) + minimum_tree_height;
-        
+            tree_height = rand() % (variable_tree_height + 1) + minimum_tree_height;
+
         place_tree(x, grass_y - 1, tree_width_side, tree_height);
         x += tree_width_side + 1;
     }
@@ -488,7 +428,7 @@ static COORD render_block(const POINT map_position, const COORD console_position
 
     bool exit = false;
     COORD size = { 0 };
-    
+
     if (map_position.x < 0 || map_position.x >= map.size.x ||
         map_position.y < 0 || map_position.y >= map.size.y)
         return size; // 또는 적절한 예외 처리
@@ -604,29 +544,29 @@ void debug_render_map(const bool pause)
 
             switch (block)
             {
-                case BLOCK_AIR:
-                    character = 'A';
-                    break;
+            case BLOCK_AIR:
+                character = 'A';
+                break;
 
-                case BLOCK_GRASS:
-                    character = 'G';
-                    break;
+            case BLOCK_GRASS:
+                character = 'G';
+                break;
 
-                case BLOCK_DIRT:
-                    character = 'D';
-                    break;
+            case BLOCK_DIRT:
+                character = 'D';
+                break;
 
-                case BLOCK_STONE:
-                    character = 'S';
-                    break;
+            case BLOCK_STONE:
+                character = 'S';
+                break;
 
-                case BLOCK_BEDROCK:
-                    character = 'B';
-                    break;
+            case BLOCK_BEDROCK:
+                character = 'B';
+                break;
 
-                case BLOCK_IRON_ORE:
-                    character = 'I';
-                    break;
+            case BLOCK_IRON_ORE:
+                character = 'I';
+                break;
             }
 
             putchar(character);
