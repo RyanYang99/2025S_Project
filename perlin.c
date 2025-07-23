@@ -25,7 +25,7 @@ void fill_table(const int seed)
     }
 }
 
-static const float lerp(const float a, const float b, const float t)
+const float lerp(const float a, const float b, const float t)
 {
     return a + t * (b - a);
 }
