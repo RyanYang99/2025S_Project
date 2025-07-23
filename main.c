@@ -14,6 +14,7 @@ static void render(void)
     render_map();
     render_player();
     render_virtual_cursor();
+    Mob_render();
     //debug_render_map(true);
 }
 
@@ -37,6 +38,8 @@ int main(void)
         update_console();
         handle_input_event();
         render();
+        Mob_Spawn_Time();
+        update_mob_ai();
     }
 
     BlockControl_Destroy();
