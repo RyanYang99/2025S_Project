@@ -28,6 +28,7 @@ typedef struct
     int hp;
 } block_info_t;
 
+
 typedef struct
 {
     int offset_x;
