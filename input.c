@@ -18,13 +18,13 @@
 HANDLE input_handle = NULL;
 DWORD original_mode = 0;
 
-keyhit_t *pKeyhit_callbacks = NULL;
+keyhit_t* pKeyhit_callbacks = NULL;
 int keyhit_callback_count = 0;
 
-mouse_click_t *pMouseClick_callbacks = NULL;
+mouse_click_t* pMouseClick_callbacks = NULL;
 int mouse_click_callback_count = 0;
 
-mouse_position_t *pMousePosition_callbacks = NULL;
+mouse_position_t* pMousePosition_callbacks = NULL;
 int mouse_position_callback_count = 0;
 
 void initialize_input_handler(void)
@@ -63,7 +63,7 @@ void handle_input_event(void)
     if (!events)
         return;
 
-    INPUT_RECORD *pInput_records = malloc(sizeof(INPUT_RECORD) * events);
+    INPUT_RECORD* pInput_records = malloc(sizeof(INPUT_RECORD) * events);
     DWORD events_read = 0;
     ReadConsoleInput(input_handle, pInput_records, events, &events_read);
 
@@ -72,21 +72,29 @@ void handle_input_event(void)
         const DWORD type = pInput_records[i].EventType;
 
         if (type == KEY_EVENT)
-            keyhit_callback(pInput_records[i].Event.KeyEvent.uChar.AsciiChar);
-        else if (type == MOUSE_EVENT)
         {
-            const MOUSE_EVENT_RECORD event = pInput_records[i].Event.MouseEvent;
-            const DWORD state = event.dwButtonState;
-            if (state == FROM_LEFT_1ST_BUTTON_PRESSED)
-                mouse_click_callback(true);
-            else if (state == RIGHTMOST_BUTTON_PRESSED)
-                mouse_click_callback(false);
-            
-            mouse_position_callback(event.dwMousePosition);
+            const KEY_EVENT_RECORD event = pInput_records[i].Event.KeyEvent;
+
+            if (event.bKeyDown)
+                keyhit_callback(event.uChar.AsciiChar);
         }
+        else if (type == MOUSE_EVENT)
+            mouse_position_callback(pInput_records[i].Event.MouseEvent.dwMousePosition);
     }
 
     free(pInput_records);
+
+    const bool mouse_reversed = GetSystemMetrics(SM_SWAPBUTTON);
+    if (GetAsyncKeyState(VK_LBUTTON))
+        if (mouse_reversed)
+            mouse_click_callback(false);
+        else
+            mouse_click_callback(true);
+    else if (GetAsyncKeyState(VK_RBUTTON))
+        if (mouse_reversed)
+            mouse_click_callback(true);
+        else
+            mouse_click_callback(false);
 }
 
 void destroy_input_handler(void)
