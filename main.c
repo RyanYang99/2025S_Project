@@ -3,11 +3,17 @@
 #include <stdio.h>
 #include <conio.h>
 #include <stdbool.h>
+#include <time.h>
 #include "map.h"
 #include "input.h"
 #include "player.h"
 #include "console.h"
 #include "BlockCtrl.h"
+
+static void update(float delta_time)
+{
+    player_update(delta_time);
+}
 
 static void render(void)
 {
@@ -28,16 +34,26 @@ int main(void)
     initialize_console(true);
     initialize_input_handler();
     create_map();
-    player_init(map.size.x / 2, map.size.y / 2);
+    player_init(map.size.x / 2);
     BlockControl_Init();
 
+    // Delta Time 측정을 위한 변수 초기화 
+    clock_t last_time = clock();
+    float delta_time = 0.0f;
 
     clear();
     while (true)
     {
+        // Delta Time 계산
+        clock_t current_time = clock();
+        delta_time = (float)(current_time - last_time) / CLOCKS_PER_SEC;
+        last_time = current_time;
+
         update_console();
         handle_input_event();
         render();
+        /*player.is_moving = 0;*/
+        update(delta_time);
         Mob_Spawn_Time();
         update_mob_ai();
     }
