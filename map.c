@@ -167,7 +167,7 @@ void set_block_at(int x, int y, block_t type)
 
 bool damage_block_at(map_t* pMap, int x, int y, int damage)
 {
-    if (x < 0 || x >= pMap->size.x || y < 0 || y >= pMap->size.y)
+    if (x < 0 || x > pMap->size.x || y < 0 || y > pMap->size.y)
         return false;
 
     if (pMap->ppBlocks[y][x].type == BLOCK_AIR)

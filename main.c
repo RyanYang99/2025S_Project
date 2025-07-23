@@ -22,7 +22,6 @@ static void render(void)
     render_player();
     render_virtual_cursor();
     Mob_render();
-    //debug_render_map(true);
 }
 
 int main(void)
@@ -57,6 +56,13 @@ int main(void)
         update(delta_time);
         Mob_Spawn_Time();
         update_mob_ai();
+
+        MSG msg = { 0 };
+        while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+        {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
     }
 
     BlockControl_Destroy();

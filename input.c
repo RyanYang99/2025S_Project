@@ -17,6 +17,7 @@
 
 HANDLE input_handle = NULL;
 DWORD original_mode = 0;
+HHOOK hook = NULL;
 
 keyhit_t* pKeyhit_callbacks = NULL;
 int keyhit_callback_count = 0;
@@ -27,11 +28,37 @@ int mouse_click_callback_count = 0;
 mouse_position_t* pMousePosition_callbacks = NULL;
 int mouse_position_callback_count = 0;
 
+static void mouse_click_callback(const bool left)
+{
+    for (int i = 0; i < mouse_click_callback_count; ++i)
+        if (pMouseClick_callbacks[i])
+            pMouseClick_callbacks[i](left);
+}
+
+static LRESULT CALLBACK MouseProc(const int nCode, const WPARAM wParam, const LPARAM lParam)
+{
+    if (nCode == HC_ACTION)
+        switch (wParam)
+        {
+            case WM_LBUTTONUP:
+                mouse_click_callback(true);
+                break;
+
+            case WM_RBUTTONUP:
+                mouse_click_callback(false);
+                break;
+        }
+
+    return CallNextHookEx(NULL, nCode, wParam, lParam);
+}
+
 void initialize_input_handler(void)
 {
     input_handle = GetStdHandle(STD_INPUT_HANDLE);
     GetConsoleMode(input_handle, &original_mode);
     SetConsoleMode(input_handle, ENABLE_EXTENDED_FLAGS | ENABLE_MOUSE_INPUT);
+
+    hook = SetWindowsHookEx(WH_MOUSE_LL, MouseProc, NULL, 0);
 }
 
 static void keyhit_callback(const char character)
@@ -39,13 +66,6 @@ static void keyhit_callback(const char character)
     for (int i = 0; i < keyhit_callback_count; ++i)
         if (pKeyhit_callbacks[i])
             pKeyhit_callbacks[i](character);
-}
-
-static void mouse_click_callback(const bool left)
-{
-    for (int i = 0; i < mouse_click_callback_count; ++i)
-        if (pMouseClick_callbacks[i])
-            pMouseClick_callbacks[i](left);
 }
 
 static void mouse_position_callback(const COORD position)
@@ -83,18 +103,6 @@ void handle_input_event(void)
     }
 
     free(pInput_records);
-
-    const bool mouse_reversed = GetSystemMetrics(SM_SWAPBUTTON);
-    if (GetAsyncKeyState(VK_LBUTTON))
-        if (mouse_reversed)
-            mouse_click_callback(false);
-        else
-            mouse_click_callback(true);
-    else if (GetAsyncKeyState(VK_RBUTTON))
-        if (mouse_reversed)
-            mouse_click_callback(true);
-        else
-            mouse_click_callback(false);
 }
 
 void destroy_input_handler(void)
@@ -104,6 +112,8 @@ void destroy_input_handler(void)
     free(pKeyhit_callbacks);
     pKeyhit_callbacks = NULL;
     keyhit_callback_count = 0;
+
+    UnhookWindowsHookEx(hook);
 }
 
 void subscribe_keyhit(const keyhit_t callback)
