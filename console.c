@@ -1,19 +1,18 @@
 ﻿//https://github.com/Kevger/DoubleBufferedWindowsConsole/blob/master/source/DoubleBufferedConsole.h
 
 #include "leak.h"
-
-#include <stdio.h>
 #include "console.h"
 
-bool console_size_changed = false, use_double_buffer = false, maximized = false;
+#include <stdio.h>
+
+bool use_double_buffer = false;
 
 int current_buffer = 0;
 HANDLE buffer[2] = { 0 };
 PCHAR_INFO character_buffer = NULL;
 SMALL_RECT written = { 0 };
 
-HANDLE handle = NULL, input_handle = NULL;
-console_key_hit_callback_t key_callback = NULL;
+HANDLE handle = NULL;
 
 console_t console = { 0 };
 
@@ -57,21 +56,32 @@ const static COORD get_console_size(const HANDLE size_handle)
     return console_size;
 }
 
-void initialize_console(bool use_double_buffering, console_key_hit_callback_t key_hit_callback)
+static void switch_font(void)
+{
+    CONSOLE_FONT_INFOEX cfi =
+    {
+        .cbSize = sizeof(cfi),
+        .nFont = 0,
+        .dwFontSize = { 8, 8 },
+        .FontFamily = FF_DONTCARE,
+        .FontWeight = FW_NORMAL,
+        .FaceName = TEXT("Terminal")
+    };
+    SetCurrentConsoleFontEx(handle, FALSE, &cfi);
+}
+
+void initialize_console(const bool use_double_buffering)
 {
     handle = GetStdHandle(STD_OUTPUT_HANDLE);
     console.size = get_console_size(handle);
+
+    switch_font();
 
     use_double_buffer = use_double_buffering;
     if (use_double_buffer)
         initialize_double_buffering();
     else
         hide_console_cursor(handle);
-
-    input_handle = GetStdHandle(STD_INPUT_HANDLE);
-    SetConsoleMode(input_handle, ENABLE_WINDOW_INPUT | ENABLE_PROCESSED_INPUT);
-
-    key_callback = key_hit_callback;
 }
 
 static void flip_double_buffer(void)
@@ -88,30 +98,6 @@ static void flip_double_buffer(void)
         current_buffer = 0;
 }
 
-static void console_event(void)
-{
-    DWORD events = 0;
-    GetNumberOfConsoleInputEvents(input_handle, &events);
-
-    if (!events)
-        return;
-
-    INPUT_RECORD *pInput_records = malloc(sizeof(INPUT_RECORD) * events);
-    DWORD events_read = 0;
-    ReadConsoleInput(input_handle, pInput_records, events, &events_read);
-
-    for (DWORD i = 0; i < events; ++i)
-    {
-        WORD event = pInput_records[i].EventType;
-        if (event == WINDOW_BUFFER_SIZE_EVENT)
-            console_size_changed = true;
-        else if (event == KEY_EVENT)
-            key_callback(pInput_records[i].Event.KeyEvent.uChar.UnicodeChar);
-    }
-
-    free(pInput_records);
-}
-
 static void resize(const HANDLE size_handle)
 {
     SMALL_RECT rect = { 0, 0, 1, 1 };
@@ -125,54 +111,34 @@ static void resize(const HANDLE size_handle)
 
 static bool update_console_size(void)
 {
+    HANDLE current_handle = handle;
+    if (use_double_buffer)
+        current_handle = buffer[current_buffer];
+    const COORD new_size = get_console_size(current_handle);
+
+    if (console.size.X == new_size.X && console.size.Y == new_size.Y)
+        return false;
+
+    console.size = new_size;
+
     if (use_double_buffer)
     {
-        WINDOWPLACEMENT window_placement =
-		{
-            .length = sizeof(window_placement)
-        };
-        GetWindowPlacement(GetConsoleWindow(), &window_placement);
+        character_buffer = realloc(character_buffer, sizeof(CHAR_INFO) * console.size.X * console.size.Y);
 
-        if (window_placement.showCmd == SW_MAXIMIZE)
-            console_size_changed = true;
-
-        if (console_size_changed)
-        {
-            console_size_changed = false;
-
-            const COORD new_size = get_console_size(buffer[current_buffer]);
-            if (console.size.X == new_size.X && console.size.Y == new_size.Y)
-                return false;
-
-            console.size = new_size;
-            character_buffer = realloc(character_buffer, sizeof(CHAR_INFO) * console.size.X * console.size.Y);
-
-            written.Right = console.size.X - 1;
-            written.Bottom = console.size.Y - 1;
+        written.Right = console.size.X - 1;
+        written.Bottom = console.size.Y - 1;
             
-            for (int i = 0; i < 2; ++i)
-                resize(buffer[i]);
-            return true;
-        }
+        for (int i = 0; i < 2; ++i)
+            resize(buffer[i]);
     }
     else
-    {
-        const COORD new_size = get_console_size(handle);
-        if (new_size.X == console.size.X && new_size.Y == console.size.Y)
-            return false;
-
-        console.size = new_size;
         resize(handle);
-        return true;
-    }
 
-    return false;
+    return true;
 }
 
 void update_console(void)
 {
-    console_event();
-
     if (update_console_size())
         clear();
 
@@ -220,4 +186,25 @@ void clear(void)
 void print_color_tchar(const color_tchar_t character, const COORD position)
 {
     write(position, character.character, (WORD)character.background | (WORD)character.foreground);
+}
+
+void destroy_console(void)
+{
+    if (use_double_buffer)
+    {
+        for (int i = 0; i < 2; ++i)
+        {
+            if (buffer[i])
+            {
+                CloseHandle(buffer[i]);
+                buffer[i] = NULL;
+            }
+        }
+
+        if (character_buffer)
+        {
+            free(character_buffer);
+            character_buffer = NULL;
+        }
+    }
 }

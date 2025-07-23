@@ -3,40 +3,26 @@
 #include <stdio.h>
 #include <conio.h>
 #include <stdbool.h>
+#include <time.h>
 #include "map.h"
+#include "input.h"
+#include "player.h"
 #include "console.h"
+#include "BlockCtrl.h"
+#include "Inventory.h"
 
-//임시 테스트용
-bool has_movement = false;
-
-static void movement(const wchar_t character)
+static void update(float delta_time)
 {
-    if (character == L'w')
-    {
-        --player.y;
-        has_movement = true;
-    }
-    else if (character == L'a')
-    {
-        --player.x;
-        has_movement = true;
-    }
-    else if (character == L's')
-    {
-        ++player.y;
-        has_movement = true;
-    }
-    else if (character == L'd')
-    {
-        ++player.x;
-        has_movement = true;
-    }
+    player_update(delta_time);
 }
 
 static void render(void)
 {
     render_map();
-    //debug_render_map();
+    render_player();
+    render_virtual_cursor();
+    Mob_render();
+    //debug_render_map(true);
 }
 
 int main(void)
@@ -46,26 +32,36 @@ int main(void)
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-    initialize_console(true, movement);
-    
-    //map.h의 map 전역 변수로 현재 사용중인 맵 접근
-    map = create_map();
-    generate_map();
+    initialize_console(true);
+    initialize_input_handler();
+    create_map();
+    player_init(map.size.x / 2);
+    BlockControl_Init();
+
+    // Delta Time 측정을 위한 변수 초기화 
+    clock_t last_time = clock();
+    float delta_time = 0.0f;
 
     clear();
     while (true)
     {
+        // Delta Time 계산
+        clock_t current_time = clock();
+        delta_time = (float)(current_time - last_time) / CLOCKS_PER_SEC;
+        last_time = current_time;
+
         update_console();
-
-        if (has_movement)
-        {
-            has_movement = false;
-            clear();
-        }
-
+        handle_input_event();
         render();
+        /*player.is_moving = 0;*/
+        update(delta_time);
+        Mob_Spawn_Time();
+        update_mob_ai();
     }
 
+    BlockControl_Destroy();
     destroy_map();
+    destroy_input_handler();
+    destroy_console();
     return EXIT_SUCCESS;
 }

@@ -72,14 +72,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="astar.c" />
+    <ClCompile Include="BlockCtrl.c" />
     <ClCompile Include="console.c" />
+    <ClCompile Include="input.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="map.c" />
+    <ClCompile Include="Mob.c" />
+    <ClCompile Include="perlin.c" />
+    <ClCompile Include="player.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="astar.h" />
+    <ClInclude Include="BlockCtrl.h" />
     <ClInclude Include="console.h" />
+    <ClInclude Include="input.h" />
     <ClInclude Include="leak.h" />
     <ClInclude Include="map.h" />
+    <ClInclude Include="Mob.h" />
+    <ClInclude Include="perlin.h" />
+    <ClInclude Include="player.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

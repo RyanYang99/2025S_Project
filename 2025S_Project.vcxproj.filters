@@ -24,6 +24,24 @@
     <ClCompile Include="map.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="perlin.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="player.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BlockCtrl.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="input.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="astar.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mob.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="console.h">
@@ -33,6 +51,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="leak.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="perlin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BlockCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="input.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="astar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mob.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
