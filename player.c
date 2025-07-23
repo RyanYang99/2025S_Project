@@ -112,7 +112,7 @@ void player_init(int x) {
 }
 
 // 충돌 감지 함수 구현
-static bool is_walkable(int x, int y) {
+bool is_walkable(int x, int y) {
     // 맵 경계 체크
     if (x < 0 || x >= map.size.x || y < 0 || y >= map.size.y) {
         return false;
@@ -173,8 +173,8 @@ void render_player(void) {
             if (pixel.character == L' ') continue;
 
             COORD draw_pos;
-            draw_pos.X = center_pos.X + x - (PLAYER_SPRITE_WIDTH / 2);
-            draw_pos.Y = center_pos.Y + y - (PLAYER_SPRITE_HEIGHT / 2);
+            draw_pos.X = (SHORT)(center_pos.X + x - (PLAYER_SPRITE_WIDTH / 2));
+            draw_pos.Y = (SHORT)(center_pos.Y + y - (PLAYER_SPRITE_HEIGHT / 2));
 
             if (draw_pos.X >= 0 && draw_pos.X < console.size.X &&
                 draw_pos.Y >= 0 && draw_pos.Y < console.size.Y) {

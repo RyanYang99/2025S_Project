@@ -1,22 +1,22 @@
-#include "leak.h"
+ï»¿#include "leak.h"
 
 #include "BlockCtrl.h"
 #include "map.h"
 #include "player.h"
-#include <math.h> // floor ÇÔ¼ö »ç¿ë
+#include <math.h> // floor í•¨ìˆ˜ ì‚¬ìš©
 
 #define MOUSE_X_OFFSET 0
 #define MOUSE_Y_OFFSET 0  
 
 static COORD latestMousePos;
 
-// ¸¶¿ì½º ÀÌµ¿ ½Ã ÃÖ½Å À§Ä¡ °»½Å
+// ë§ˆìš°ìŠ¤ ì´ë™ ì‹œ ìµœì‹  ìœ„ì¹˜ ê°±ì‹ 
 static void BC_OnMouseMove(const COORD pos)
 {
     latestMousePos = pos;
 }
 
-// ¸¶¿ì½º Å¬¸¯ ½Ã »óÈ£ÀÛ¿ë Ã³¸®
+// ë§ˆìš°ìŠ¤ í´ë¦­ ì‹œ ìƒí˜¸ìž‘ìš© ì²˜ë¦¬
 static void BC_OnMouseClick(const bool left)
 {
     int screen_cx = console.size.X / 2;
@@ -36,39 +36,39 @@ static void BC_OnMouseClick(const bool left)
 
     if (left)
     {
-        int damage = 3;  // ¿¹: ¼Õ µ¥¹ÌÁö (³ªÁß¿¡ µµ±¸º°·Î ¹Ù²Ü ¿¹Á¤)
+        int damage = 3;  // ì˜ˆ: ì† ë°ë¯¸ì§€ (ë‚˜ì¤‘ì— ë„êµ¬ë³„ë¡œ ë°”ê¿€ ì˜ˆì •)
 
         bool destroyed = damage_block_at(&map, block_x, block_y, damage);
 
         if (destroyed)
         {
-            // ºí·ÏÀÌ ºÎ¼­Á³À» ¶§ Ãß°¡ Ã³¸® ÀÖÀ¸¸é ¿©±â¼­
+            // ë¸”ë¡ì´ ë¶€ì„œì¡Œì„ ë•Œ ì¶”ê°€ ì²˜ë¦¬ ìžˆìœ¼ë©´ ì—¬ê¸°ì„œ
         }
     }
     else
     {
         if (block_x == player.x && block_y == player.y)
-            return;  // 1. ÇÃ·¹ÀÌ¾î À§Ä¡¿¡´Â ¼³Ä¡ ±ÝÁö
+            return;  // 1. í”Œë ˆì´ì–´ ìœ„ì¹˜ì—ëŠ” ì„¤ì¹˜ ê¸ˆì§€
 
         block_info_t target = get_block_info_at(block_x, block_y);
         if (target.type != BLOCK_AIR)
-            return;  // 2. ÀÌ¹Ì ºí·ÏÀÌ ÀÖ´Â °÷¿¡´Â ¼³Ä¡ ±ÝÁö
+            return;  // 2. ì´ë¯¸ ë¸”ë¡ì´ ìžˆëŠ” ê³³ì—ëŠ” ì„¤ì¹˜ ê¸ˆì§€
 
-        block_t held_block = BLOCK_DIRT; // 4. ³ªÁß¿¡ ÀÎº¥Åä¸®¿¡¼­ ¼±ÅÃÇÑ ºí·ÏÀ¸·Î ´ëÃ¼
-        if (held_block == BLOCK_AIR) return; // °ø±â ºí·ÏÀº ¼³Ä¡ ºÒ°¡
+        block_t held_block = BLOCK_DIRT; // 4. ë‚˜ì¤‘ì— ì¸ë²¤í† ë¦¬ì—ì„œ ì„ íƒí•œ ë¸”ë¡ìœ¼ë¡œ ëŒ€ì²´
+        if (held_block == BLOCK_AIR) return; // ê³µê¸° ë¸”ë¡ì€ ì„¤ì¹˜ ë¶ˆê°€
 
-        // 5. µµ±¸°¡ µé·Á ÀÖ´Ù¸é ¼³Ä¡ ºÒ°¡ (°¡Á¤: BLOCK_TOOL_*·Î ±¸ºÐÇÏ°Å³ª enum °ª µî)
+        // 5. ë„êµ¬ê°€ ë“¤ë ¤ ìžˆë‹¤ë©´ ì„¤ì¹˜ ë¶ˆê°€ (ê°€ì •: BLOCK_TOOL_*ë¡œ êµ¬ë¶„í•˜ê±°ë‚˜ enum ê°’ ë“±)
         //if (held_block >= TOOL_BEGIN && held_block <= TOOL_END) return;
 
-        // 6. ¸Ê °æ°è Ã¼Å©´Â get_block_info_at / set_block_at¿¡¼­ ÀÌ¹Ì Ã³¸®
-        set_block_at(block_x, block_y, held_block); // 3. ÀÚµ¿À¸·Î Ã¼·Â ÃÊ±âÈ­µÊ
+        // 6. ë§µ ê²½ê³„ ì²´í¬ëŠ” get_block_info_at / set_block_atì—ì„œ ì´ë¯¸ ì²˜ë¦¬
+        set_block_at(block_x, block_y, held_block); // 3. ìžë™ìœ¼ë¡œ ì²´ë ¥ ì´ˆê¸°í™”ë¨
 
         
     }
 }
 
 
-// °¡»ó Ä¿¼­ ·»´õ¸µ (¸ð¼­¸® ½ºÅ¸ÀÏ)
+// ê°€ìƒ ì»¤ì„œ ë Œë”ë§ (ëª¨ì„œë¦¬ ìŠ¤íƒ€ì¼)
 void render_virtual_cursor(void)
 {
     int screen_cx = console.size.X / 2;
@@ -86,19 +86,19 @@ void render_virtual_cursor(void)
     int draw_x = screen_cx + (block_x - player.x) * block_width;
     int draw_y = screen_cy + (block_y - player.y) * block_height;
 
-    // °¢ ¸ð¼­¸®¿¡ ¹®ÀÚ¸¦ Ãâ·Â
-    color_tchar_t tl = {L'¦£', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE };
-    color_tchar_t tr = {L'¦¤', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE };
-    color_tchar_t bl = {L'¦¦', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE };
-    color_tchar_t br = {L'¦¥', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE };
+    // ê° ëª¨ì„œë¦¬ì— ë¬¸ìžë¥¼ ì¶œë ¥
+    color_tchar_t tl = {L'â”Œ', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE };
+    color_tchar_t tr = {L'â”', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE };
+    color_tchar_t bl = {L'â””', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE };
+    color_tchar_t br = {L'â”˜', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE };
 
-    print_color_tchar(tl, (COORD) { draw_x, draw_y });
-    print_color_tchar(tr, (COORD) { draw_x + block_width - 1, draw_y });
-    print_color_tchar(bl, (COORD) { draw_x, draw_y + block_height - 1 });
-    print_color_tchar(br, (COORD) { draw_x + block_width - 1, draw_y + block_height - 1 });
+    print_color_tchar(tl, (COORD) { (SHORT)draw_x, (SHORT)draw_y });
+    print_color_tchar(tr, (COORD) { (SHORT)(draw_x + block_width - 1), (SHORT)draw_y });
+    print_color_tchar(bl, (COORD) { (SHORT)draw_x, (SHORT)(draw_y + block_height - 1) });
+    print_color_tchar(br, (COORD) { (SHORT)(draw_x + block_width - 1), (SHORT)(draw_y + block_height - 1) });
 }
 
-// ÃÊ±âÈ­ ¹× ÇØÁ¦
+// ì´ˆê¸°í™” ë° í•´ì œ
 void BlockControl_Init(void)
 {
     subscribe_mouse_position(BC_OnMouseMove);

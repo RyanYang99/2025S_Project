@@ -1,13 +1,13 @@
-#pragma once
+ï»¿#pragma once
 
 #include <Windows.h>
 #include "map.h"
 #include "input.h"
 
-// ¸ğµâ ÃÊ±âÈ­: ¹İµå½Ã main()¿¡¼­ È£Ãâ
+// ëª¨ë“ˆ ì´ˆê¸°í™”: ë°˜ë“œì‹œ main()ì—ì„œ í˜¸ì¶œ
 void BlockControl_Init(void);
 
-// ¸ğµâ Á¤¸®: ÇÁ·Î±×·¥ Á¾·á Àü È£Ãâ
+// ëª¨ë“ˆ ì •ë¦¬: í”„ë¡œê·¸ë¨ ì¢…ë£Œ ì „ í˜¸ì¶œ
 void BlockControl_Destroy(void);
 
 void render_virtual_cursor(void);

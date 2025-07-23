@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <time.h>
 #include "map.h"
+#include "Mob.h"
 #include "input.h"
 #include "player.h"
 #include "console.h"

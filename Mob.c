@@ -1,4 +1,4 @@
-#include <stdio.h>
+ï»¿#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <Windows.h>
@@ -14,121 +14,121 @@
 
 Mob mobs[Max_Mob];
 
-int mob_count = 0; // ¸÷ÀÇ °³Ã¼¼ö È®ÀÎ
-int mob_level = 1; // ³­ÀÌµµ (½Ã°£ºñ·Ê Áõ°¡)  
+int mob_count = 0; // ëª¹ì˜ ê°œì²´ìˆ˜ í™•ì¸
+int mob_level = 1; // ë‚œì´ë„ (ì‹œê°„ë¹„ë¡€ ì¦ê°€)  
 
-long startTime = 0; // °ÔÀÓ ½ÃÀÛ ½Ã°£
-long totalElapsedTime = 0; // ÃÑ °æ°ú ½Ã°£
-long last_spawn_time = 0;// ¸¶Áö¸· ½ºÆù½Ã°£
+long startTime = 0; // ê²Œì„ ì‹œì‘ ì‹œê°„
+long totalElapsedTime = 0; // ì´ ê²½ê³¼ ì‹œê°„
+long last_spawn_time = 0;// ë§ˆì§€ë§‰ ìŠ¤í°ì‹œê°„
 
 
-COORD console_c() // ÄÜ¼Ö Áß¾Ó Ã£±â
+COORD console_c() // ì½˜ì†” ì¤‘ì•™ ì°¾ê¸°
 {
-	COORD center_m;
-	center_m.X = console.size.X / 2;
-	center_m.Y = console.size.Y / 2;
-	return center_m;
+    COORD center_m;
+    center_m.X = console.size.X / 2;
+    center_m.Y = console.size.Y / 2;
+    return center_m;
 }
 
 void Mob_Spawn_Time()
 {
-	srand(time(NULL));//·£´ı°ª ÃÊ±âÈ­ 
-	static int start_c = 0;
-	if (start_c == 0) // ½ÃÀÛ½Ã°£ 0À¸·Î ¼³Á¤
-	{
-		startTime = clock();
-		last_spawn_time = startTime;
-		start_c = 1; // Ã³À½ ½ÇÇÛ½Ã¸¸ ½ÃÀÛ½Ã°£°ª 0À¸·Î ¼³Á¤
-	}
+    srand((unsigned int)time(NULL));//ëœë¤ê°’ ì´ˆê¸°í™” 
+    static int start_c = 0;
+    if (start_c == 0) // ì‹œì‘ì‹œê°„ 0ìœ¼ë¡œ ì„¤ì •
+    {
+        startTime = clock();
+        last_spawn_time = startTime;
+        start_c = 1; // ì²˜ìŒ ì‹¤í•¼ì‹œë§Œ ì‹œì‘ì‹œê°„ê°’ 0ìœ¼ë¡œ ì„¤ì •
+    }
 
 
 
-	long prevSpawn = clock(); //ÇöÀç½Ã°£
-	if ((prevSpawn - last_spawn_time) / CLOCKS_PER_SEC == 5) // ¼ÒÈ¯ °£°İ ¼³Á¤(ÃÊ ´ÜÀ§)
-	{
-		if (mob_count < Max_Mob) //ÀÏÁ¤¼ö ÀÌ»ó ¸÷»ı¼º Á¦ÇÑ
-		{
-			MobSpawn(player.x, player.y); //ÇÃ·¹ÀÌ¾î ÁÂÇ¥¸¦ ¹Ş¾Æ ÇÃ·¹ÀÌ¾î ±âÁØÀ¸·Î »ı¼º
-			last_spawn_time = prevSpawn;
-		}
+    long prevSpawn = clock(); //í˜„ì¬ì‹œê°„
+    if ((prevSpawn - last_spawn_time) / CLOCKS_PER_SEC == 5) // ì†Œí™˜ ê°„ê²© ì„¤ì •(ì´ˆ ë‹¨ìœ„)
+    {
+        if (mob_count < Max_Mob) //ì¼ì •ìˆ˜ ì´ìƒ ëª¹ìƒì„± ì œí•œ
+        {
+            MobSpawn(player.x, player.y); //í”Œë ˆì´ì–´ ì¢Œí‘œë¥¼ ë°›ì•„ í”Œë ˆì´ì–´ ê¸°ì¤€ìœ¼ë¡œ ìƒì„±
+            last_spawn_time = prevSpawn;
+        }
 
-	}
+    }
 
-	totalElapsedTime = (prevSpawn - startTime) / CLOCKS_PER_SEC;
-	if (totalElapsedTime == 100 && mob_level < 10) // ³­µµ Á¶Á¤¿ë ÀÓ½Ã »ı¼º
-	{
-		mob_level++;
-	}
+    totalElapsedTime = (prevSpawn - startTime) / CLOCKS_PER_SEC;
+    if (totalElapsedTime == 100 && mob_level < 10) // ë‚œë„ ì¡°ì •ìš© ì„ì‹œ ìƒì„±
+    {
+        mob_level++;
+    }
 
 }
 
 void MobSpawn(int player_x, int player_y) 
 {
 
-	for (int check_x = player_x - 50; check_x <= player_x + 50; check_x++) //ÇÃ·¹ÀÌ¾î ÁÖº¯ x°ª Å½»ö
-	{
-		for (int check_y = player_y - 50; check_y <= player_y + 50; check_y++) //ÇÃ·¹ÀÌ¾î ÁÖº¯ y°ª Å½»ö
-		{
-			if (check_x >= 0 && check_x < map.size.x && check_y >= 0 && check_y + 1 < map.size.y) // ¸Ê ¹è¿­ ÃÊ°ú È®ÀÎ(ÃÊ°úÇÏ¿© Å½»ö½Ã ¿¹¿Ü¹ß»ı ¹æÁö¿ë)
-			{
-				if (map.ppBlocks[check_y + 1][check_x].type == BLOCK_GRASS) //Ç® ÀÚÃ¼°¡ ¶¥À§¿¡ »ı¼º µÇ¹Ç·Î Ç® À§ÀÌ±â¸¸ ÇÏ¸é »ı¼º µÇµµ·Ï ¼³Á¤
-				{
-					int Spawn_r = rand() % 50; // ½ºÆù È®·ü
-					if (Spawn_r == 0)
-					{
-						mobs[mob_count].x = check_x; // Å½»öÀ¸·Î Á¶°ÇÀÌ ¸Â´Â ÁÂÇ¥°ª ÀúÀå
-						mobs[mob_count].y = check_y;
-						mobs[mob_count].HP = mob_level * 5;
-						mobs[mob_count].atk = mob_level * 2; //ÀÌÈÄ Ãß°¡ (³­ÀÌµµ¿¡ µû¶ó Áõ°¡)
-						mobs[mob_count].last_move_time = clock();
-						mob_count++;
-					}
-				}
-			}
+    for (int check_x = player_x - 50; check_x <= player_x + 50; check_x++) //í”Œë ˆì´ì–´ ì£¼ë³€ xê°’ íƒìƒ‰
+    {
+        for (int check_y = player_y - 50; check_y <= player_y + 50; check_y++) //í”Œë ˆì´ì–´ ì£¼ë³€ yê°’ íƒìƒ‰
+        {
+            if (check_x >= 0 && check_x < map.size.x && check_y >= 0 && check_y + 1 < map.size.y) // ë§µ ë°°ì—´ ì´ˆê³¼ í™•ì¸(ì´ˆê³¼í•˜ì—¬ íƒìƒ‰ì‹œ ì˜ˆì™¸ë°œìƒ ë°©ì§€ìš©)
+            {
+                if (map.ppBlocks[check_y + 1][check_x].type == BLOCK_GRASS) //í’€ ìì²´ê°€ ë•…ìœ„ì— ìƒì„± ë˜ë¯€ë¡œ í’€ ìœ„ì´ê¸°ë§Œ í•˜ë©´ ìƒì„± ë˜ë„ë¡ ì„¤ì •
+                {
+                    int Spawn_r = rand() % 50; // ìŠ¤í° í™•ë¥ 
+                    if (Spawn_r == 0)
+                    {
+                        mobs[mob_count].x = check_x; // íƒìƒ‰ìœ¼ë¡œ ì¡°ê±´ì´ ë§ëŠ” ì¢Œí‘œê°’ ì €ì¥
+                        mobs[mob_count].y = check_y;
+                        mobs[mob_count].HP = mob_level * 5;
+                        mobs[mob_count].atk = mob_level * 2; //ì´í›„ ì¶”ê°€ (ë‚œì´ë„ì— ë”°ë¼ ì¦ê°€)
+                        mobs[mob_count].last_move_time = clock();
+                        mob_count++;
+                    }
+                }
+            }
 
-		}
-	}
+        }
+    }
 
 }
 
 
-void Mob_render() // ¸÷ ·»´õ¸µ
+void Mob_render() // ëª¹ ë Œë”ë§
 {
 
-	COORD center_m = console_c();
+    COORD center_m = console_c();
 
-	for (int i = 0; i < mob_count; i++)
-	{
-		int mob_x = center_m.X + (mobs[i].x - player.x) * 3; // ÇÃ·¹ÀÌ¾î ¿òÁ÷ÀÓ µû¶ó ¸÷ À§Ä¡µµ ¸Ê¿¡ ¸Â°Ô º¯°æ
-		int mob_y = center_m.Y + (mobs[i].y - player.y) * 3; // ÇÃ·¹ÀÌ¾î ¿òÁ÷ÀÓ°ú µ¿ÀÏÇÏ°Ô ¼³Á¤ ÇÏÁö ¾ÊÀ¸¸é ¼ÒÈ¯À§Ä¡¿¡ ¹®Á¦¹ß»ı(Á¶°Ç¿¡ ¸ÂÁö ¤·³º´Â À§Ä¡¿¡ »ı¼º)
+    for (int i = 0; i < mob_count; i++)
+    {
+        int mob_x = center_m.X + (mobs[i].x - player.x) * 3; // í”Œë ˆì´ì–´ ì›€ì§ì„ ë”°ë¼ ëª¹ ìœ„ì¹˜ë„ ë§µì— ë§ê²Œ ë³€ê²½
+        int mob_y = center_m.Y + (mobs[i].y - player.y) * 3; // í”Œë ˆì´ì–´ ì›€ì§ì„ê³¼ ë™ì¼í•˜ê²Œ ì„¤ì • í•˜ì§€ ì•Šìœ¼ë©´ ì†Œí™˜ìœ„ì¹˜ì— ë¬¸ì œë°œìƒ(ì¡°ê±´ì— ë§ì§€ ã…‡ë‚³ëŠ” ìœ„ì¹˜ì— ìƒì„±)
 
-		// È­¸é ¹Û ¸÷Àº ±×¸®Áö ¾ÊÀ½
-		if (mob_x < 0 || mob_x >= console.size.X || mob_y < 0 || mob_y >= console.size.Y)
-			continue;
+        // í™”ë©´ ë°– ëª¹ì€ ê·¸ë¦¬ì§€ ì•ŠìŒ
+        if (mob_x < 0 || mob_x >= console.size.X || mob_y < 0 || mob_y >= console.size.Y)
+            continue;
 
-		COORD Mobpos = { mob_x, mob_y }; // ÀúÀåÇÑ ¼ÒÈ¯°¡´É ÁÂÇ¥°ª ¹ŞÀ½
-		color_tchar_t mob_c =
-		{
-			'@',
-			BACKGROUND_T_BLACK,
-			FOREGROUND_T_RED };
-		print_color_tchar(mob_c, Mobpos);
-	}
+        COORD Mobpos = { (SHORT)mob_x, (SHORT)mob_y }; // ì €ì¥í•œ ì†Œí™˜ê°€ëŠ¥ ì¢Œí‘œê°’ ë°›ìŒ
+        color_tchar_t mob_c =
+        {
+            '@',
+            BACKGROUND_T_BLACK,
+            FOREGROUND_T_RED };
+        print_color_tchar(mob_c, Mobpos);
+    }
 
 }
 
 void update_mob_ai() {
-	long current_time = clock();
-	for (int i = 0; i < mob_count; ++i) {
-		if ((current_time - mobs[i].last_move_time) / (double)CLOCKS_PER_SEC >= 0.5) {
-			
-			COORD next_pos = find_path_next_step(mobs[i].x, mobs[i].y, player.x, player.y, map.size.x, map.size.y);
+    long current_time = clock();
+    for (int i = 0; i < mob_count; ++i) {
+        if ((current_time - mobs[i].last_move_time) / (double)CLOCKS_PER_SEC >= 0.5) {
+            
+            COORD next_pos = find_path_next_step(mobs[i].x, mobs[i].y, player.x, player.y, map.size.x, map.size.y);
 
-			if (next_pos.X != -1 && next_pos.Y != -1) {
-				mobs[i].x = next_pos.X;
-				mobs[i].y = next_pos.Y;
-			}
-			mobs[i].last_move_time = current_time;
-		}
-	}
+            if (next_pos.X != -1 && next_pos.Y != -1) {
+                mobs[i].x = next_pos.X;
+                mobs[i].y = next_pos.Y;
+            }
+            mobs[i].last_move_time = current_time;
+        }
+    }
 }

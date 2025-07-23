@@ -128,7 +128,7 @@ const color_tchar_t pBlock_textures[BLOCKS][TEXTURE_SIZE][TEXTURE_SIZE] =
 };
 
 // 블록 기본 체력 설정
-static int get_block_max_health(block_t type)
+int get_block_max_health(block_t type)
 {
     switch (type) //주먹=3데미지? 나무 곡=10 돌곡=17 철곡=30
     {
@@ -165,19 +165,19 @@ void set_block_at(int x, int y, block_t type)
 }
 
 
-bool damage_block_at(map_t* map, int x, int y, int damage)
+bool damage_block_at(map_t* pMap, int x, int y, int damage)
 {
-    if (x < 0 || x >= map->size.x || y < 0 || y >= map->size.y)
+    if (x < 0 || x >= pMap->size.x || y < 0 || y >= pMap->size.y)
         return false;
 
-    if (map->ppBlocks[y][x].type == BLOCK_AIR)
+    if (pMap->ppBlocks[y][x].type == BLOCK_AIR)
         return false;
 
-    map->ppBlocks[y][x].hp -= damage;
+    pMap->ppBlocks[y][x].hp -= damage;
 
-    if (map->ppBlocks[y][x].hp <= 0)
+    if (pMap->ppBlocks[y][x].hp <= 0)
     {
-        initialize_block(&map->ppBlocks[y][x], BLOCK_AIR);
+        initialize_block(&pMap->ppBlocks[y][x], BLOCK_AIR);
         return true;
     }
 
@@ -205,7 +205,7 @@ static void allocate_map(void)
 }
 
 // 블록 초기화 함수
-static void initialize_block(block_info_t* block, block_t type)
+void initialize_block(block_info_t* block, block_t type)
 {
     block->type = type;
     block->hp = get_block_max_health(type);
