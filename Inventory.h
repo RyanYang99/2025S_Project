@@ -1,18 +1,21 @@
 #pragma once
 
+
 #include "stdio.h"
 #include "stdlib.h"
 #include "stdbool.h"
+#include "ItemDB.h"
+#include "time.h"
 
-#define INVENTORY_SIZE 40
+#define ITEMS_PER_PAGE 10   // 한 페이지에 보여줄 아이템 수
+#define MAX_PAGES 5         // 최대 페이지 수
+#define INVENTORY_SIZE (ITEMS_PER_PAGE * MAX_PAGES) // 총 인벤토리 칸 수
 
-typedef struct Item_Info {
-	int index; //아이템 인덱스
-	char name[32]; //아이템 이름
-	int maxStack; //아이템 최대갯수(장비는 1로 고정)
-	int type; // 아이템 종류
-	int BaseDurability; // 아이템 내구도
-}Item_Info;
+#define COLOR_DEFAULT 7
+#define COLOR_SELECT_DARK 8
+#define COLOR_SELECT_BRIGHT 15
+#define COLOR_INFO 14
+#define COLOR_EQUIPPED 10
 
 typedef struct Player_Item {
 	int Item_Index;  //DB를 참조하는 index
@@ -23,5 +26,11 @@ typedef struct Player_Item {
 
 typedef struct Inventory {
 	Player_Item item[INVENTORY_SIZE];
-	int selectedIndex; //인벤토리 현재 선택 된 칸
+	//int selectedIndex; //인벤토리 현재 선택 된 칸
 }Inventory;
+
+void InitInventory(Inventory* inv);
+bool AddItemToInventory(Inventory* inv, ItemDB* db, int itemIndex, int quantity);
+void ShowInventory(Inventory* playerInventory, ItemDB* db);
+void gotoxy(int x, int y);
+void HandleInventoryKeyInput();
