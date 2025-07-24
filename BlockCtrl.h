@@ -4,6 +4,11 @@
 #include "map.h"
 #include "input.h"
 
+//디버깅, 테스트 용도; 디버깅 이외에 필요시 BlockCtrl.c에 선언된 block_x/y 사용.
+#if _DEBUG
+extern int selected_block_x, selected_block_y;
+#endif
+
 // 모듈 초기화: 반드시 main()에서 호출
 void BlockControl_Init(void);
 
@@ -11,4 +16,3 @@ void BlockControl_Init(void);
 void BlockControl_Destroy(void);
 
 void render_virtual_cursor(void);
-

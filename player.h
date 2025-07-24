@@ -25,7 +25,7 @@ int find_ground_pos(int x);
 // 플레이어 이동
 void player_move(int dx, int dy);
 
-void player_update(float delta_time); // Delta Time을 인자로 받음
+void player_update(void);
 
 bool is_walkable(int x, int y);
 

@@ -1,4 +1,5 @@
 ﻿//https://gpfault.net/posts/perlin-noise.txt.html
+#include "leak.h"
 #include "perlin.h"
 
 #include <math.h>

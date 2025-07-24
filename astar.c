@@ -1,4 +1,6 @@
-﻿// astar.c
+﻿#include "leak.h"
+
+// astar.c
 #include "astar.h" // 새로 만든 astar.h를 포함합니다.
 
 #include <stdio.h>   // fprintf, NULL 등을 위해

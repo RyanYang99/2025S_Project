@@ -42,6 +42,12 @@
     <ClCompile Include="Mob.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="global_state.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="delta.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="console.h">
@@ -69,6 +75,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Mob.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="global_state.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="delta.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

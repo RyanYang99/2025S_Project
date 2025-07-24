@@ -75,6 +75,8 @@
     <ClCompile Include="astar.c" />
     <ClCompile Include="BlockCtrl.c" />
     <ClCompile Include="console.c" />
+    <ClCompile Include="delta.c" />
+    <ClCompile Include="global_state.c" />
     <ClCompile Include="input.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="map.c" />
@@ -86,6 +88,8 @@
     <ClInclude Include="astar.h" />
     <ClInclude Include="BlockCtrl.h" />
     <ClInclude Include="console.h" />
+    <ClInclude Include="delta.h" />
+    <ClInclude Include="global_state.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="leak.h" />
     <ClInclude Include="map.h" />

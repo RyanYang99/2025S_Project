@@ -124,6 +124,28 @@ const color_tchar_t pBlock_textures[BLOCKS][TEXTURE_SIZE][TEXTURE_SIZE] =
         {
             { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE }
         }
+    },
+    {
+        {
+            { '?' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '?' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '?' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }
+        },
+        {
+            { '?' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '?' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '?' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }
+        },
+        {
+            { '?' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '?' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '?' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }
+        }
+    },
+    {
+        {
+            { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }
+        },
+        {
+            { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }
+        },
+        {
+            { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }
+        }
     }
 };
 
@@ -167,7 +189,7 @@ void set_block_at(int x, int y, block_t type)
 
 bool damage_block_at(map_t* pMap, int x, int y, int damage)
 {
-    if (x < 0 || x > pMap->size.x || y < 0 || y > pMap->size.y)
+    if (x < 0 || x >= pMap->size.x || y < 0 || y >= pMap->size.y)
         return false;
 
     if (pMap->ppBlocks[y][x].type == BLOCK_AIR)
@@ -271,6 +293,15 @@ static void generate_strip(const int x, const biome_t biome, const bool override
 
         if (map.ppBlocks[iron_y][x].type == BLOCK_STONE)
             initialize_block(&map.ppBlocks[iron_y][x], BLOCK_IRON_ORE);
+    }
+
+    if (height > 150)
+    {
+        for (int wy = 150; wy < height; ++wy)
+        {
+            if (map.ppBlocks[wy][x].type == BLOCK_AIR)
+                initialize_block(&map.ppBlocks[wy][x], BLOCK_WATER);
+        }
     }
 }
 
