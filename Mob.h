@@ -1,11 +1,11 @@
-// Mob.h
+ï»¿// Mob.h
 #pragma once
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <stdbool.h>
-#include <windows.h> // COORD¸¦ »ç¿ëÇÏ±â À§ÇØ Ãß°¡
+#include <windows.h> // COORDë¥¼ ì‚¬ìš©í•˜ê¸° ìœ„í•´ ì¶”ê°€
 
 #include "player.h"
 #include "map.h"
@@ -17,16 +17,16 @@
 
 
 typedef struct {
-    int x;  // ¿ùµå ÁÂÇ¥ X
-    int y;  // ¿ùµå ÁÂÇ¥ Y
+    int x;  // ì›”ë“œ ì¢Œí‘œ X
+    int y;  // ì›”ë“œ ì¢Œí‘œ Y
     int HP;
     int atk;
-    long last_move_time; // ¸ó½ºÅÍ °³º° ÀÌµ¿ ½Ã°£ Á¶ÀıÀ» À§ÇÑ Å¸ÀÌ¸Ó
+    long last_move_time; // ëª¬ìŠ¤í„° ê°œë³„ ì´ë™ ì‹œê°„ ì¡°ì ˆì„ ìœ„í•œ íƒ€ì´ë¨¸
 } Mob;
 
 extern Mob mobs[Max_Mob]; 
-extern int mob_count; // mobs ¹è¿­ÀÇ ÇöÀç À¯È¿ÇÑ ¸÷ °³¼ö
-extern int mob_level; // ³­ÀÌµµ
+extern int mob_count; // mobs ë°°ì—´ì˜ í˜„ì¬ ìœ íš¨í•œ ëª¹ ê°œìˆ˜
+extern int mob_level; // ë‚œì´ë„
 
 void Mob_Spawn_Time();
 void MobSpawn(int x, int y);

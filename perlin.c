@@ -1,4 +1,5 @@
 ﻿//https://gpfault.net/posts/perlin-noise.txt.html
+#include "leak.h"
 #include "perlin.h"
 
 #include <math.h>
@@ -42,7 +43,7 @@ static const float grad(const int p)
 
 const float perlin_noise(const float x)
 {
-    const int xi = (int)floor(x);
+    const int xi = (int)floorf(x);
     const float xf = x - xi;
 
     return lerp(grad(xi) * xf, grad(xi + 1) * (xf - 1.0f), fade(xf));

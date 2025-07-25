@@ -3,10 +3,13 @@
 
 #include "map.h"
 #include "input.h"
+#include "delta.h"
 #include "console.h"
+#include "global_state.h"
 #include <stdio.h> // swprintf 사용하기위해
 #include <wchar.h>
 #include <time.h>
+#include <conio.h>
 
 player_t player = { 0, 0, 1000, 0, 0.0f, 0 }; // 초기 위치 및 체력, is_walking 상태 추가 (0: 정지, 1: 걷기)
 
@@ -54,7 +57,15 @@ static const PlayerSpritePixel player_sprite_walk[2][PLAYER_SPRITE_HEIGHT][PLAYE
 };
 
 
-static void movement(const char character) {
+static void movement(void) {
+    if (!_kbhit())
+        return;
+
+    const char character = (char)_getch();
+
+    if (character == 'q')
+        game_exit = true;
+
     if (character == 'w' || character == 'a' || character == 's' || character == 'd') {
         // 새로운 위치 계산
         int new_x = player.x;
@@ -80,7 +91,9 @@ static void update_player_offset(void) {
 }
 
 // *** 새로운 업데이트 함수 ***
-void player_update(float delta_time) {
+void player_update(void) {
+    movement();
+
     if (player.is_moving) {
         // Delta Time을 타이머에 누적
         player.animation_timer += delta_time;
@@ -105,14 +118,17 @@ void player_update(float delta_time) {
 void player_init(int x) {
     player.x = x;
     player.y = find_ground_pos(x);
+    if (player.y - 1 >= 0)
+        --player.y; // 가능할 시 찾은 블록 위로 설정
+
     player.hp = 1000; // 초기 체력
 
-    subscribe_keyhit(movement);
+    //subscribe_keyhit(movement);
     subscribe_offset_change(update_player_offset);
 }
 
 // 충돌 감지 함수 구현
-static bool is_walkable(int x, int y) {
+bool is_walkable(int x, int y) {
     // 맵 경계 체크
     if (x < 0 || x >= map.size.x || y < 0 || y >= map.size.y) {
         return false;
@@ -123,20 +139,13 @@ static bool is_walkable(int x, int y) {
 
     // 블록 타입에 따른 이동 가능 여부 판단
     switch (block.type) {
-    case BLOCK_AIR:
-        return true;
-    case BLOCK_GRASS:
-    case BLOCK_DIRT:
-    case BLOCK_STONE:
-    case BLOCK_BEDROCK:
-    case BLOCK_IRON_ORE:
-    case BLOCK_LOG:
-    case BLOCK_LEAF:
-    case BLOCK_SNOW:
-        return false;
-    default:
-        return false;
+        case BLOCK_AIR:
+        case BLOCK_LEAF:
+        case BLOCK_WATER:
+            return true;
     }
+
+    return false;
 }
 
 void player_move(int dx, int dy) {
@@ -173,8 +182,8 @@ void render_player(void) {
             if (pixel.character == L' ') continue;
 
             COORD draw_pos;
-            draw_pos.X = center_pos.X + x - (PLAYER_SPRITE_WIDTH / 2);
-            draw_pos.Y = center_pos.Y + y - (PLAYER_SPRITE_HEIGHT / 2);
+            draw_pos.X = (SHORT)(center_pos.X + x - (PLAYER_SPRITE_WIDTH / 2));
+            draw_pos.Y = (SHORT)(center_pos.Y + y - (PLAYER_SPRITE_HEIGHT / 2));
 
             if (draw_pos.X >= 0 && draw_pos.X < console.size.X &&
                 draw_pos.Y >= 0 && draw_pos.Y < console.size.Y) {
@@ -215,13 +224,8 @@ void render_player(void) {
 int find_ground_pos(int x)
 {
     for (int y = 0; y < map.size.y; ++y)
-    {
-        if (map.ppBlocks[y][x].type == BLOCK_GRASS)
-        {
-            return y; //가장 높은 풀 블록을 찾으면 해당 좌표 반환
-        }
+        if (!is_walkable(x, y))
+            return y; //걷지 못하는 블록을 찾으면 y좌표 반환
 
-    }
-
-    return map.size.x / 2; //풀 블록을 찾지 못하면 0 반환;
+    return map.size.y / 2; //블록을 찾지 못하면 맵 높이의 절반 반환;
 }
