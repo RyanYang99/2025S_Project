@@ -44,7 +44,7 @@ void Mob_Spawn_Time()
 
 
 	long prevSpawn = clock(); //현재시간
-	if ((prevSpawn - last_spawn_time) / CLOCKS_PER_SEC == 5) // 소환 간격 설정(초 단위)
+	if ((prevSpawn - last_spawn_time) / CLOCKS_PER_SEC >= 5) // 소환 간격 설정(초 단위)
 	{
 		if (mob_count < Max_Mob) //일정수 이상 몹생성 제한
 		{
@@ -71,17 +71,27 @@ void MobSpawn(int player_x, int player_y)
 		{
 			if (check_x >= 0 && check_x < map.size.x && check_y >= 0 && check_y + 1 < map.size.y) // 맵 배열 초과 확인(초과하여 탐색시 예외발생 방지용)
 			{
-				if (map.ppBlocks[check_y + 1][check_x].type == BLOCK_GRASS) //풀 자체가 땅위에 생성 되므로 풀 위이기만 하면 생성 되도록 설정
+				if (
+						(map.ppBlocks[check_y + 1][check_x].type == BLOCK_GRASS) || 
+						(map.ppBlocks[check_y + 1][check_x].type == BLOCK_SNOW && map.ppBlocks[check_y ][check_x].type == BLOCK_AIR)
+					) //풀, 눈 자체가 땅위에 생성 되므로 풀 위이기만 하면 생성 되도록 설정(눈은 여러겹 생성이므로 배경과 바로 아래 블럭이 조건에 맞는지 확인)
 				{
-					int Spawn_r = rand() % 50; // 스폰 확률
-					if (Spawn_r == 0)
+					if (
+						((check_x <= player_x - 20) || (check_x >= player_x + 20)) && 
+						((check_y <= player_y - 20) || (check_y >= player_y + 20))
+						) // 플레이어 주변 20칸 이내로는 스폰X
 					{
-						mobs[mob_count].x = check_x; // 탐색으로 조건이 맞는 좌표값 저장
-						mobs[mob_count].y = check_y;
-						mobs[mob_count].HP = mob_level * 5;
-						mobs[mob_count].atk = mob_level * 2; //이후 추가 (난이도에 따라 증가)
-						mobs[mob_count].last_move_time = clock();
-						mob_count++;
+						int Spawn_r = rand() % 50; // 스폰 확률
+						if (Spawn_r == 0)
+						{
+							mobs[mob_count].x = check_x; // 탐색으로 조건이 맞는 좌표값 저장
+							mobs[mob_count].y = check_y;
+							mobs[mob_count].HP = mob_level * 5;
+							mobs[mob_count].atk = mob_level * 2; //이후 추가 (난이도에 따라 증가)
+							mobs[mob_count].despawn_check = clock(); //디스폰 초기화
+							mobs[mob_count].last_move_time = clock();
+							mob_count++;
+						}
 					}
 				}
 			}
@@ -91,20 +101,24 @@ void MobSpawn(int player_x, int player_y)
 
 }
 
-
 void Mob_render() // 몹 렌더링
 {
 
-	COORD center_m = console_c();
+	COORD mob_center = console_c();
 
 	for (int i = 0; i < mob_count; i++)
 	{
-		int mob_x = center_m.X + (mobs[i].x - player.x) * 3; // 플레이어 움직임 따라 몹 위치도 맵에 맞게 변경
-		int mob_y = center_m.Y + (mobs[i].y - player.y) * 3; // 플레이어 움직임과 동일하게 설정 하지 않으면 소환위치에 문제발생(조건에 맞지 ㅇ낳는 위치에 생성)
-
+		int mob_x = mob_center.X + (mobs[i].x - player.x) * 3; // 플레이어 움직임 따라 몹 위치도 맵에 맞게 변경
+		int mob_y = mob_center.Y + (mobs[i].y - player.y) * 3; // 플레이어 움직임과 동일하게 설정 하지 않으면 소환위치에 문제발생(조건에 맞지 ㅇ낳는 위치에 생성)
 		// 화면 밖 몹은 그리지 않음
+
+		
+
 		if (mob_x < 0 || mob_x >= console.size.X || mob_y < 0 || mob_y >= console.size.Y)
+		{
 			continue;
+		}
+
 
 		COORD Mobpos = { mob_x, mob_y }; // 저장한 소환가능 좌표값 받음
 		color_tchar_t mob_c =
@@ -117,18 +131,46 @@ void Mob_render() // 몹 렌더링
 
 }
 
-void update_mob_ai() {
+void DespawnMob()
+{
+	for (int i = 0; i < mob_count; )
+	{
+		int x = abs(mobs[i].x - player.x); // 몹거리 절댓값 체크
+		int y = abs(mobs[i].y - player.y);
+		if (x > 70 || y > 70) //플레이어 기준 일정거리 이상이면 몹 디스폰
+		{
+			if ((clock() - mobs[i].despawn_check) / CLOCKS_PER_SEC >= 5)
+			{
+				for (int j = i; j < mob_count - 1; j++)
+				{
+					mobs[j] = mobs[j + 1];
+				}
+				mob_count--;
+				continue;
+			}
+		}
+			mobs[i].despawn_check = clock(); // 디스폰 초기화
+			i++;
+	}
+}
+
+void update_mob_ai()
+{
 	long current_time = clock();
-	for (int i = 0; i < mob_count; ++i) {
-		if ((current_time - mobs[i].last_move_time) / (double)CLOCKS_PER_SEC >= 0.5) {
-			
+	for (int i = 0; i < mob_count; ++i)
+	{
+		if ((current_time - mobs[i].last_move_time) / (double)CLOCKS_PER_SEC >= 0.5)
+		{
+
 			COORD next_pos = find_path_next_step(mobs[i].x, mobs[i].y, player.x, player.y, map.size.x, map.size.y);
 
-			if (next_pos.X != -1 && next_pos.Y != -1) {
+			if (next_pos.X != -1 && next_pos.Y != -1)
+			{
 				mobs[i].x = next_pos.X;
 				mobs[i].y = next_pos.Y;
 			}
 			mobs[i].last_move_time = current_time;
 		}
+
 	}
 }

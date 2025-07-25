@@ -32,7 +32,16 @@ bool is_valid_block(int x, int y, int map_size_x, int map_size_y) {
         return false;
     }
     block_t block_under_mob = map.ppBlocks[y + 1][x].type;
-    return (block_under_mob == BLOCK_GRASS || block_under_mob == BLOCK_DIRT);
+    block_t block_background_mob = map.ppBlocks[y][x].type;
+    return (
+        (block_background_mob == BLOCK_AIR && block_under_mob == BLOCK_GRASS) ||
+        (block_background_mob == BLOCK_AIR && block_under_mob == BLOCK_SNOW) ||
+        (block_background_mob == BLOCK_AIR && block_under_mob == BLOCK_AIR) ||
+        (block_background_mob == BLOCK_AIR && block_under_mob == BLOCK_LEAF) ||
+        (block_background_mob == BLOCK_AIR && block_under_mob == BLOCK_DIRT) ||
+        (block_background_mob == BLOCK_AIR && block_under_mob == BLOCK_STONE)
+
+        );
 }
 
 // 노드 비교 함수 (qsort 사용을 위해)

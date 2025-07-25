@@ -56,6 +56,8 @@ int main(void)
         update(delta_time);
         Mob_Spawn_Time();
         update_mob_ai();
+        DespawnMob();
+        
     }
 
     BlockControl_Destroy();

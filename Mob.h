@@ -21,6 +21,11 @@ typedef struct {
     int y;  // 월드 좌표 Y
     int HP;
     int atk;
+    int state; // 현재 상태
+    // 1 :
+    // 2 :
+    // 3 :
+    int despawn_check; //디스폰 체크
     long last_move_time; // 몬스터 개별 이동 시간 조절을 위한 타이머
 } Mob;
 
@@ -31,5 +36,7 @@ extern int mob_level; // 난이도
 void Mob_Spawn_Time();
 void MobSpawn(int x, int y);
 void Mob_render();
+void DespawnMob();
+
 
 void update_mob_ai(void);
