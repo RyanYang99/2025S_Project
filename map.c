@@ -13,8 +13,9 @@
 
 typedef enum
 {
-    BIOME_PLAINS = 0,
-    BIOME_SNOWY_MOUNTAINS = 1
+    BIOME_PLAINS,
+    BIOME_SNOWY_MOUNTAINS,
+    BIOME_DESERT
 }
 biome_t;
 
@@ -127,13 +128,13 @@ const color_tchar_t pBlock_textures[BLOCKS][TEXTURE_SIZE][TEXTURE_SIZE] =
     },
     {
         {
-            { '?' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '?' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '?' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }
+            { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }
         },
         {
-            { '?' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '?' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '?' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }
+            { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }
         },
         {
-            { '?' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '?' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '?' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }
+            { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }
         }
     },
     {
@@ -162,6 +163,7 @@ int get_block_max_health(block_t type)
     case BLOCK_LOG:         return 9;
     case BLOCK_LEAF:        return 3;
     case BLOCK_SNOW:        return 3;
+    case BLOCK_SAND:        return 3;
     case BLOCK_BEDROCK:     return -1;
     default:                return 1;
     }
@@ -258,6 +260,10 @@ static void generate_strip(const int x, const biome_t biome, const bool override
         {
             f1 = 0.006f;
             a = 0.7f;
+        } else if (biome == BIOME_DESERT)
+        {
+            f1 = 0.002f;
+            a = 0.4f;
         }
 
         const float px = (float)x - total_offsets,
@@ -277,13 +283,21 @@ static void generate_strip(const int x, const biome_t biome, const bool override
         initialize_block(&map.ppBlocks[y][x], BLOCK_STONE);
 
     for (int y = height + dirt_height; y > height; --y)
-        initialize_block(&map.ppBlocks[y][x], BLOCK_DIRT);
+    {
+        block_t block = BLOCK_DIRT;
+        if (biome == BIOME_DESERT)
+            block = BLOCK_SAND;
+        
+        initialize_block(&map.ppBlocks[y][x], block);
+    }
 
     if (biome == BIOME_PLAINS)
         initialize_block(&map.ppBlocks[height][x], BLOCK_GRASS);
     else if (biome == BIOME_SNOWY_MOUNTAINS)
         for (int y = height + snow_height; y >= height; --y)
             initialize_block(&map.ppBlocks[y][x], BLOCK_SNOW);
+    else if (biome == BIOME_DESERT)
+        initialize_block(&map.ppBlocks[height][x], BLOCK_SAND);
 
     //철광석을 20% 확률로 생성
     if (rand() % 100 >= 80)
@@ -317,6 +331,8 @@ static biome_t generate_map(const int old_width, const bool right)
     biome_t biome = BIOME_PLAINS;
     if (biome_random >= 75)
         biome = BIOME_SNOWY_MOUNTAINS;
+    else if (biome_random < 25)
+        biome = BIOME_DESERT;
 
     for (int x = start_x; x < end_x; ++x)
         generate_strip(x, biome, false, 0);
