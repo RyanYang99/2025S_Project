@@ -313,24 +313,24 @@ static biome_t generate_map(const int old_width, const bool right)
     if (!right)
         end_x -= old_width;
 
-    const int biome_random = rand() % 100 + 1;
+    const int biome_random = rand() % 100;
     biome_t biome = BIOME_PLAINS;
-    //25%
-    if (biome_random > 50)
+    if (biome_random >= 75)
         biome = BIOME_SNOWY_MOUNTAINS;
 
     for (int x = start_x; x < end_x; ++x)
         generate_strip(x, biome, false, 0);
 
     const int blend_width = 10,
-        target_1 = find_top(right ? start_x - 1 : difference),
-        target_2 = find_top(right ? start_x + blend_width : end_x - blend_width);
-    if (target_1 != -1 && target_2 != -1)
+              target_1 = find_top(right ? start_x - 1 : difference),
+              target_2 = find_top(right ? start_x + blend_width : end_x - blend_width);
+
+    if (target_1 != -1 && target_2 != -1 && abs(target_1 - target_2) > 1)
         for (int x = right ? start_x : end_x - blend_width, i = 0; x <= (right ? start_x + blend_width : end_x); ++x, ++i)
             generate_strip(x,
-                biome,
-                true,
-                (int)round(lerp((float)(right ? target_1 : target_2), (float)(right ? target_2 : target_1), (float)i / blend_width)));
+                           biome,
+                           true,
+                           (int)roundf(lerp((float)(right ? target_1 : target_2), (float)(right ? target_2 : target_1), (float)i / blend_width)));
 
     return biome;
 }
@@ -372,7 +372,7 @@ static void place_tree(const int x, const int y, const int width_to_sides, const
     place_leaves(x, width_to_sides, leaves_lower, leaves_upper, true);
     place_leaves(x, width_to_sides, leaves_lower, leaves_upper, false);
 
-    const int half = (int)round(width_to_sides / 2), top = leaves_upper - 1;
+    const int half = (int)roundf(width_to_sides / 2.0f), top = leaves_upper - 1;
     for (int tx = x - half; tx <= x + half; ++tx)
     {
         if (map.ppBlocks[top][tx].type == BLOCK_AIR)
@@ -396,6 +396,9 @@ static void generate_trees(const int start, const int end)
 
         const int grass_y = find_grass(x);
         if (grass_y - maximum_tree_height - 1 < 0) //-1 = 잎 계산
+            continue;
+
+        if (map.ppBlocks[grass_y - 1][x].type == BLOCK_WATER)
             continue;
 
         const int tree_width_side = rand() % (variable_tree_width_side + 1) + minimum_tree_width_side,
@@ -423,7 +426,6 @@ static void resize_map(const bool right)
     }
 
     const biome_t biome = generate_map(old, right);
-
     if (biome == BIOME_PLAINS)
         generate_trees(right ? old : 0, right ? map.size.x - 1 : chunk);
 }

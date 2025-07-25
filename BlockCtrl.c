@@ -28,8 +28,10 @@ static void BC_OnMouseMove(const COORD pos)
     draw_x = (int)(screen_cx + (block_x - player.x) * TEXTURE_SIZE);
     draw_y = (int)(screen_cy + (block_y - player.y) * TEXTURE_SIZE);
 
+#if _DEBUG
     selected_block_x = block_x;
     selected_block_y = block_y;
+#endif
 }
 
 // 마우스 클릭 시 상호작용 처리
