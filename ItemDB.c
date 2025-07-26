@@ -74,7 +74,7 @@ void InputItemFromUser(ItemDB* db) {
     printf("최대 갯수 : ");
     scanf("%d", &maxStack);
 
-    printf("타입 (0:소모품, 1:무기, 2:도구, 3:방어구, 4:재료, 5:소모품) : ");
+    printf("타입 (0:소모품, 1:무기, 2:도구, 3:방어구, 4:재료, 5:기타) : ");
     scanf("%d", &type);
 
     printf("기본 내구도 : ");
