@@ -37,6 +37,7 @@ void Mob_Spawn_Time();
 void MobSpawn(int x, int y);
 void Mob_render();
 void DespawnMob();
+void Mob_deadcheck();
 
 
 void update_mob_ai(void);

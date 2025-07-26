@@ -54,10 +54,13 @@ void Mob_Spawn_Time()
 
 	}
 
-	totalElapsedTime = (prevSpawn - startTime) / CLOCKS_PER_SEC;
-	if (totalElapsedTime == 100 && mob_level < 10) // 난도 조정용 임시 생성
+	//totalElapsedTime = (prevSpawn - startTime) / CLOCKS_PER_SEC;
+	long dif_prevtime = clock();
+	long dif_check = startTime;
+	if (((dif_prevtime - dif_check) / CLOCKS_PER_SEC >= 100) && (mob_level < 10)) // 일정시간마다 스폰되는 몹의 레벨 상승
 	{
 		mob_level++;
+		dif_check = dif_prevtime;
 	}
 
 }
@@ -86,8 +89,8 @@ void MobSpawn(int player_x, int player_y)
 						{
 							mobs[mob_count].x = check_x; // 탐색으로 조건이 맞는 좌표값 저장
 							mobs[mob_count].y = check_y;
-							mobs[mob_count].HP = mob_level * 5;
-							mobs[mob_count].atk = mob_level * 2; //이후 추가 (난이도에 따라 증가)
+							mobs[mob_count].HP = mob_level * 10; //몹 레벨에 따라 몹 체력, 몹 공격력 증가
+							mobs[mob_count].atk = mob_level * 5; 
 							mobs[mob_count].despawn_check = clock(); //디스폰 초기화
 							mobs[mob_count].last_move_time = clock();
 							mob_count++;
@@ -137,13 +140,13 @@ void DespawnMob()
 	{
 		int x = abs(mobs[i].x - player.x); // 몹거리 절댓값 체크
 		int y = abs(mobs[i].y - player.y);
-		if (x > 70 || y > 70) //플레이어 기준 일정거리 이상이면 몹 디스폰
+		if (x > 70 || y > 70) //플레이어 기준 일정거리 이상이면 몹 디스폰카운트 시작
 		{
-			if ((clock() - mobs[i].despawn_check) / CLOCKS_PER_SEC >= 5)
+			if ((clock() - mobs[i].despawn_check) / CLOCKS_PER_SEC >= 5) //디스폰카운트 일정시간 적용시 몹 디스폰
 			{
 				for (int j = i; j < mob_count - 1; j++)
 				{
-					mobs[j] = mobs[j + 1];
+					mobs[j] = mobs[j + 1]; //디스폰 적용몹 배열 제거 및 밀기
 				}
 				mob_count--;
 				continue;
@@ -151,6 +154,24 @@ void DespawnMob()
 		}
 			mobs[i].despawn_check = clock(); // 디스폰 초기화
 			i++;
+	}
+}
+
+void Mob_deadcheck() // 몹 사망체크
+{
+	for (int i = 0; i < mob_count; )
+	{
+		if (mobs[i].HP <= 0)
+		{
+
+			for (int j = i; j < mob_count - 1; j++)
+			{
+				mobs[j] = mobs[j + 1]; // hp가 0이하인 몹 배열 제거 및 밀기
+			}
+			mob_count--;
+			continue;
+		}
+		i++;
 	}
 }
 
