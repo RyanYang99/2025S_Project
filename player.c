@@ -3,10 +3,15 @@
 
 #include "map.h"
 #include "input.h"
+#include "delta.h"
 #include "console.h"
+#include "global_state.h"
+
 #include <stdio.h> // swprintf 사용하기위해
 #include <wchar.h>
 #include <time.h>
+#include <conio.h>
+
 #include <stdbool.h>
 
 player_t player = { 0, 0, 1000, 0, 0.0f, 0 }; // 초기 위치 및 체력, is_walking 상태 추가 (0: 정지, 1: 걷기)
@@ -67,10 +72,10 @@ void player_take_damage(int damage)
 }
 
 
-
-static void movement(const char character) {
+// ==> 윤성 코드
+//static void movement(const char character) {
     
-    // ==> 윤성 코드
+    
     //if (character == 'w' || character == 'a' || character == 's' || character == 'd') {
     //    // 새로운 위치 계산
     //    int new_x = player.x;
@@ -84,24 +89,42 @@ static void movement(const char character) {
     //        player.x = new_x;
     //        player.y = new_y;
     //        player.is_moving = 1; // 실제로 이동했을 때만 애니메이션 활성화
+        //}
     //    }
        
-        // ==>승준 코드 
-        // {
-    int dx = 0;
-    int dy = 0;
+       
+     // ==>승준 코드 
+static void movement()
+{
+    if (!_kbhit())return;
+
+    const char character = (char)_getch();
+
+    if (character == 'q') game_exit = true;
+
+    if (character == 'w' || character == 'a' || character == 's' || character == 'd')
+    {
+        int dx = 0;
+        int dy = 0;
         bool can_move = false;
-        if (character == 'w') { dy = -1; can_move = true; }
-        else if (character == 'a') { dx= -1; can_move = true; }
-        else if (character == 's') { dy = 1; can_move = true; }
-        else if (character == 'd') { dx = 1; can_move = true; }
+
+        if (character == 'w') { dy--; can_move = true; }
+        else if (character == 'a') { dx--; can_move = true; }
+        else if (character == 's') { dy++; can_move = true; }
+        else if (character == 'd') { dx++; can_move = true; }
 
         if (can_move)
         {
             player_move(dx, dy);
         }
-        //-===> 승준 코드 }
+
+    }
 }
+    //-===> 승준 코드 
+
+
+
+
 
 static void update_player_offset(void) {
     player.x += map.offset_x;
@@ -137,7 +160,7 @@ void player_init(int x) {
     player.y = find_ground_pos(x);
     player.hp = 1000; // 초기 체력
 
-    subscribe_keyhit(movement);
+    //subscribe_keyhit(movement);
     subscribe_offset_change(update_player_offset);
 }
 

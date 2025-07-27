@@ -17,9 +17,7 @@
 
 HANDLE input_handle = NULL;
 DWORD original_mode = 0;
-
-keyhit_t* pKeyhit_callbacks = NULL;
-int keyhit_callback_count = 0;
+HHOOK hook = NULL;
 
 mouse_click_t* pMouseClick_callbacks = NULL;
 int mouse_click_callback_count = 0;
@@ -27,25 +25,31 @@ int mouse_click_callback_count = 0;
 mouse_position_t* pMousePosition_callbacks = NULL;
 int mouse_position_callback_count = 0;
 
-void initialize_input_handler(void)
-{
-    input_handle = GetStdHandle(STD_INPUT_HANDLE);
-    GetConsoleMode(input_handle, &original_mode);
-    SetConsoleMode(input_handle, ENABLE_EXTENDED_FLAGS | ENABLE_MOUSE_INPUT);
-}
-
-static void keyhit_callback(const char character)
-{
-    for (int i = 0; i < keyhit_callback_count; ++i)
-        if (pKeyhit_callbacks[i])
-            pKeyhit_callbacks[i](character);
-}
-
 static void mouse_click_callback(const bool left)
 {
     for (int i = 0; i < mouse_click_callback_count; ++i)
         if (pMouseClick_callbacks[i])
             pMouseClick_callbacks[i](left);
+}
+
+static const COORD convert_to_console(const POINT point)
+{
+    POINT client_point =
+    {
+        .x = point.x,
+        .y = point.y
+    };
+    ScreenToClient(GetConsoleWindow(), &client_point);
+
+    CONSOLE_FONT_INFO font = { 0 };
+    GetCurrentConsoleFont(GetStdHandle(STD_OUTPUT_HANDLE), false, &font);
+
+    const COORD consoleCoord =
+    {
+        .X = (SHORT)(client_point.x / font.dwFontSize.X),
+        .Y = (SHORT)(client_point.y / font.dwFontSize.Y)
+    };
+    return consoleCoord;
 }
 
 static void mouse_position_callback(const COORD position)
@@ -55,65 +59,52 @@ static void mouse_position_callback(const COORD position)
             pMousePosition_callbacks[i](position);
 }
 
-void handle_input_event(void)
+static LRESULT CALLBACK LowLevelMouseProc(const int nCode, const WPARAM wParam, const LPARAM lParam)
 {
-    DWORD events = 0;
-    GetNumberOfConsoleInputEvents(input_handle, &events);
-
-    if (!events)
-        return;
-
-    INPUT_RECORD* pInput_records = malloc(sizeof(INPUT_RECORD) * events);
-    DWORD events_read = 0;
-    ReadConsoleInput(input_handle, pInput_records, events, &events_read);
-
-    for (DWORD i = 0; i < events; ++i)
+    if (nCode == HC_ACTION)
     {
-        const DWORD type = pInput_records[i].EventType;
+        const MSLLHOOKSTRUCT* pMouse_struct = (MSLLHOOKSTRUCT*)lParam;
+        const COORD position = convert_to_console(pMouse_struct->pt);
+        mouse_position_callback(position);
 
-        if (type == KEY_EVENT)
+        switch (wParam)
         {
-            const KEY_EVENT_RECORD event = pInput_records[i].Event.KeyEvent;
+        case WM_LBUTTONUP:
+            mouse_click_callback(true);
+            break;
 
-            if (event.bKeyDown)
-                keyhit_callback(event.uChar.AsciiChar);
+        case WM_RBUTTONUP:
+            mouse_click_callback(false);
+            break;
         }
-        else if (type == MOUSE_EVENT)
-            mouse_position_callback(pInput_records[i].Event.MouseEvent.dwMousePosition);
     }
 
-    free(pInput_records);
+    return CallNextHookEx(NULL, nCode, wParam, lParam);
+}
 
-    const bool mouse_reversed = GetSystemMetrics(SM_SWAPBUTTON);
-    if (GetAsyncKeyState(VK_LBUTTON))
-        if (mouse_reversed)
-            mouse_click_callback(false);
-        else
-            mouse_click_callback(true);
-    else if (GetAsyncKeyState(VK_RBUTTON))
-        if (mouse_reversed)
-            mouse_click_callback(true);
-        else
-            mouse_click_callback(false);
+void initialize_input_handler(void)
+{
+    input_handle = GetStdHandle(STD_INPUT_HANDLE);
+    GetConsoleMode(input_handle, &original_mode);
+    SetConsoleMode(input_handle, ENABLE_EXTENDED_FLAGS | ENABLE_MOUSE_INPUT);
+
+    //디버깅 할때 주석 처리
+    hook = SetWindowsHookEx(WH_MOUSE_LL, LowLevelMouseProc, NULL, 0);
 }
 
 void destroy_input_handler(void)
 {
     SetConsoleMode(input_handle, original_mode);
 
-    free(pKeyhit_callbacks);
-    pKeyhit_callbacks = NULL;
-    keyhit_callback_count = 0;
-}
+    free(pMouseClick_callbacks);
+    pMouseClick_callbacks = NULL;
+    mouse_click_callback_count = 0;
 
-void subscribe_keyhit(const keyhit_t callback)
-{
-    CALLBACK_SUBSCRIBE_IMPLEMENTATION(keyhit_t, pKeyhit_callbacks, keyhit_callback_count);
-}
+    free(pMousePosition_callbacks);
+    pMousePosition_callbacks = NULL;
+    mouse_position_callback_count = 0;
 
-void unsubscribe_keyhit(const keyhit_t callback)
-{
-    CALLBACK_UNSUBSCRIBE_IMPLEMENTATION(pKeyhit_callbacks, keyhit_callback_count);
+    UnhookWindowsHookEx(hook);
 }
 
 void subscribe_mouse_click(const mouse_click_t callback)

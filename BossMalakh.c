@@ -138,7 +138,7 @@ void Boss_Render()
 {
     if (boss.state == E_BOOS_STATE_DEFEATED) return;
 
-    COORD center_m = console_c();
+    COORD center_m = { console.size.X / 2 , console.size.Y / 2 };
 
    
     int boss_screen_base_x = center_m.X + (boss.x - player.x) * BOSS_DRAW_SCALE - (BOSS_SPRITE_WIDTH * BOSS_DRAW_SCALE / 2);

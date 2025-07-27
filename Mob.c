@@ -1,3 +1,4 @@
+#include "leak.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -11,6 +12,8 @@
 #include "map.h"
 #include "console.h"
 #include "astar.h"
+#include "delta.h"
+
 
 Mob mobs[Max_Mob];
 
@@ -22,48 +25,39 @@ long totalElapsedTime = 0; // 총 경과 시간
 long last_spawn_time = 0;// 마지막 스폰시간
 
 
-//COORD console_c() // 콘솔 중앙 찾기
-//{
-//	COORD center_m;
-//	center_m.X = console.size.X / 2;
-//	center_m.Y = console.size.Y / 2;
-//	return center_m;
-//}
+COORD console_c() // 콘솔 중앙 찾기
+{
+	COORD center_m;
+	center_m.X = console.size.X / 2;
+	center_m.Y = console.size.Y / 2;
+	return center_m;
+}
 
 void Mob_Spawn_Time()
 {
-	srand(time(NULL));//랜덤값 초기화 
-	static int start_c = 0;
-	if (start_c == 0) // 시작시간 0으로 설정
+	static float spawnTimer = 0.0f, totalElapsedTime = 0.0f;
+	spawnTimer += delta_time;
+	totalElapsedTime += delta_time;
+
+	if (spawnTimer >= 5.0f) // 소환 간격 설정(초 단위)
 	{
-		startTime = clock();
-		last_spawn_time = startTime;
-		start_c = 1; // 처음 실핼시만 시작시간값 0으로 설정
-	}
+		spawnTimer = 0;
 
-
-
-	long prevSpawn = clock(); //현재시간
-	if ((prevSpawn - last_spawn_time) / CLOCKS_PER_SEC == 5) // 소환 간격 설정(초 단위)
-	{
 		if (mob_count < Max_Mob) //일정수 이상 몹생성 제한
 		{
 			MobSpawn(player.x, player.y); //플레이어 좌표를 받아 플레이어 기준으로 생성
-			last_spawn_time = prevSpawn;
 		}
-
 	}
 
-	totalElapsedTime = (prevSpawn - startTime) / CLOCKS_PER_SEC;
 	if (totalElapsedTime == 100 && mob_level < 10) // 난도 조정용 임시 생성
 	{
 		mob_level++;
 	}
-
 }
 
-void MobSpawn(int player_x, int player_y) //플레이어 주변 최소범위 스폰제한 예정
+void MobSpawn(int player_x, int player_y)
 {
+	srand((unsigned int)time(NULL)); // 랜덤값 초기화 
 
 	for (int check_x = player_x - 50; check_x <= player_x + 50; check_x++) //플레이어 주변 x값 탐색
 	{
@@ -92,6 +86,7 @@ void MobSpawn(int player_x, int player_y) //플레이어 주변 최소범위 스폰제한 예정
 }
 
 
+
 void Mob_render() // 몹 렌더링
 {
 
@@ -106,7 +101,7 @@ void Mob_render() // 몹 렌더링
 		if (mob_x < 0 || mob_x >= console.size.X || mob_y < 0 || mob_y >= console.size.Y)
 			continue;
 
-		COORD Mobpos = { mob_x, mob_y }; // 저장한 소환가능 좌표값 받음
+		COORD Mobpos = { (SHORT)mob_x, (SHORT)mob_y }; // 저장한 소환가능 좌표값 받음
 		color_tchar_t mob_c =
 		{
 			'@',

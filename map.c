@@ -13,8 +13,9 @@
 
 typedef enum
 {
-    BIOME_PLAINS = 0,
-    BIOME_SNOWY_MOUNTAINS = 1
+    BIOME_PLAINS,
+    BIOME_SNOWY_MOUNTAINS,
+    BIOME_DESERT
 }
 biome_t;
 
@@ -124,11 +125,33 @@ const color_tchar_t pBlock_textures[BLOCKS][TEXTURE_SIZE][TEXTURE_SIZE] =
         {
             { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE }
         }
+    },
+    {
+        {
+            { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }
+        },
+        {
+            { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }
+        },
+        {
+            { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }
+        }
+    },
+    {
+        {
+            { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }
+        },
+        {
+            { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }
+        },
+        {
+            { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }
+        }
     }
 };
 
 // 블록 기본 체력 설정
-static int get_block_max_health(block_t type)
+int get_block_max_health(block_t type)
 {
     switch (type) //주먹=3데미지? 나무 곡=10 돌곡=17 철곡=30
     {
@@ -140,6 +163,7 @@ static int get_block_max_health(block_t type)
     case BLOCK_LOG:         return 9;
     case BLOCK_LEAF:        return 3;
     case BLOCK_SNOW:        return 3;
+    case BLOCK_SAND:        return 3;
     case BLOCK_BEDROCK:     return -1;
     default:                return 1;
     }
@@ -165,19 +189,19 @@ void set_block_at(int x, int y, block_t type)
 }
 
 
-bool damage_block_at(map_t* map, int x, int y, int damage)
+bool damage_block_at(map_t* pMap, int x, int y, int damage)
 {
-    if (x < 0 || x >= map->size.x || y < 0 || y >= map->size.y)
+    if (x < 0 || x >= pMap->size.x || y < 0 || y >= pMap->size.y)
         return false;
 
-    if (map->ppBlocks[y][x].type == BLOCK_AIR)
+    if (pMap->ppBlocks[y][x].type == BLOCK_AIR)
         return false;
 
-    map->ppBlocks[y][x].hp -= damage;
+    pMap->ppBlocks[y][x].hp -= damage;
 
-    if (map->ppBlocks[y][x].hp <= 0)
+    if (pMap->ppBlocks[y][x].hp <= 0)
     {
-        initialize_block(&map->ppBlocks[y][x], BLOCK_AIR);
+        initialize_block(&pMap->ppBlocks[y][x], BLOCK_AIR);
         return true;
     }
 
@@ -205,7 +229,7 @@ static void allocate_map(void)
 }
 
 // 블록 초기화 함수
-static void initialize_block(block_info_t* block, block_t type)
+void initialize_block(block_info_t* block, block_t type)
 {
     block->type = type;
     block->hp = get_block_max_health(type);
@@ -237,6 +261,11 @@ static void generate_strip(const int x, const biome_t biome, const bool override
             f1 = 0.006f;
             a = 0.7f;
         }
+        else if (biome == BIOME_DESERT)
+        {
+            f1 = 0.002f;
+            a = 0.4f;
+        }
 
         const float px = (float)x - total_offsets,
             noise = perlin_noise(px * f1) +
@@ -255,13 +284,21 @@ static void generate_strip(const int x, const biome_t biome, const bool override
         initialize_block(&map.ppBlocks[y][x], BLOCK_STONE);
 
     for (int y = height + dirt_height; y > height; --y)
-        initialize_block(&map.ppBlocks[y][x], BLOCK_DIRT);
+    {
+        block_t block = BLOCK_DIRT;
+        if (biome == BIOME_DESERT)
+            block = BLOCK_SAND;
+
+        initialize_block(&map.ppBlocks[y][x], block);
+    }
 
     if (biome == BIOME_PLAINS)
         initialize_block(&map.ppBlocks[height][x], BLOCK_GRASS);
     else if (biome == BIOME_SNOWY_MOUNTAINS)
         for (int y = height + snow_height; y >= height; --y)
             initialize_block(&map.ppBlocks[y][x], BLOCK_SNOW);
+    else if (biome == BIOME_DESERT)
+        initialize_block(&map.ppBlocks[height][x], BLOCK_SAND);
 
     //철광석을 20% 확률로 생성
     if (rand() % 100 >= 80)
@@ -271,6 +308,15 @@ static void generate_strip(const int x, const biome_t biome, const bool override
 
         if (map.ppBlocks[iron_y][x].type == BLOCK_STONE)
             initialize_block(&map.ppBlocks[iron_y][x], BLOCK_IRON_ORE);
+    }
+
+    if (height > 150)
+    {
+        for (int wy = 150; wy < height; ++wy)
+        {
+            if (map.ppBlocks[wy][x].type == BLOCK_AIR)
+                initialize_block(&map.ppBlocks[wy][x], BLOCK_WATER);
+        }
     }
 }
 
@@ -282,11 +328,12 @@ static biome_t generate_map(const int old_width, const bool right)
     if (!right)
         end_x -= old_width;
 
-    const int biome_random = rand() % 100 + 1;
+    const int biome_random = rand() % 100;
     biome_t biome = BIOME_PLAINS;
-    //25%
-    if (biome_random > 50)
+    if (biome_random >= 75)
         biome = BIOME_SNOWY_MOUNTAINS;
+    else if (biome_random < 25)
+        biome = BIOME_DESERT;
 
     for (int x = start_x; x < end_x; ++x)
         generate_strip(x, biome, false, 0);
@@ -294,12 +341,13 @@ static biome_t generate_map(const int old_width, const bool right)
     const int blend_width = 10,
         target_1 = find_top(right ? start_x - 1 : difference),
         target_2 = find_top(right ? start_x + blend_width : end_x - blend_width);
-    if (target_1 != -1 && target_2 != -1)
+
+    if (target_1 != -1 && target_2 != -1 && abs(target_1 - target_2) > 1)
         for (int x = right ? start_x : end_x - blend_width, i = 0; x <= (right ? start_x + blend_width : end_x); ++x, ++i)
             generate_strip(x,
                 biome,
                 true,
-                (int)round(lerp((float)(right ? target_1 : target_2), (float)(right ? target_2 : target_1), (float)i / blend_width)));
+                (int)roundf(lerp((float)(right ? target_1 : target_2), (float)(right ? target_2 : target_1), (float)i / blend_width)));
 
     return biome;
 }
@@ -341,7 +389,7 @@ static void place_tree(const int x, const int y, const int width_to_sides, const
     place_leaves(x, width_to_sides, leaves_lower, leaves_upper, true);
     place_leaves(x, width_to_sides, leaves_lower, leaves_upper, false);
 
-    const int half = (int)round(width_to_sides / 2), top = leaves_upper - 1;
+    const int half = (int)roundf(width_to_sides / 2.0f), top = leaves_upper - 1;
     for (int tx = x - half; tx <= x + half; ++tx)
     {
         if (map.ppBlocks[top][tx].type == BLOCK_AIR)
@@ -365,6 +413,9 @@ static void generate_trees(const int start, const int end)
 
         const int grass_y = find_grass(x);
         if (grass_y - maximum_tree_height - 1 < 0) //-1 = 잎 계산
+            continue;
+
+        if (map.ppBlocks[grass_y - 1][x].type == BLOCK_WATER)
             continue;
 
         const int tree_width_side = rand() % (variable_tree_width_side + 1) + minimum_tree_width_side,
@@ -392,7 +443,6 @@ static void resize_map(const bool right)
     }
 
     const biome_t biome = generate_map(old, right);
-
     if (biome == BIOME_PLAINS)
         generate_trees(right ? old : 0, right ? map.size.x - 1 : chunk);
 }

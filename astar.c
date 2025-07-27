@@ -1,3 +1,5 @@
+#include "leak.h"
+
 // astar.c
 #include "astar.h" // 새로 만든 astar.h를 포함합니다.
 
@@ -116,15 +118,15 @@ COORD find_path_next_step(int start_x, int start_y, int target_x, int target_y, 
             // 경로 재구성: 시작 노드 바로 다음 노드를 찾음
             PathNode* path_ptr = current_node;
             if (path_ptr->parent == NULL) { // 이미 시작 노드에 도착했다면 (시작점 == 목표점)
-                next_step.X = target_x; // 현재 위치가 곧 목표 위치
-                next_step.Y = target_y;
+                next_step.X = (SHORT)target_x; // 현재 위치가 곧 목표 위치
+                next_step.Y = (SHORT)target_y;
             }
             else {
                 while (path_ptr->parent != NULL && path_ptr->parent->parent != NULL) {
                     path_ptr = path_ptr->parent;
                 }
-                next_step.X = path_ptr->x;
-                next_step.Y = path_ptr->y;
+                next_step.X = (SHORT)path_ptr->x;
+                next_step.Y = (SHORT)path_ptr->y;
             }
             // 찾았으므로 루프 종료
             break;
