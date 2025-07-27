@@ -1,15 +1,17 @@
+ï»¿#include "leak.h"
+
 // astar.c
-#include "astar.h" // »õ·Î ¸¸µç astar.h¸¦ Æ÷ÇÔÇÕ´Ï´Ù.
+#include "astar.h" // ìƒˆë¡œ ë§Œë“  astar.hë¥¼ í¬í•¨í•©ë‹ˆë‹¤.
 
-#include <stdio.h>   // fprintf, NULL µîÀ» À§ÇØ
-#include <stdlib.h>  // malloc, free, qsort, exit µîÀ» À§ÇØ
-#include <math.h>    // abs() ÇÔ¼ö¸¦ À§ÇØ
+#include <stdio.h>   // fprintf, NULL ë“±ì„ ìœ„í•´
+#include <stdlib.h>  // malloc, free, qsort, exit ë“±ì„ ìœ„í•´
+#include <math.h>    // abs() í•¨ìˆ˜ë¥¼ ìœ„í•´
 
-// PathNode ¸Ş¸ğ¸® ÇÒ´ç ¹× ÃÊ±âÈ­
+// PathNode ë©”ëª¨ë¦¬ í• ë‹¹ ë° ì´ˆê¸°í™”
 PathNode* Create_node(int x, int y, int g, int h, PathNode* parent) {
     PathNode* newNode = (PathNode*)malloc(sizeof(PathNode));
     if (newNode == NULL) {
-        fprintf(stderr, "¸Ş¸ğ¸® ÇÒ´ç ½ÇÆĞ (PathNode)\n");
+        fprintf(stderr, "ë©”ëª¨ë¦¬ í• ë‹¹ ì‹¤íŒ¨ (PathNode)\n");
         exit(EXIT_FAILURE);
     }
     newNode->x = x;
@@ -21,12 +23,12 @@ PathNode* Create_node(int x, int y, int g, int h, PathNode* parent) {
     return newNode;
 }
 
-// ÈŞ¸®½ºÆ½ ÇÔ¼ö (¸ÇÇØÆ° °Å¸®)
+// íœ´ë¦¬ìŠ¤í‹± í•¨ìˆ˜ (ë§¨í•´íŠ¼ ê±°ë¦¬)
 int Calculate_Heuristic(int x1, int y1, int x2, int y2) {
     return abs(x1 - x2) + abs(y1 - y2);
 }
 
-// ÇØ´ç ÁÂÇ¥°¡ ¸Ê ¹üÀ§ ³»¿¡ ÀÖ°í ÀÌµ¿ °¡´ÉÇÑ ºí·ÏÀÎÁö È®ÀÎ
+// í•´ë‹¹ ì¢Œí‘œê°€ ë§µ ë²”ìœ„ ë‚´ì— ìˆê³  ì´ë™ ê°€ëŠ¥í•œ ë¸”ë¡ì¸ì§€ í™•ì¸
 bool is_valid_block(int x, int y, int map_size_x, int map_size_y) {
     if (x < 0 || x >= map_size_x || y < 0 || y >= map_size_y - 1) {
         return false;
@@ -35,46 +37,46 @@ bool is_valid_block(int x, int y, int map_size_x, int map_size_y) {
     return (block_under_mob == BLOCK_GRASS || block_under_mob == BLOCK_DIRT);
 }
 
-// ³ëµå ºñ±³ ÇÔ¼ö (qsort »ç¿ëÀ» À§ÇØ)
+// ë…¸ë“œ ë¹„êµ í•¨ìˆ˜ (qsort ì‚¬ìš©ì„ ìœ„í•´)
 int Compare_nodes(const void* a, const void* b) {
     PathNode* nodeA = *(PathNode**)a;
     PathNode* nodeB = *(PathNode**)b;
-    return nodeA->f - nodeB->f; // F°ªÀÌ ÀÛÀº ³ëµå°¡ ¿ì¼±¼øÀ§ ³ôÀ½
+    return nodeA->f - nodeB->f; // Fê°’ì´ ì‘ì€ ë…¸ë“œê°€ ìš°ì„ ìˆœìœ„ ë†’ìŒ
 }
 
-// A* °æ·Î Ã£±â ÇÔ¼ö (´ÙÀ½ ÇÑ Ä­ ÀÌµ¿)
+// A* ê²½ë¡œ ì°¾ê¸° í•¨ìˆ˜ (ë‹¤ìŒ í•œ ì¹¸ ì´ë™)
 COORD find_path_next_step(int start_x, int start_y, int target_x, int target_y, int map_size_x, int map_size_y) {
-    // µ¿ÀûÀ¸·Î closed_list_grid ÇÒ´ç ¹× ÃÊ±âÈ­
+    // ë™ì ìœ¼ë¡œ closed_list_grid í• ë‹¹ ë° ì´ˆê¸°í™”
     bool** closed_list_grid = (bool**)malloc(map_size_y * sizeof(bool*));
     if (closed_list_grid == NULL) {
-        fprintf(stderr, "closed_list_grid ¸Ş¸ğ¸® ÇÒ´ç ½ÇÆĞ\n");
+        fprintf(stderr, "closed_list_grid ë©”ëª¨ë¦¬ í• ë‹¹ ì‹¤íŒ¨\n");
         return (COORD) { -1, -1 };
     }
     for (int i = 0; i < map_size_y; ++i) {
-        closed_list_grid[i] = (bool*)calloc(map_size_x, sizeof(bool)); // callocÀ¸·Î false·Î ÃÊ±âÈ­
+        closed_list_grid[i] = (bool*)calloc(map_size_x, sizeof(bool)); // callocìœ¼ë¡œ falseë¡œ ì´ˆê¸°í™”
         if (closed_list_grid[i] == NULL) {
-            fprintf(stderr, "closed_list_grid[%d] ¸Ş¸ğ¸® ÇÒ´ç ½ÇÆĞ\n", i);
+            fprintf(stderr, "closed_list_grid[%d] ë©”ëª¨ë¦¬ í• ë‹¹ ì‹¤íŒ¨\n", i);
             for (int j = 0; j < i; ++j) free(closed_list_grid[j]);
             free(closed_list_grid);
             return (COORD) { -1, -1 };
         }
     }
 
-    // A* ³ëµåµéÀ» ÀúÀåÇÒ µ¿Àû ¹è¿­
-#define MAX_NODES_FOR_ASTAR_SEARCH 200 * 200 // ¿¹½Ã: MAP_MAX_Y * ÃÖ´ë X »çÀÌÁî
+    // A* ë…¸ë“œë“¤ì„ ì €ì¥í•  ë™ì  ë°°ì—´
+#define MAX_NODES_FOR_ASTAR_SEARCH 200 * 200 // ì˜ˆì‹œ: MAP_MAX_Y * ìµœëŒ€ X ì‚¬ì´ì¦ˆ
     PathNode** open_list = (PathNode**)malloc(MAX_NODES_FOR_ASTAR_SEARCH * sizeof(PathNode*));
     if (open_list == NULL) {
-        fprintf(stderr, "open_list ¸Ş¸ğ¸® ÇÒ´ç ½ÇÆĞ\n");
+        fprintf(stderr, "open_list ë©”ëª¨ë¦¬ í• ë‹¹ ì‹¤íŒ¨\n");
         for (int i = 0; i < map_size_y; ++i) free(closed_list_grid[i]);
         free(closed_list_grid);
         return (COORD) { -1, -1 };
     }
     int open_list_count = 0;
 
-    // ÇÒ´çµÈ ¸ğµç PathNode¸¦ ÃßÀûÇÏ¿© ÇÔ¼ö Á¾·á ½Ã ÇØÁ¦
+    // í• ë‹¹ëœ ëª¨ë“  PathNodeë¥¼ ì¶”ì í•˜ì—¬ í•¨ìˆ˜ ì¢…ë£Œ ì‹œ í•´ì œ
     PathNode** all_allocated_nodes = (PathNode**)malloc(MAX_NODES_FOR_ASTAR_SEARCH * sizeof(PathNode*));
     if (all_allocated_nodes == NULL) {
-        fprintf(stderr, "all_allocated_nodes ¸Ş¸ğ¸® ÇÒ´ç ½ÇÆĞ\n");
+        fprintf(stderr, "all_allocated_nodes ë©”ëª¨ë¦¬ í• ë‹¹ ì‹¤íŒ¨\n");
         free(open_list);
         for (int i = 0; i < map_size_y; ++i) free(closed_list_grid[i]);
         free(closed_list_grid);
@@ -82,74 +84,74 @@ COORD find_path_next_step(int start_x, int start_y, int target_x, int target_y, 
     }
     int allocated_node_count = 0;
 
-    // ½ÃÀÛ ³ëµå »ı¼º ¹× ¿ÀÇÂ ¸®½ºÆ®¿¡ Ãß°¡
+    // ì‹œì‘ ë…¸ë“œ ìƒì„± ë° ì˜¤í”ˆ ë¦¬ìŠ¤íŠ¸ì— ì¶”ê°€
     PathNode* start_node = Create_node(start_x, start_y, 0, Calculate_Heuristic(start_x, start_y, target_x, target_y), NULL);
     open_list[open_list_count++] = start_node;
     all_allocated_nodes[allocated_node_count++] = start_node;
 
     PathNode* current_node = NULL;
-    COORD next_step = { -1, -1 }; // Ã£Áö ¸øÇßÀ» °æ¿ì ¹İÈ¯ÇÒ °ª
+    COORD next_step = { -1, -1 }; // ì°¾ì§€ ëª»í–ˆì„ ê²½ìš° ë°˜í™˜í•  ê°’
 
-    int dx[] = { 0, 0, 1, -1 }; // »ó, ÇÏ, ¿ì, ÁÂ
+    int dx[] = { 0, 0, 1, -1 }; // ìƒ, í•˜, ìš°, ì¢Œ
     int dy[] = { -1, 1, 0, 0 };
 
     while (open_list_count > 0) {
-        // ¿ÀÇÂ ¸®½ºÆ® Á¤·Ä 
+        // ì˜¤í”ˆ ë¦¬ìŠ¤íŠ¸ ì •ë ¬ 
         qsort(open_list, open_list_count, sizeof(PathNode*), Compare_nodes);
 
-        // °¡Àå ÀÛÀº F°ª ³ëµå ÃßÃâ
+        // ê°€ì¥ ì‘ì€ Fê°’ ë…¸ë“œ ì¶”ì¶œ
         current_node = open_list[0];
-        // ÃßÃâÇÑ ³ëµå¸¦ ¿ÀÇÂ ¸®½ºÆ®¿¡¼­ Á¦°Å (¹è¿­ ÀçÁ¤·Ä)
+        // ì¶”ì¶œí•œ ë…¸ë“œë¥¼ ì˜¤í”ˆ ë¦¬ìŠ¤íŠ¸ì—ì„œ ì œê±° (ë°°ì—´ ì¬ì •ë ¬)
         for (int i = 0; i < open_list_count - 1; ++i) {
             open_list[i] = open_list[i + 1];
         }
         open_list_count--;
 
-        // ÇöÀç ³ëµå¸¦ Å¬·ÎÁî ¸®½ºÆ®¿¡ Ãß°¡
+        // í˜„ì¬ ë…¸ë“œë¥¼ í´ë¡œì¦ˆ ë¦¬ìŠ¤íŠ¸ì— ì¶”ê°€
         if (current_node->x >= 0 && current_node->x < map_size_x &&
             current_node->y >= 0 && current_node->y < map_size_y) {
             closed_list_grid[current_node->y][current_node->x] = true;
         }
 
-        // ¸ñÇ¥¿¡ µµ´ŞÇß´ÂÁö È®ÀÎ
+        // ëª©í‘œì— ë„ë‹¬í–ˆëŠ”ì§€ í™•ì¸
         if (current_node->x == target_x && current_node->y == target_y) {
-            // °æ·Î Àç±¸¼º: ½ÃÀÛ ³ëµå ¹Ù·Î ´ÙÀ½ ³ëµå¸¦ Ã£À½
+            // ê²½ë¡œ ì¬êµ¬ì„±: ì‹œì‘ ë…¸ë“œ ë°”ë¡œ ë‹¤ìŒ ë…¸ë“œë¥¼ ì°¾ìŒ
             PathNode* path_ptr = current_node;
-            if (path_ptr->parent == NULL) { // ÀÌ¹Ì ½ÃÀÛ ³ëµå¿¡ µµÂøÇß´Ù¸é (½ÃÀÛÁ¡ == ¸ñÇ¥Á¡)
-                next_step.X = target_x; // ÇöÀç À§Ä¡°¡ °ğ ¸ñÇ¥ À§Ä¡
-                next_step.Y = target_y;
+            if (path_ptr->parent == NULL) { // ì´ë¯¸ ì‹œì‘ ë…¸ë“œì— ë„ì°©í–ˆë‹¤ë©´ (ì‹œì‘ì  == ëª©í‘œì )
+                next_step.X = (SHORT)target_x; // í˜„ì¬ ìœ„ì¹˜ê°€ ê³§ ëª©í‘œ ìœ„ì¹˜
+                next_step.Y = (SHORT)target_y;
             }
             else {
                 while (path_ptr->parent != NULL && path_ptr->parent->parent != NULL) {
                     path_ptr = path_ptr->parent;
                 }
-                next_step.X = path_ptr->x;
-                next_step.Y = path_ptr->y;
+                next_step.X = (SHORT)path_ptr->x;
+                next_step.Y = (SHORT)path_ptr->y;
             }
-            // Ã£¾ÒÀ¸¹Ç·Î ·çÇÁ Á¾·á
+            // ì°¾ì•˜ìœ¼ë¯€ë¡œ ë£¨í”„ ì¢…ë£Œ
             break;
         }
 
-        // ÀÌ¿ô ³ëµå Å½»ö
+        // ì´ì›ƒ ë…¸ë“œ íƒìƒ‰
         for (int i = 0; i < 4; ++i) {
             int neighbor_x = current_node->x + dx[i];
             int neighbor_y = current_node->y + dy[i];
 
-            // ¸Ê ¹üÀ§ ³»¿¡ ÀÖ°í ÀÌµ¿ °¡´ÉÇÑ ºí·ÏÀÎÁö È®ÀÎ
+            // ë§µ ë²”ìœ„ ë‚´ì— ìˆê³  ì´ë™ ê°€ëŠ¥í•œ ë¸”ë¡ì¸ì§€ í™•ì¸
             if (!is_valid_block(neighbor_x, neighbor_y, map_size_x, map_size_y)) {
                 continue;
             }
 
-            // Å¬·ÎÁî ¸®½ºÆ®¿¡ ÀÖ´ÂÁö È®ÀÎ
+            // í´ë¡œì¦ˆ ë¦¬ìŠ¤íŠ¸ì— ìˆëŠ”ì§€ í™•ì¸
             if (neighbor_x >= 0 && neighbor_x < map_size_x &&
                 neighbor_y >= 0 && neighbor_y < map_size_y &&
                 closed_list_grid[neighbor_y][neighbor_x]) {
                 continue;
             }
 
-            int new_g = current_node->g + 1; // ÀÎÁ¢ ³ëµåÀÌ¹Ç·Î ºñ¿ëÀº 1
+            int new_g = current_node->g + 1; // ì¸ì ‘ ë…¸ë“œì´ë¯€ë¡œ ë¹„ìš©ì€ 1
 
-            // ¿ÀÇÂ ¸®½ºÆ®¿¡ ÀÌ¹Ì ÀÖ´ÂÁö È®ÀÎ
+            // ì˜¤í”ˆ ë¦¬ìŠ¤íŠ¸ì— ì´ë¯¸ ìˆëŠ”ì§€ í™•ì¸
             bool in_open_list = false;
             PathNode* existing_node = NULL;
             for (int j = 0; j < open_list_count; ++j) {
@@ -168,32 +170,32 @@ COORD find_path_next_step(int start_x, int start_y, int target_x, int target_y, 
                 }
             }
             else {
-                // ¿ÀÇÂ ¸®½ºÆ®¿¡ ¾øÀ¸¸é »õ ³ëµå »ı¼º ¹× Ãß°¡
+                // ì˜¤í”ˆ ë¦¬ìŠ¤íŠ¸ì— ì—†ìœ¼ë©´ ìƒˆ ë…¸ë“œ ìƒì„± ë° ì¶”ê°€
                 PathNode* neighbor_node = Create_node(
                     neighbor_x, neighbor_y, new_g,
                     Calculate_Heuristic(neighbor_x, neighbor_y, target_x, target_y),
                     current_node
                 );
-                if (open_list_count < MAX_NODES_FOR_ASTAR_SEARCH) { // ¿ÀÇÂ ¸®½ºÆ® ¿ë·® È®ÀÎ
+                if (open_list_count < MAX_NODES_FOR_ASTAR_SEARCH) { // ì˜¤í”ˆ ë¦¬ìŠ¤íŠ¸ ìš©ëŸ‰ í™•ì¸
                     open_list[open_list_count++] = neighbor_node;
                     all_allocated_nodes[allocated_node_count++] = neighbor_node;
                 }
                 else {
-                    fprintf(stderr, "¿ÀÇÂ ¸®½ºÆ® ¿ë·® ÃÊ°ú!\n");
-                    free(neighbor_node); // ÇÒ´çµÈ ³ëµå ÇØÁ¦
+                    fprintf(stderr, "ì˜¤í”ˆ ë¦¬ìŠ¤íŠ¸ ìš©ëŸ‰ ì´ˆê³¼!\n");
+                    free(neighbor_node); // í• ë‹¹ëœ ë…¸ë“œ í•´ì œ
                 }
             }
         }
     }
 
-    // ÇÒ´çµÈ ¸ğµç PathNode ¸Ş¸ğ¸® ÇØÁ¦
+    // í• ë‹¹ëœ ëª¨ë“  PathNode ë©”ëª¨ë¦¬ í•´ì œ
     for (int i = 0; i < allocated_node_count; ++i) {
         free(all_allocated_nodes[i]);
     }
     free(all_allocated_nodes);
-    free(open_list); // ¿ÀÇÂ ¸®½ºÆ® ¹è¿­ ÀÚÃ¼ ÇØÁ¦
+    free(open_list); // ì˜¤í”ˆ ë¦¬ìŠ¤íŠ¸ ë°°ì—´ ìì²´ í•´ì œ
 
-    // Å¬·ÎÁî ¸®½ºÆ® ±×¸®µå ¸Ş¸ğ¸® ÇØÁ¦
+    // í´ë¡œì¦ˆ ë¦¬ìŠ¤íŠ¸ ê·¸ë¦¬ë“œ ë©”ëª¨ë¦¬ í•´ì œ
     for (int i = 0; i < map_size_y; ++i) {
         free(closed_list_grid[i]);
     }

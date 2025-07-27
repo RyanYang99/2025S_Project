@@ -1,14 +1,18 @@
-#pragma once
+ï»¿#pragma once
 
 #include <Windows.h>
 #include "map.h"
 #include "input.h"
 
-// ¸ğµâ ÃÊ±âÈ­: ¹İµå½Ã main()¿¡¼­ È£Ãâ
+//ë””ë²„ê¹…, í…ŒìŠ¤íŠ¸ ìš©ë„; ë””ë²„ê¹… ì´ì™¸ì— í•„ìš”ì‹œ BlockCtrl.cì— ì„ ì–¸ëœ block_x/y ì‚¬ìš©.
+#if _DEBUG
+extern int selected_block_x, selected_block_y;
+#endif
+
+// ëª¨ë“ˆ ì´ˆê¸°í™”: ë°˜ë“œì‹œ main()ì—ì„œ í˜¸ì¶œ
 void BlockControl_Init(void);
 
-// ¸ğµâ Á¤¸®: ÇÁ·Î±×·¥ Á¾·á Àü È£Ãâ
+// ëª¨ë“ˆ ì •ë¦¬: í”„ë¡œê·¸ë¨ ì¢…ë£Œ ì „ í˜¸ì¶œ
 void BlockControl_Destroy(void);
 
 void render_virtual_cursor(void);
-

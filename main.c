@@ -5,15 +5,53 @@
 #include <stdbool.h>
 #include <time.h>
 #include "map.h"
+#include "Mob.h"
 #include "input.h"
+#include "delta.h"
 #include "player.h"
 #include "console.h"
 #include "BlockCtrl.h"
+#include "global_state.h"
 
-static void update(float delta_time)
+#if _DEBUG
+static void print_debug_text(const char *pText, const int y)
 {
-    player_update(delta_time);
+    color_tchar_t character =
+    {
+        .background = BACKGROUND_T_BLACK,
+        .foreground = FOREGROUND_T_WHITE,
+    };
+    COORD position =
+    {
+        .X = 0,
+        .Y = (SHORT)y
+    };
+
+    for (int i = 0; i < strlen(pText); ++i)
+    {
+        character.character = pText[i];
+        position.X = (SHORT)i;
+        print_color_tchar(character, position);
+    }
 }
+
+static void render_debug_text(void)
+{
+    char pMessage[100] = "";
+
+    int fps = -1;
+    if (delta_time > 0.0f)
+        fps = (int)(1.0f / delta_time);
+    sprintf_s(pMessage, 100, "FPS: %d", fps);
+    print_debug_text(pMessage, 0);
+
+    sprintf_s(pMessage, 100, "Player: (%d, %d)", player.x, player.y);
+    print_debug_text(pMessage, 1);
+
+    sprintf_s(pMessage, 100, "Mouse: (%d, %d)", selected_block_x, selected_block_y);
+    print_debug_text(pMessage, 2);
+}
+#endif
 
 static void render(void)
 {
@@ -21,7 +59,10 @@ static void render(void)
     render_player();
     render_virtual_cursor();
     Mob_render();
-    //debug_render_map(true);
+
+#if _DEBUG
+    render_debug_text();
+#endif
 }
 
 int main(void)
@@ -37,25 +78,26 @@ int main(void)
     player_init(map.size.x / 2);
     BlockControl_Init();
 
-    // Delta Time 측정을 위한 변수 초기화 
-    clock_t last_time = clock();
-    float delta_time = 0.0f;
-
     clear();
-    while (true)
+    while (!game_exit)
     {
-        // Delta Time 계산
-        clock_t current_time = clock();
-        delta_time = (float)(current_time - last_time) / CLOCKS_PER_SEC;
-        last_time = current_time;
+        update_delta_time();
+
+        MSG msg = { 0 };
+        while (PeekMessage(&msg, NULL, WM_MOUSEFIRST, WM_MOUSELAST, PM_REMOVE))
+        {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
 
         update_console();
-        handle_input_event();
-        render();
+        
         /*player.is_moving = 0;*/
-        update(delta_time);
+        player_update();
         Mob_Spawn_Time();
         update_mob_ai();
+
+        render();
     }
 
     BlockControl_Destroy();

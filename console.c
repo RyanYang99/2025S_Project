@@ -4,11 +4,14 @@
 #include "console.h"
 
 #include <stdio.h>
+#include "input.h"
 
 bool use_double_buffer = false;
 
 int current_buffer = 0;
 HANDLE buffer[2] = { 0 };
+
+int character_buffer_count = 0;
 PCHAR_INFO character_buffer = NULL;
 SMALL_RECT written = { 0 };
 
@@ -41,7 +44,8 @@ static void initialize_double_buffering(void)
         buffer[i] = new_handle;
     }
 
-    character_buffer = malloc(sizeof(CHAR_INFO) * console.size.X * console.size.Y);
+    character_buffer_count = console.size.X * console.size.Y;
+    character_buffer = malloc(sizeof(CHAR_INFO) * character_buffer_count);
 }
 
 //https://stackoverflow.com/a/12642749
@@ -123,7 +127,8 @@ static bool update_console_size(void)
 
     if (use_double_buffer)
     {
-        character_buffer = realloc(character_buffer, sizeof(CHAR_INFO) * console.size.X * console.size.Y);
+        character_buffer_count = console.size.X * console.size.Y;
+        character_buffer = realloc(character_buffer, sizeof(CHAR_INFO) * character_buffer_count);
 
         written.Right = console.size.X - 1;
         written.Bottom = console.size.Y - 1;
@@ -156,6 +161,9 @@ void write(const COORD position, const TCHAR character, const WORD attribute)
     if (use_double_buffer)
     {
         const int i = index(position.X, position.Y);
+        if (i > character_buffer_count || i < 0)
+            return;
+
         character_buffer[i].Char.UnicodeChar = character;
         character_buffer[i].Attributes = attribute;
     }
