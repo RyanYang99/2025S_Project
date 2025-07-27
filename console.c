@@ -16,6 +16,15 @@ HANDLE handle = NULL;
 
 console_t console = { 0 };
 
+COORD console_c() // 콘솔 중앙 찾기
+{
+    COORD center_m;
+    center_m.X = console.size.X / 2;
+    center_m.Y = console.size.Y / 2;
+    return center_m;
+}
+
+
 static void hide_console_cursor(const HANDLE cursor_handle)
 {
     CONSOLE_CURSOR_INFO cci = { 0 };

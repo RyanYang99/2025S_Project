@@ -22,13 +22,13 @@ long totalElapsedTime = 0; // 총 경과 시간
 long last_spawn_time = 0;// 마지막 스폰시간
 
 
-COORD console_c() // 콘솔 중앙 찾기
-{
-	COORD center_m;
-	center_m.X = console.size.X / 2;
-	center_m.Y = console.size.Y / 2;
-	return center_m;
-}
+//COORD console_c() // 콘솔 중앙 찾기
+//{
+//	COORD center_m;
+//	center_m.X = console.size.X / 2;
+//	center_m.Y = console.size.Y / 2;
+//	return center_m;
+//}
 
 void Mob_Spawn_Time()
 {
@@ -62,7 +62,7 @@ void Mob_Spawn_Time()
 
 }
 
-void MobSpawn(int player_x, int player_y) 
+void MobSpawn(int player_x, int player_y) //플레이어 주변 최소범위 스폰제한 예정
 {
 
 	for (int check_x = player_x - 50; check_x <= player_x + 50; check_x++) //플레이어 주변 x값 탐색

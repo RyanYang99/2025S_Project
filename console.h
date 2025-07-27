@@ -51,3 +51,5 @@ void write(const COORD position, const TCHAR character, const WORD attribute);
 void clear(void);
 void print_color_tchar(const color_tchar_t character, const COORD position);
 void destroy_console(void);
+
+COORD console_c(); // 콘솔 중앙 좌표 반환
