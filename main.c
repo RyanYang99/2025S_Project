@@ -92,7 +92,6 @@ int main(void)
 
         update_console();
         
-        /*player.is_moving = 0;*/
         player_update();
         Mob_Spawn_Time();
         update_mob_ai();
