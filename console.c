@@ -19,6 +19,14 @@ HANDLE handle = NULL;
 
 console_t console = { 0 };
 
+bool is_new_console(void)
+{
+    CONSOLE_FONT_INFO font = { 0 };
+    GetCurrentConsoleFont(GetStdHandle(STD_OUTPUT_HANDLE), false, &font);
+
+    return font.dwFontSize.X <= 0;
+}
+
 static void hide_console_cursor(const HANDLE cursor_handle)
 {
     CONSOLE_CURSOR_INFO cci = { 0 };

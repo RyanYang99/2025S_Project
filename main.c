@@ -72,6 +72,45 @@ int main(void)
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
+    if (is_new_console())
+    {
+        printf_s("Attempting to launch in conhost.exe.\n");
+
+        int argc = 0;
+        const LPWSTR *pArgv = CommandLineToArgvW(GetCommandLine(), &argc);
+
+        STARTUPINFO startup_info =
+        {
+            .cb = sizeof(startup_info)
+        };
+        PROCESS_INFORMATION process_information = { 0 };
+
+        const int path_character = (int)wcslen(pArgv[0]) + 4, path_size = sizeof(WCHAR) * path_character;
+        LPWSTR pArgument = calloc(path_size, sizeof(WCHAR));
+        wcscat_s(pArgument, path_size, L"-- ");
+        wcscat_s(pArgument, path_size, pArgv[0]);
+
+        const BOOL success = CreateProcess(TEXT("C:\\Windows\\System32\\conhost.exe"),
+                                           pArgument,
+                                           NULL,
+                                           NULL,
+                                           false,
+                                           0,
+                                           NULL,
+                                           NULL,
+                                           &startup_info,
+                                           &process_information);
+
+        free(pArgument);
+        if (success)
+        {
+            WaitForSingleObject(process_information.hProcess, INFINITE);
+            CloseHandle(process_information.hProcess);
+            CloseHandle(process_information.hThread);
+            return 0;
+        }
+    }
+
     initialize_console(true);
     initialize_input_handler();
     create_map();

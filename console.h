@@ -45,6 +45,7 @@ console_t;
 
 extern console_t console;
 
+bool is_new_console(void);
 void initialize_console(const bool use_double_buffering);
 void update_console(void);
 void write(const COORD position, const TCHAR character, const WORD attribute);
