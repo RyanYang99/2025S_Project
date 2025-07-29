@@ -40,6 +40,7 @@ color_tchar_t;
 typedef struct
 {
     COORD size;
+    HWND window;
 }
 console_t;
 
@@ -51,4 +52,5 @@ void update_console(void);
 void write(const COORD position, const TCHAR character, const WORD attribute);
 void clear(void);
 void print_color_tchar(const color_tchar_t character, const COORD position);
+const COORD convert_monitor_to_console(const POINT point);
 void destroy_console(void);

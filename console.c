@@ -17,6 +17,8 @@ SMALL_RECT written = { 0 };
 
 HANDLE handle = NULL;
 
+float dpi_scale = 0.0f;
+
 console_t console = { 0 };
 
 bool is_new_console(void)
@@ -86,6 +88,8 @@ void initialize_console(const bool use_double_buffering)
 {
     handle = GetStdHandle(STD_OUTPUT_HANDLE);
     console.size = get_console_size(handle);
+    console.window = GetConsoleWindow();
+    dpi_scale = (float)GetDpiForWindow(console.window) / 96.0f;
 
     switch_font();
 
@@ -202,6 +206,26 @@ void clear(void)
 void print_color_tchar(const color_tchar_t character, const COORD position)
 {
     write(position, character.character, (WORD)character.background | (WORD)character.foreground);
+}
+
+const COORD convert_monitor_to_console(const POINT point)
+{
+    POINT client_point =
+    {
+        .x = point.x,
+        .y = point.y
+    };
+    ScreenToClient(console.window, &client_point);
+
+    CONSOLE_FONT_INFO font = { 0 };
+    GetCurrentConsoleFont(GetStdHandle(STD_OUTPUT_HANDLE), false, &font);
+
+    const COORD consoleCoord =
+    {
+        .X = (SHORT)(client_point.x / (font.dwFontSize.X * dpi_scale)),
+        .Y = (SHORT)(client_point.y / (font.dwFontSize.Y * dpi_scale))
+    };
+    return consoleCoord;
 }
 
 void destroy_console(void)

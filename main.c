@@ -112,6 +112,8 @@ int main(void)
         }
     }
 
+    SetProcessDPIAware();
+
     initialize_console(true);
     initialize_input_handler();
     create_map();

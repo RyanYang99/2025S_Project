@@ -2,6 +2,7 @@
 #include "input.h"
 
 #include <Windows.h>
+#include "console.h"
 
 #define CALLBACK_SUBSCRIBE_IMPLEMENTATION(type, array, count) \
     if (!array) \
@@ -32,26 +33,6 @@ static void mouse_click_callback(const bool left)
             pMouseClick_callbacks[i](left);
 }
 
-static const COORD convert_to_console(const POINT point)
-{
-    POINT client_point =
-    {
-        .x = point.x,
-        .y = point.y
-    };
-    ScreenToClient(GetConsoleWindow(), &client_point);
-
-    CONSOLE_FONT_INFO font = { 0 };
-    GetCurrentConsoleFont(GetStdHandle(STD_OUTPUT_HANDLE), false, &font);
-
-    const COORD consoleCoord =
-    {
-        .X = (SHORT)(client_point.x / font.dwFontSize.X),
-        .Y = (SHORT)(client_point.y / font.dwFontSize.Y)
-    };
-    return consoleCoord;
-}
-
 static void mouse_position_callback(const COORD position)
 {
     for (int i = 0; i < mouse_position_callback_count; ++i)
@@ -64,7 +45,8 @@ static LRESULT CALLBACK LowLevelMouseProc(const int nCode, const WPARAM wParam, 
     if (nCode == HC_ACTION)
     {
         const MSLLHOOKSTRUCT *pMouse_struct = (MSLLHOOKSTRUCT *)lParam;
-        const COORD position = convert_to_console(pMouse_struct->pt);
+        const COORD position = convert_monitor_to_console(pMouse_struct->pt);
+
         mouse_position_callback(position);
 
         switch (wParam)
