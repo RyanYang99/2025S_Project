@@ -1,6 +1,8 @@
 ﻿#include "leak.h"
 #include "ItemDB.h"
 
+ItemDB g_db = { 0 };
+
 Item_Info* FindItemByIndex(const ItemDB* db, int index) {
     for (size_t i = 0; i < db->count; ++i) {
         if (db->item[i].index == index) {
@@ -62,7 +64,7 @@ void InputItemFromUser(ItemDB* db) {
             continue; // 루프의 처음으로 돌아감
         }
 
-        getchar(); // scanf가 남긴 개행 문자 제거
+        (void)getchar(); // scanf가 남긴 개행 문자 제거
 
         // FindItemByIndex 함수로 중복 검사
         if (FindItemByIndex(db, index) != NULL) {
@@ -246,13 +248,12 @@ void SelectMode(ItemDB* db) // main으로부터 받은 주소(포인터) db
 
 void CallItemDB(ItemDB* db)
 {
-    // UTF-8 환경 설정
-    //setlocale(LC_ALL, ".UTF8");
-    //SetConsoleOutputCP(CP_UTF8);
-    //SetConsoleCP(CP_UTF8);
+    setlocale(LC_ALL, ".UTF8");
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
 
     // 1. 프로그램 시작 시 DB 초기화 및 데이터 로드 (딱 한 번!)
-    InitItemDB(db); // main의 db 변수 주소를 넘김
+    InitItemDB(db);
     printf("기존 아이템 정보를 'items.csv'에서 불러옵니다...\n");
     LoadItemDBFromCSV(db, "items.csv");
     printf("로드 완료! 현재 아이템 수: %zu\n\n", db->count);
@@ -263,9 +264,6 @@ void CallItemDB(ItemDB* db)
     // 3. 루프가 끝나고 프로그램이 종료되기 직전, 최종 데이터를 저장 (딱 한 번!)
     printf("\n변경된 아이템 정보를 'items.csv'에 저장합니다.\n");
     SaveItemDBToCSV(db, "items.csv");
-
-    // 4. 메모리 해제
-    FreeItemDB(db);
 
     printf("프로그램을 종료합니다.\n");
 }

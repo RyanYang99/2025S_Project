@@ -2,17 +2,23 @@
 #include "Inventory.h"
 
 #include <conio.h>
+#include "input.h"
+#include "console.h"
+#include "formatter.h"
 
-Inventory* g_inv;
-ItemDB* g_db;
+#define INVENTORY_BACKGROUND BACKGROUND_T_BLACK
+#define INVENTORY_FOREGROUND FOREGROUND_T_WHITE
+#define FOREGROUND_EQUIPPED FOREGROUND_T_DARKBLUE
 
-void gotoxy(int x, int y) {
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    COORD pos = { (SHORT)x, (SHORT)y };
-    SetConsoleCursorPosition(hConsole, pos);
-}
+Inventory g_inv = { 0 };
 
-void InitInventory(Inventory* inv) {
+bool isInventoryOpen = false;
+int current_selection_index = 0,
+    max_selection_index = ITEMS_PER_PAGE - 1,
+    current_page_index = 0,
+    max_page_index = MAX_PAGES - 1;
+
+void InitInventory(Inventory *inv) {
     for (int i = 0; i < INVENTORY_SIZE; ++i) {
         inv->item[i].Item_Index = 0; // 0은 빈 칸을 의미
         inv->item[i].quantity = 0;
@@ -79,182 +85,119 @@ bool AddItemToInventory(Inventory* inv, ItemDB* db, int itemIndex, int quantityT
     return true;
 }
 
-void PrintItemDetails(const Player_Item* pItem, const ItemDB* db) {
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+static void render_inventory_item(const Inventory * const pInventory,
+                                  const ItemDB * const pDB,
+                                  const int y,
+                                  const int inventory_index,
+                                  const bool selected)
+{
+    const Player_Item *pItem = &pInventory->item[inventory_index];
+    COORD position =
+    {
+        .Y = (SHORT)y
+    };
 
-    //이전에 있던 글 제거 밑 공백으로 덮어씌우기
-    printf("                                                                                \r");
+    if (selected)
+        position.X += (SHORT)fprint_string("> ", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
 
-    if (pItem->Item_Index == 0) {
-        // 빈 칸일 경우 아무것도 출력하지 않고 함수 종료
+    if (pItem->Item_Index)
+    {
+        const Item_Info *pItem_info = FindItemByIndex(pDB, pItem->Item_Index);
+        if (!pItem_info)
+            return;
+
+        position.X += (SHORT)fprint_string("[ %s", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND, pItem_info->name);
+
+        if (pItem_info->maxStack > 1)
+            position.X += (SHORT)fprint_string(" (x%d) ]", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND, pItem->quantity);
+
+        if (pItem_info->type == ITEM_WEAPON || pItem_info->type == ITEM_TOOL || pItem_info->type == ITEM_ARMOR)
+            position.X += (SHORT)fprint_string(" (내구성: %d/%d) ]", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND, pItem->durability, pItem_info->BaseDurability);
+
+        if (pItem->isEquipped)
+            position.X += (SHORT)fprint_string(" [E] ", position, INVENTORY_BACKGROUND, FOREGROUND_EQUIPPED);
+
+    }
+    else
+        fprint_string("[ 비어있음 ]", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
+}
+
+void RenderInventory(Inventory* inv, ItemDB* db) {
+    if (!isInventoryOpen)
         return;
+
+    COORD position = { 0 };
+    fprint_string("=== 인벤토리 (%d / %d) ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND, current_page_index + 1, MAX_PAGES);
+
+    const int start_index = current_page_index * ITEMS_PER_PAGE;
+    for (int i = 0; i < ITEMS_PER_PAGE; ++i)
+    {
+        render_inventory_item(inv, db, ++position.Y, start_index + i, i == current_selection_index);
     }
 
-    Item_Info* itemInfo = FindItemByIndex(db, pItem->Item_Index);
-    if (!itemInfo) return;
+    ++position.Y;
+    fprint_string("=== (W / S: 선택, A / D: 페이지, E: 사용 / 장착, I: 닫기) ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
 
-    // 이제 새로운 내용을 출력합니다.
-    printf("  > ");
-    SetConsoleTextAttribute(hConsole, COLOR_INFO);
-    printf("%s", itemInfo->name);
-    if (pItem->isEquipped) {
-        SetConsoleTextAttribute(hConsole, COLOR_EQUIPPED);
-        printf(" (장착중)");
-    }
-    SetConsoleTextAttribute(hConsole, COLOR_INFO);
-    printf(": ");
-    switch (itemInfo->type) {
-    case ITEM_CONSUMABLE: printf("사용 시 효과가 발동됩니다."); break;
-    case ITEM_WEAPON: case ITEM_TOOL: case ITEM_ARMOR:
-        printf("내구도: %d/%d", pItem->durability, itemInfo->BaseDurability); break;
-    case ITEM_MATERIAL: printf("제작에 사용되는 재료입니다."); break;
-    case ITEM_MISC: printf("특별한 용도가 있는 기타 아이템입니다."); break;
-    }
-    SetConsoleTextAttribute(hConsole, COLOR_DEFAULT);
-}
+    const Player_Item *pItem = &inv->item[start_index + current_selection_index];
+    if (!pItem->Item_Index)
+        return;
 
-void RedrawLine(const Inventory* inv, const ItemDB* db, int y, int slotIndex, bool isSelected, bool isBlinkOn) {
-    gotoxy(0, y); // 해당 줄의 시작으로 커서 이동
+    const Item_Info *pItem_info = FindItemByIndex(db, pItem->Item_Index);
+    position.Y += 2;
+    position.X += (SHORT)fprint_string("%s", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND, pItem_info->name);
 
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    const Player_Item* pItem = &inv->item[slotIndex];
+    if (pItem->isEquipped)
+        position.X += (SHORT)fprint_string(" (장착중)", position, INVENTORY_BACKGROUND, FOREGROUND_EQUIPPED);
 
-    // 선택 여부에 따른 색상 및 커서 마커(>) 설정
-    if (isSelected) {
-        SetConsoleTextAttribute(hConsole, isBlinkOn ? COLOR_SELECT_BRIGHT : COLOR_SELECT_DARK);
-        printf(" > ");
-    }
-    else {
-        SetConsoleTextAttribute(hConsole, COLOR_DEFAULT);
-        printf("   ");
+    char *pDescription = "";
+    switch (pItem_info->type) {
+        case ITEM_CONSUMABLE:
+            pDescription = ": 사용 시 효과가 발동됩니다.";
+            break;
+
+        case ITEM_MATERIAL:
+            pDescription = ": 제작에 사용되는 재료입니다.";
+            break;
+
+        case ITEM_MISC:
+            pDescription = ": 특별한 용도가 있는 기타 아이템입니다.";
+            break;
     }
 
-    // 아이템 정보 출력
-    if (pItem->Item_Index != 0) {
-        Item_Info* itemInfo = FindItemByIndex(db, pItem->Item_Index);
-        if (!itemInfo) return; // DB에 없으면 그냥 넘어감
-
-        printf("[%s]", itemInfo->name);
-        if (itemInfo->maxStack > 1) printf(" (x%d)", pItem->quantity);
-        if (pItem->isEquipped) {
-            SetConsoleTextAttribute(hConsole, COLOR_EQUIPPED);
-            printf(" [E]");
-        }
-    }
-    else {
-        printf("[ 비어있음 ]");
-    }
-
-    // 이전에 있던 글자 찌꺼기를 지우기 위해 줄 끝까지 공백으로 덮어씀
-    printf("                                        ");
-    SetConsoleTextAttribute(hConsole, COLOR_DEFAULT);
-}
-
-
-void DrawInventory(const Inventory* inv, const ItemDB* db, int currentPage, int totalPages) {
-
-    // 헤더 및 페이지 정보 출력
-    gotoxy(0, 0);
-    printf("================= 인벤토리 (%d/%d 페이지) =================\n", currentPage + 1, totalPages);
-
-    // 아이템 목록 전체 그리기
-    int start_index_inv = currentPage * ITEMS_PER_PAGE;
-    for (int i = 0; i < ITEMS_PER_PAGE; ++i) {
-        int y = 1 + i; // 헤더가 1줄 있으므로 y좌표는 1부터 시작
-        int slotIndex = start_index_inv + i;
-        // 선택되지 않은 상태(isSelected=false)로 모든 줄을 그림
-        RedrawLine(inv, db, y, slotIndex, false, false);
-    }
-
-    // 하단 메뉴 출력
-    gotoxy(0, 1 + ITEMS_PER_PAGE + 2); // 목록 아래에 그리기
-    printf("\n=========================================================\n");
-    printf("  (W/S: 이동, A/D: 페이지, E: 사용/장착, I/ESC: 닫기)\n");
-}
-
-void ShowInventory(Inventory* playerInventory, ItemDB* db) {
-    int currentPage = 0;
-    int selectedIndexOnPage = 0;
-    int totalPages = (INVENTORY_SIZE - 1) / ITEMS_PER_PAGE + 1;
-
-    clock_t last_time = clock();
-    bool isBlinkOn = true;
-    int oldSelectionOnPage = -1; // 이전 선택 위치를 추적하기 위한 변수
-
-    // 1. 인벤토리 진입 시 화면을 딱 한 번만 지우고 전체를 그림
-    system("cls");
-    DrawInventory(playerInventory, db, currentPage, totalPages);
-
-    while (1) {
-        // --- 점멸 효과 또는 키 입력에 따른 업데이트 ---
-        // 이전 선택 위치와 현재 선택 위치가 다르거나, 점멸 상태가 바뀌었을 때만 그림
-        if (oldSelectionOnPage != selectedIndexOnPage || (double)(clock() - last_time) / CLOCKS_PER_SEC > 0.4) {
-            if ((double)(clock() - last_time) / CLOCKS_PER_SEC > 0.4) {
-                isBlinkOn = !isBlinkOn;
-                last_time = clock();
-            }
-
-            // 2. 이전에 선택됐던 줄을 일반 상태로 되돌림
-            if (oldSelectionOnPage != -1) {
-                int oldSlotIndex = currentPage * ITEMS_PER_PAGE + oldSelectionOnPage;
-                RedrawLine(playerInventory, db, 1 + oldSelectionOnPage, oldSlotIndex, false, false);
-            }
-
-            // 3. 새로 선택된 줄을 강조해서 그림
-            int currentSlotIndex = currentPage * ITEMS_PER_PAGE + selectedIndexOnPage;
-            RedrawLine(playerInventory, db, 1 + selectedIndexOnPage, currentSlotIndex, true, isBlinkOn);
-
-            // 4. 아이템 상세 정보 창 업데이트
-            gotoxy(0, 1 + ITEMS_PER_PAGE); // 목록 바로 아래로 커서 이동
-            PrintItemDetails(&playerInventory->item[currentSlotIndex], db);
-            oldSelectionOnPage = selectedIndexOnPage; // 현재 선택 위치를 '이전 위치'로 기록
-        }
-
-        // --- 사용자 키 입력 처리 ---
-        if (_kbhit()) {
-            char input = (char)_getch();
-            switch (input) {
-            case 'w': case 'W': if (selectedIndexOnPage > 0) selectedIndexOnPage--; break;
-            case 's': case 'S': if (selectedIndexOnPage < ITEMS_PER_PAGE - 1) selectedIndexOnPage++; break;
-
-            case 'a': case 'A': case 'd': case 'D':
-                if (input == 'a' || input == 'A') {
-                    if (currentPage > 0) currentPage--;
-                }
-                else {
-                    if (currentPage < totalPages - 1) currentPage++;
-                }
-                selectedIndexOnPage = 0;
-                oldSelectionOnPage = -1;
-                DrawInventory(playerInventory, db, currentPage, totalPages); // 페이지가 바뀌면 전체를 다시 그림
-                break;
-
-            case 'e': case 'E':
-                oldSelectionOnPage = -1; // 상호작용 후 상태가 바뀌었을 수 있으므로 강제 업데이트
-                DrawInventory(playerInventory, db, currentPage, totalPages);
-                break;
-
-            case 'i': case 'I': case 27:
-                system("cls");
-                return;
-            }
-        }
-        else {
-            Sleep(50); // 키 입력이 없으면 잠시 대기
-        }
-    }
+    fprint_string("%s", position, INVENTORY_BACKGROUND, FOREGROUND_T_YELLOW, pDescription);
 }
 
 //I키 입력시 인벤토리 호출
 void HandleInventoryKeyInput()
 {
-    char input;
-    if (_kbhit()) {
-        input = (char)_getch();
-        switch (input) {
-        case 'i': case 'I':
-            ShowInventory(g_inv, g_db);
-            break;
-        }
+    if (!keyboard_pressed)
+        return;
+
+    const char character = (char)tolower(input_character);
+    if (character == 'i')
+        isInventoryOpen = !isInventoryOpen;
+
+    if (!isInventoryOpen)
+        return;
+
+    if (character == 'w' && current_selection_index > 0)
+        --current_selection_index;
+    else if (character == 's' && current_selection_index < max_selection_index)
+        ++current_selection_index;
+    else if (character == 'a' && current_page_index > 0)
+        --current_page_index;
+    else if (character == 'd' && current_page_index < max_page_index)
+        ++current_page_index;
+    else if (character == 'e')
+    {
+        const Player_Item *pItem = &g_inv.item[(current_page_index * ITEMS_PER_PAGE) + current_selection_index];
+        if (!pItem->Item_Index)
+            return;
+
+        const Item_Info *pItem_info = FindItemByIndex(&g_db, pItem->Item_Index);
+        if (!pItem_info)
+            return;
+
+        //사용 / 장착 처리
     }
 }

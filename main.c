@@ -15,46 +15,24 @@
 #include "ItemDB.h"
 #include "inventory.h"
 
-Inventory* g_inv;
-ItemDB* g_db;
-
 #if _DEBUG
-static void print_debug_text(const char* pText, const int y)
-{
-    color_tchar_t character =
-    {
-        .background = BACKGROUND_T_BLACK,
-        .foreground = FOREGROUND_T_WHITE,
-    };
-    COORD position =
-    {
-        .X = 0,
-        .Y = (SHORT)y
-    };
-
-    for (int i = 0; i < strlen(pText); ++i)
-    {
-        character.character = pText[i];
-        position.X = (SHORT)i;
-        print_color_tchar(character, position);
-    }
-}
-
 static void render_debug_text(void)
 {
-    char pMessage[100] = "";
+    const BACKGROUND_color_t background = BACKGROUND_T_BLACK;
+    const FOREGROUND_color_t foreground = FOREGROUND_T_WHITE;
+
+    COORD position = { 0, 0 };
 
     int fps = -1;
     if (delta_time > 0.0f)
         fps = (int)(1.0f / delta_time);
-    sprintf_s(pMessage, 100, "FPS: %d", fps);
-    print_debug_text(pMessage, 0);
+    fprint_string("FPS: %d", position, background, foreground, fps);
+    ++position.Y;
 
-    sprintf_s(pMessage, 100, "Player: (%d, %d)", player.x, player.y);
-    print_debug_text(pMessage, 1);
+    fprint_string("Player: (%d, %d)", position, background, foreground, player.x, player.y);
+    ++position.Y;
 
-    sprintf_s(pMessage, 100, "Mouse: (%d, %d)", selected_block_x, selected_block_y);
-    print_debug_text(pMessage, 2);
+    fprint_string("Mouse: (%d, %d)", position, background, foreground, selected_block_x, selected_block_y);
 }
 #endif
 
@@ -64,9 +42,11 @@ static void render(void)
     render_player();
     render_virtual_cursor();
     Mob_render();
+    RenderInventory(&g_inv, &g_db);
+    //render_hotbar();
 
 #if _DEBUG
-    render_debug_text();
+    //render_debug_text();
 #endif
 }
 
@@ -77,21 +57,13 @@ int main(void)
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-    ItemDB db; // 아이템 DB 선언
-    Inventory inv;
-
-    g_db = &db;
-    g_inv = &inv;
-
-    CallItemDB(g_db);
-
+    CallItemDB(&g_db);
     initialize_console(true);
     initialize_input_handler();
     create_map();
     player_init(map.size.x / 2);
     BlockControl_Init();
-    InitInventory(g_inv);
-
+    InitInventory(&g_inv);
 
     clear();
     while (!game_exit)
@@ -104,21 +76,19 @@ int main(void)
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
-
         update_console();
+        update_input();
 
-        HandleInventoryKeyInput();
-
-        /*player.is_moving = 0;*/
         player_update();
+        HandleInventoryKeyInput();
         Mob_Spawn_Time();
         update_mob_ai();
-
 
         render();
     }
 
     BlockControl_Destroy();
+    FreeItemDB(&g_db);
     destroy_map();
     destroy_input_handler();
     destroy_console();

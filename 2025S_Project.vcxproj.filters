@@ -48,6 +48,18 @@
     <ClCompile Include="delta.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="inventory.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemDB.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Tool.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="formatter.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="console.h">
@@ -83,5 +95,20 @@
     <ClInclude Include="delta.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inventory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemDB.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Tool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="formatter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="items.csv" />
   </ItemGroup>
 </Project>

@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-//#define _CRT_SECURE_NO_WARNINGS
-
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
@@ -37,6 +35,8 @@ typedef struct ItemDB {
     size_t count;
 }ItemDB;
 
+extern ItemDB g_db;
+
 void InitItemDB(ItemDB* db);
 int AddItemToDB(ItemDB* db, int index, const char* name, int maxStack, int type, int baseDurability, int toolkind, int materialTier, int isplaceable, int blockID);
 void PrintItemDB(const ItemDB* db);
@@ -44,5 +44,4 @@ void FreeItemDB(ItemDB* db);
 void SaveItemDBToCSV(const ItemDB* db, const char* filename);
 void LoadItemDBFromCSV(ItemDB* db, const char* filename);
 Item_Info* FindItemByIndex(const ItemDB* db, int index);
-void SelectMode();
 void CallItemDB(ItemDB* db);

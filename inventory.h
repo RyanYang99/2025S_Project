@@ -29,8 +29,9 @@ typedef struct Inventory {
     int selectedIndex; //인벤토리 현재 선택 된 칸
 }Inventory;
 
+extern Inventory g_inv;
+
 void InitInventory(Inventory* inv);
-bool AddItemToInventory(Inventory* inv, ItemDB* db, int itemIndex, int quantity);
-void ShowInventory(Inventory* playerInventory, ItemDB* db);
-void gotoxy(int x, int y);
+bool AddItemToInventory(Inventory* inv, ItemDB* db, int itemIndex, int quantityToAdd);
+void RenderInventory(Inventory* inv, ItemDB *db);
 void HandleInventoryKeyInput();

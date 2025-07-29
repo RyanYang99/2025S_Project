@@ -6,9 +6,6 @@
 #include "inventory.h"
 #include "player.h"
 
-extern Inventory* g_inv;
-extern ItemDB* g_db;
-
 // 도구 종류 상수 (toolkind 값에 대응)
 #define TOOL_KIND_NONE     -1
 #define TOOL_KIND_PICKAXE  0
@@ -135,7 +132,7 @@ bool CanPlaceBlock(int x, int y)
 
 bool ConsumeEquippedBlockItem(Inventory* inv, const ItemDB* db)
 {
-    Player_Item* equipped = GetEquippedItem(g_inv, g_inv->selectedIndex);
+    Player_Item* equipped = GetEquippedItem(&g_inv, g_inv.selectedIndex);
     if (!equipped || equipped->quantity <= 0)
         return false;
 

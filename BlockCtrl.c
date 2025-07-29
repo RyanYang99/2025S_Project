@@ -8,9 +8,6 @@
 #include "Tool.h"
 #include "inventory.h"
 
-extern Inventory* g_inv;
-extern ItemDB* g_db;
-
 static COORD latestMousePos;
 static float screen_cx = 0, screen_cy = 0, relative_mouse_x = 0, relative_mouse_y = 0;
 static int block_x = 0, block_y = 0, draw_x = 0, draw_y = 0;
@@ -49,11 +46,11 @@ static void BC_OnMouseClick(const bool left)
     if (left)
     {
         // 1. 현재 장착된 아이템 가져오기
-        Player_Item* equipped = GetEquippedItem(g_inv, g_inv->selectedIndex);
+        Player_Item* equipped = GetEquippedItem(&g_inv, g_inv.selectedIndex);
         const Item_Info* info = NULL;
         if (equipped)
         {
-            info = FindItemByIndex(g_db, equipped->Item_Index);
+            info = FindItemByIndex(&g_db, equipped->Item_Index);
         }
 
         // 2. 현재 블록 정보 확인
@@ -63,10 +60,10 @@ static void BC_OnMouseClick(const bool left)
         if (!CanToolBreakBlock(info, targetBlock.type)) return;
 
         // 4. 도구의 데미지 계산
-        int damage = GetToolDamageToBlock(info, targetBlock.type);
+        //int damage = GetToolDamageToBlock(info, targetBlock.type);
 
         // 5. 데미지를 주고 파괴 여부 확인
-        bool destroyed = damage_block_at(&map, block_x, block_y, damage);
+        //bool destroyed = damage_block_at(&map, block_x, block_y, damage);
 
         /*
         if (destroyed)
@@ -85,18 +82,18 @@ static void BC_OnMouseClick(const bool left)
 
 
         // 1. 인벤토리에서 선택된 아이템 가져오기
-        Player_Item* equipped = GetEquippedItem(g_inv, g_inv->selectedIndex);
+        Player_Item* equipped = GetEquippedItem(&g_inv, g_inv.selectedIndex);
         if (!equipped || equipped->quantity <= 0) return;
 
         // 2. 아이템 정보 가져오기
-        const Item_Info* info = FindItemByIndex(g_db, equipped->Item_Index);
+        const Item_Info* info = FindItemByIndex(&g_db, equipped->Item_Index);
         if (!info || !info->isplaceable) return;  // 설치 불가능한 아이템은 무시
 
         // 3. 설치 가능한 위치인지 확인
         if (!CanPlaceBlock(block_x, block_y)) return;
 
         // 4. 아이템 인덱스로 설치할 블록 타입 추출
-        block_t blockType = GetBlockTypeFromItem(g_db, equipped->Item_Index);
+        block_t blockType = GetBlockTypeFromItem(&g_db, equipped->Item_Index);
         if (blockType == BLOCK_AIR) return;
 
         // 5. 설치 시도
@@ -104,7 +101,7 @@ static void BC_OnMouseClick(const bool left)
         if (!success) return;
 
         // 6. 수량 차감
-        ConsumeEquippedBlockItem(g_inv, g_db);
+        ConsumeEquippedBlockItem(&g_inv, &g_db);
     }
 }
 
