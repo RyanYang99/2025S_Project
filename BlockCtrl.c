@@ -4,6 +4,12 @@
 #include "map.h"
 #include "player.h"
 #include <math.h> // floorf 함수 사용
+#include "ItemDB.h"
+#include "Tool.h"
+#include "inventory.h"
+
+extern Inventory* g_inv;
+extern ItemDB* g_db;
 
 static COORD latestMousePos;
 static float screen_cx = 0, screen_cy = 0, relative_mouse_x = 0, relative_mouse_y = 0;
@@ -42,32 +48,63 @@ static void BC_OnMouseClick(const bool left)
 
     if (left)
     {
-        int damage = 3;  // 예: 손 데미지 (나중에 도구별로 바꿀 예정)
+        // 1. 현재 장착된 아이템 가져오기
+        Player_Item* equipped = GetEquippedItem(g_inv, g_inv->selectedIndex);
+        const Item_Info* info = NULL;
+        if (equipped)
+        {
+            info = FindItemByIndex(g_db, equipped->Item_Index);
+        }
 
+        // 2. 현재 블록 정보 확인
+        block_info_t targetBlock = get_block_info_at(block_x, block_y);
+
+        // 3. 도구가 해당 블록을 부술 수 있는지 확인
+        if (!CanToolBreakBlock(info, targetBlock.type)) return;
+
+        // 4. 도구의 데미지 계산
+        int damage = GetToolDamageToBlock(info, targetBlock.type);
+
+        // 5. 데미지를 주고 파괴 여부 확인
         bool destroyed = damage_block_at(&map, block_x, block_y, damage);
 
+        /*
         if (destroyed)
         {
-            // 블록이 부서졌을 때 추가 처리 있으면 여기서
+            int dropItemIndex = GetDropItemFromBlockType(targetBlock.type);
+
+            if (dropItemIndex != -1)
+            {
+                AddItemToInventory(g_inv, g_db, dropItemIndex, 1);
+            }
         }
+        */
     }
     else
     {
-        if (block_x == player.x && block_y == player.y)
-            return;  // 1. 플레이어 위치에는 설치 금지
 
-        block_info_t target = get_block_info_at(block_x, block_y);
-        if (target.type != BLOCK_AIR)
-            return;  // 2. 이미 블록이 있는 곳에는 설치 금지
 
-        block_t held_block = BLOCK_DIRT; // 4. 나중에 인벤토리에서 선택한 블록으로 대체
-        if (held_block == BLOCK_AIR) return; // 공기 블록은 설치 불가
+        // 1. 인벤토리에서 선택된 아이템 가져오기
+        Player_Item* equipped = GetEquippedItem(g_inv, g_inv->selectedIndex);
+        if (!equipped || equipped->quantity <= 0) return;
 
-        // 5. 도구가 들려 있다면 설치 불가 (가정: BLOCK_TOOL_*로 구분하거나 enum 값 등)
-        //if (held_block >= TOOL_BEGIN && held_block <= TOOL_END) return;
+        // 2. 아이템 정보 가져오기
+        const Item_Info* info = FindItemByIndex(g_db, equipped->Item_Index);
+        if (!info || !info->isplaceable) return;  // 설치 불가능한 아이템은 무시
 
-        // 6. 맵 경계 체크는 get_block_info_at / set_block_at에서 이미 처리
-        set_block_at(block_x, block_y, held_block); // 3. 자동으로 체력 초기화됨
+        // 3. 설치 가능한 위치인지 확인
+        if (!CanPlaceBlock(block_x, block_y)) return;
+
+        // 4. 아이템 인덱스로 설치할 블록 타입 추출
+        block_t blockType = GetBlockTypeFromItem(g_db, equipped->Item_Index);
+        if (blockType == BLOCK_AIR) return;
+
+        // 5. 설치 시도
+        bool success = set_block_at(block_x, block_y, blockType);
+        if (!success) return;
+
+        // 6. 수량 차감
+        ConsumeEquippedBlockItem(g_inv, g_db);
     }
 }
 
@@ -75,10 +112,10 @@ static void BC_OnMouseClick(const bool left)
 void render_virtual_cursor(void)
 {
     // 각 모서리에 문자를 출력
-    color_tchar_t tl = {L'┌', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE };
-    color_tchar_t tr = {L'┐', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE };
-    color_tchar_t bl = {L'└', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE };
-    color_tchar_t br = {L'┘', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE };
+    color_tchar_t tl = { L'┌', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE };
+    color_tchar_t tr = { L'┐', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE };
+    color_tchar_t bl = { L'└', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE };
+    color_tchar_t br = { L'┘', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE };
 
     print_color_tchar(tl, (COORD) { (SHORT)draw_x, (SHORT)draw_y });
     print_color_tchar(tr, (COORD) { (SHORT)(draw_x + TEXTURE_SIZE - 1), (SHORT)draw_y });

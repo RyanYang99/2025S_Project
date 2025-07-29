@@ -12,9 +12,14 @@
 #include "console.h"
 #include "BlockCtrl.h"
 #include "global_state.h"
+#include "ItemDB.h"
+#include "inventory.h"
+
+Inventory* g_inv;
+ItemDB* g_db;
 
 #if _DEBUG
-static void print_debug_text(const char *pText, const int y)
+static void print_debug_text(const char* pText, const int y)
 {
     color_tchar_t character =
     {
@@ -72,11 +77,21 @@ int main(void)
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
+    ItemDB db; // 아이템 DB 선언
+    Inventory inv;
+
+    g_db = &db;
+    g_inv = &inv;
+
+    CallItemDB(g_db);
+
     initialize_console(true);
     initialize_input_handler();
     create_map();
     player_init(map.size.x / 2);
     BlockControl_Init();
+    InitInventory(g_inv);
+
 
     clear();
     while (!game_exit)
@@ -91,11 +106,14 @@ int main(void)
         }
 
         update_console();
-        
+
+        HandleInventoryKeyInput();
+
         /*player.is_moving = 0;*/
         player_update();
         Mob_Spawn_Time();
         update_mob_ai();
+
 
         render();
     }

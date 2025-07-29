@@ -80,11 +80,14 @@
     <ClCompile Include="delta.c" />
     <ClCompile Include="global_state.c" />
     <ClCompile Include="input.c" />
+    <ClCompile Include="inventory.c" />
+    <ClCompile Include="ItemDB.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="map.c" />
     <ClCompile Include="Mob.c" />
     <ClCompile Include="perlin.c" />
     <ClCompile Include="player.c" />
+    <ClCompile Include="Tool.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="astar.h" />
@@ -93,11 +96,17 @@
     <ClInclude Include="delta.h" />
     <ClInclude Include="global_state.h" />
     <ClInclude Include="input.h" />
+    <ClInclude Include="inventory.h" />
+    <ClInclude Include="ItemDB.h" />
     <ClInclude Include="leak.h" />
     <ClInclude Include="map.h" />
     <ClInclude Include="Mob.h" />
     <ClInclude Include="perlin.h" />
     <ClInclude Include="player.h" />
+    <ClInclude Include="Tool.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="items.csv" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

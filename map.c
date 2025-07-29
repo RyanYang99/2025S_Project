@@ -153,18 +153,18 @@ const color_tchar_t pBlock_textures[BLOCKS][TEXTURE_SIZE][TEXTURE_SIZE] =
 // 블록 기본 체력 설정
 int get_block_max_health(block_t type)
 {
-    switch (type) //주먹=3데미지? 나무 곡=10 돌곡=17 철곡=30
+    switch (type) //맨손(3) 4~5대, 나무도구(9) 3대, 돌도구(15) 2대, 철 도구(21) 1대를 기준으로 밸런스잡기
     {
     case BLOCK_AIR:         return 0;
-    case BLOCK_DIRT:        return 5;
-    case BLOCK_STONE:       return 20;
-    case BLOCK_IRON_ORE:    return 30;
-    case BLOCK_GRASS:       return 3;
-    case BLOCK_LOG:         return 9;
-    case BLOCK_LEAF:        return 3;
-    case BLOCK_SNOW:        return 3;
-    case BLOCK_SAND:        return 3;
-    case BLOCK_BEDROCK:     return -1;
+    case BLOCK_GRASS:       return 6;
+    case BLOCK_SNOW:        return 6;
+    case BLOCK_LEAF:        return 7;
+    case BLOCK_SAND:        return 8;
+    case BLOCK_DIRT:        return 12;
+    case BLOCK_LOG:         return 12;
+    case BLOCK_STONE:       return 21;
+    case BLOCK_IRON_ORE:    return 35;
+    case BLOCK_BEDROCK:     return 99999;
     default:                return 1;
     }
 }

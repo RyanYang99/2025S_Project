@@ -44,6 +44,9 @@ static const COORD convert_to_console(const POINT point)
     CONSOLE_FONT_INFO font = { 0 };
     GetCurrentConsoleFont(GetStdHandle(STD_OUTPUT_HANDLE), false, &font);
 
+    if (font.dwFontSize.X == 0) font.dwFontSize.X = 8;
+    if (font.dwFontSize.Y == 0) font.dwFontSize.Y = 16;
+
     const COORD consoleCoord =
     {
         .X = (SHORT)(client_point.x / font.dwFontSize.X),
