@@ -46,7 +46,6 @@ static LRESULT CALLBACK LowLevelMouseProc(const int nCode, const WPARAM wParam, 
     {
         const MSLLHOOKSTRUCT *pMouse_struct = (MSLLHOOKSTRUCT *)lParam;
         const COORD position = convert_monitor_to_console(pMouse_struct->pt);
-
         mouse_position_callback(position);
 
         switch (wParam)

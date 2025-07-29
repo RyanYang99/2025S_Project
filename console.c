@@ -17,6 +17,7 @@ SMALL_RECT written = { 0 };
 
 HANDLE handle = NULL;
 
+HWND window = NULL;
 float dpi_scale = 0.0f;
 
 console_t console = { 0 };
@@ -88,8 +89,10 @@ void initialize_console(const bool use_double_buffering)
 {
     handle = GetStdHandle(STD_OUTPUT_HANDLE);
     console.size = get_console_size(handle);
-    console.window = GetConsoleWindow();
-    dpi_scale = (float)GetDpiForWindow(console.window) / 96.0f;
+    window = GetConsoleWindow();
+
+    SetProcessDPIAware();
+    dpi_scale = (float)GetDpiForWindow(window) / 96.0f;
 
     switch_font();
 
@@ -215,7 +218,7 @@ const COORD convert_monitor_to_console(const POINT point)
         .x = point.x,
         .y = point.y
     };
-    ScreenToClient(console.window, &client_point);
+    ScreenToClient(window, &client_point);
 
     CONSOLE_FONT_INFO font = { 0 };
     GetCurrentConsoleFont(GetStdHandle(STD_OUTPUT_HANDLE), false, &font);

@@ -40,7 +40,6 @@ color_tchar_t;
 typedef struct
 {
     COORD size;
-    HWND window;
 }
 console_t;
 
