@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 
 #include "stdio.h"
@@ -7,9 +7,9 @@
 #include "ItemDB.h"
 #include "time.h"
 
-#define ITEMS_PER_PAGE 10   // ÇÑ ÆäÀÌÁö¿¡ º¸¿©ÁÙ ¾ÆÀÌÅÛ ¼ö
-#define MAX_PAGES 5         // ÃÖ´ë ÆäÀÌÁö ¼ö
-#define INVENTORY_SIZE (ITEMS_PER_PAGE * MAX_PAGES) // ÃÑ ÀÎº¥Åä¸® Ä­ ¼ö
+#define ITEMS_PER_PAGE 10   // í•œ í˜ì´ì§€ì— ë³´ì—¬ì¤„ ì•„ì´í…œ ìˆ˜
+#define MAX_PAGES 5         // ìµœëŒ€ í˜ì´ì§€ ìˆ˜
+#define INVENTORY_SIZE (ITEMS_PER_PAGE * MAX_PAGES) // ì´ ì¸ë²¤í† ë¦¬ ì¹¸ ìˆ˜
 
 #define COLOR_DEFAULT 7
 #define COLOR_SELECT_DARK 8
@@ -18,15 +18,15 @@
 #define COLOR_EQUIPPED 10
 
 typedef struct Player_Item {
-	int Item_Index;  //DB¸¦ ÂüÁ¶ÇÏ´Â index
-	int quantity; //ÇöÀç ¼ö·®
-	int durability; //ÇöÀç ³»±¸µµ
-	bool isEquipped; //ÀåÂø¿©ºÎ   
+    int Item_Index;  //DBë¥¼ ì°¸ì¡°í•˜ëŠ” index
+    int quantity; //í˜„ì¬ ìˆ˜ëŸ‰
+    int durability; //í˜„ì¬ ë‚´êµ¬ë„
+    bool isEquipped; //ì¥ì°©ì—¬ë¶€   
 }Player_Item;
 
 typedef struct Inventory {
-	Player_Item item[INVENTORY_SIZE];
-	int selectedIndex; //ÀÎº¥Åä¸® ÇöÀç ¼±ÅÃ µÈ Ä­
+    Player_Item item[INVENTORY_SIZE];
+    int selectedIndex; //ì¸ë²¤í† ë¦¬ í˜„ì¬ ì„ íƒ ëœ ì¹¸
 }Inventory;
 
 void InitInventory(Inventory* inv);

@@ -1,3 +1,5 @@
+ï»¿#include "leak.h"
+
 #include "ItemDB.h"
 #include "blockctrl.h"
 #include <stdbool.h>
@@ -7,26 +9,26 @@
 extern Inventory* g_inv;
 extern ItemDB* g_db;
 
-// µµ±¸ Á¾·ù »ó¼ö (toolkind °ª¿¡ ´ëÀÀ)
+// ë„êµ¬ ì¢…ë¥˜ ìƒìˆ˜ (toolkind ê°’ì— ëŒ€ì‘)
 #define TOOL_KIND_NONE     -1
 #define TOOL_KIND_PICKAXE  0
 #define TOOL_KIND_AXE      1
 #define TOOL_KIND_SHOVEL   2
 
-// Àç·á Æ¼¾î »ó¼ö (materialTier °ª¿¡ ´ëÀÀ)
-#define TIER_HAND   0  // ¸Ç¼Õ
+// ì¬ë£Œ í‹°ì–´ ìƒìˆ˜ (materialTier ê°’ì— ëŒ€ì‘)
+#define TIER_HAND   0  // ë§¨ì†
 #define TIER_WOOD   1
 #define TIER_STONE  2
 #define TIER_IRON   3
 
 
-// ÇöÀç ¼±ÅÃµÈ ÀÎº¥Åä¸® Ä­ÀÇ ¾ÆÀÌÅÛ Æ÷ÀÎÅÍ¸¦ ¹İÈ¯
+// í˜„ì¬ ì„ íƒëœ ì¸ë²¤í† ë¦¬ ì¹¸ì˜ ì•„ì´í…œ í¬ì¸í„°ë¥¼ ë°˜í™˜
 Player_Item* GetEquippedItem(Inventory* inv, int selectedSlotIndex)
 {
     if (selectedSlotIndex < 0 || selectedSlotIndex >= INVENTORY_SIZE) return NULL;
 
     Player_Item* item = &inv->item[selectedSlotIndex];
-    if (item->Item_Index == 0 || item->quantity == 0) return NULL; // ºó Ä­
+    if (item->Item_Index == 0 || item->quantity == 0) return NULL; // ë¹ˆ ì¹¸
 
     return item;
 }
@@ -42,44 +44,44 @@ bool CanToolBreakBlock(const Item_Info* tool, int blockType)
     {
     case BLOCK_GRASS:
     case BLOCK_LEAF:
-        return true; //¸Ç¼Õ,¸ğµç µµ±¸
+        return true; //ë§¨ì†,ëª¨ë“  ë„êµ¬
 
     case BLOCK_DIRT:
-        return (toolKind == TOOL_KIND_NONE || toolKind == TOOL_KIND_SHOVEL || toolKind == TOOL_KIND_PICKAXE); //¸Ç¼Õ,»ğ,°î±ªÀÌ·Î¸¸ °¡´É
+        return (toolKind == TOOL_KIND_NONE || toolKind == TOOL_KIND_SHOVEL || toolKind == TOOL_KIND_PICKAXE); //ë§¨ì†,ì‚½,ê³¡ê´­ì´ë¡œë§Œ ê°€ëŠ¥
 
     case BLOCK_SNOW:
     case BLOCK_SAND:
-        return (toolKind == TOOL_KIND_SHOVEL || toolKind == TOOL_KIND_NONE); //¸Ç¼Õ,»ğÀ¸·Î¸¸ °¡´É
+        return (toolKind == TOOL_KIND_SHOVEL || toolKind == TOOL_KIND_NONE); //ë§¨ì†,ì‚½ìœ¼ë¡œë§Œ ê°€ëŠ¥
 
     case BLOCK_LOG:
-        return (toolKind == TOOL_KIND_AXE || toolKind == TOOL_KIND_NONE); //¸Ç¼Õ,µµ³¢·Î¸¸ °¡´É
+        return (toolKind == TOOL_KIND_AXE || toolKind == TOOL_KIND_NONE); //ë§¨ì†,ë„ë¼ë¡œë§Œ ê°€ëŠ¥
 
     case BLOCK_STONE:
-        return (toolKind == TOOL_KIND_PICKAXE && toolTier >= TIER_WOOD); //³ª¹«µî±ŞÀÌ»ó and °î±ªÀÌ·Î¸¸ °¡´É
+        return (toolKind == TOOL_KIND_PICKAXE && toolTier >= TIER_WOOD); //ë‚˜ë¬´ë“±ê¸‰ì´ìƒ and ê³¡ê´­ì´ë¡œë§Œ ê°€ëŠ¥
 
     case BLOCK_IRON_ORE:
-        return (toolKind == TOOL_KIND_PICKAXE && toolTier >= TIER_STONE); //µ¹µî±ŞÀÌ»ó and °î±ªÀÌ·Î¸¸ °¡´É
+        return (toolKind == TOOL_KIND_PICKAXE && toolTier >= TIER_STONE); //ëŒë“±ê¸‰ì´ìƒ and ê³¡ê´­ì´ë¡œë§Œ ê°€ëŠ¥
 
     case BLOCK_BEDROCK:
     case BLOCK_AIR:
     case BLOCK_WATER:
-        return false; //¾î¶² µµ±¸·Îµµ ÆÄ±«ºÒ°¡
+        return false; //ì–´ë–¤ ë„êµ¬ë¡œë„ íŒŒê´´ë¶ˆê°€
 
     default:
-        return false; //¾î¶² µµ±¸·Îµµ ÆÄ±«ºÒ°¡
+        return false; //ì–´ë–¤ ë„êµ¬ë¡œë„ íŒŒê´´ë¶ˆê°€
     }
 }
 
 
 
 
-// µµ±¸°¡ ÇØ´ç ºí·Ï¿¡ ÁÖ´Â µ¥¹ÌÁö¸¦ °è»êÇÏ´Â ÇÔ¼ö
+// ë„êµ¬ê°€ í•´ë‹¹ ë¸”ë¡ì— ì£¼ëŠ” ë°ë¯¸ì§€ë¥¼ ê³„ì‚°í•˜ëŠ” í•¨ìˆ˜
 int GetToolDamageToBlock(const Item_Info* tool, int blockType)
 {
-    const int baseDamage = 3;         // ¸Ç¼Õ ±âº» µ¥¹ÌÁö
-    const int bonusPerTier = 6;       // µµ±¸ Æ¼¾î 1´Ü°è´ç Ãß°¡ µ¥¹ÌÁö
+    const int baseDamage = 3;         // ë§¨ì† ê¸°ë³¸ ë°ë¯¸ì§€
+    const int bonusPerTier = 6;       // ë„êµ¬ í‹°ì–´ 1ë‹¨ê³„ë‹¹ ì¶”ê°€ ë°ë¯¸ì§€
 
-    // µµ±¸°¡ ¾ø°Å³ª ÇØ´ç ºí·ÏÀ» ºÎ¼ú ¼ö ¾øÀ¸¸é ¸Ç¼Õ µ¥¹ÌÁö
+    // ë„êµ¬ê°€ ì—†ê±°ë‚˜ í•´ë‹¹ ë¸”ë¡ì„ ë¶€ìˆ  ìˆ˜ ì—†ìœ¼ë©´ ë§¨ì† ë°ë¯¸ì§€
     if (tool == NULL || !CanToolBreakBlock(tool, blockType))
     {
         return baseDamage;
@@ -90,7 +92,7 @@ int GetToolDamageToBlock(const Item_Info* tool, int blockType)
     return baseDamage + (bonusPerTier * toolTier);
 }
 
-// ºí·ÏÆÄ±«½Ã ÀÎº¥Åä¸®¿¡ ¾Ë¸ÂÀº ¾ÆÀÌÅÛ È¹µæ 
+// ë¸”ë¡íŒŒê´´ì‹œ ì¸ë²¤í† ë¦¬ì— ì•Œë§ì€ ì•„ì´í…œ íšë“ 
 int GetDropItemFromBlockType(block_t blockType)
 {
     switch (blockType)
@@ -103,7 +105,7 @@ int GetDropItemFromBlockType(block_t blockType)
     case BLOCK_LEAF: return 504;
     case BLOCK_SNOW: return 505;
     case BLOCK_SAND: return 408;
-        // ¹°, º£µå¶ô, °ø±â µîÀº µå·Ó ¾øÀ½
+        // ë¬¼, ë² ë“œë½, ê³µê¸° ë“±ì€ ë“œë¡­ ì—†ìŒ
     default: return -1;
     }
 }
@@ -113,20 +115,20 @@ int GetDropItemFromBlockType(block_t blockType)
 
 bool CanPlaceBlock(int x, int y)
 {
-    // 1. ÇÃ·¹ÀÌ¾î À§Ä¡¿¡´Â ¼³Ä¡ ºÒ°¡
+    // 1. í”Œë ˆì´ì–´ ìœ„ì¹˜ì—ëŠ” ì„¤ì¹˜ ë¶ˆê°€
     if (x == player.x && y == player.y)
         return false;
 
-    // 2. ÇØ´ç À§Ä¡ÀÇ ºí·Ï Á¤º¸ °¡Á®¿À±â
+    // 2. í•´ë‹¹ ìœ„ì¹˜ì˜ ë¸”ë¡ ì •ë³´ ê°€ì ¸ì˜¤ê¸°
     block_info_t target = get_block_info_at(x, y);
 
-    // 3. ÀÌ¹Ì ºí·ÏÀÌ Á¸ÀçÇÏ¸é ¼³Ä¡ ºÒ°¡
+    // 3. ì´ë¯¸ ë¸”ë¡ì´ ì¡´ì¬í•˜ë©´ ì„¤ì¹˜ ë¶ˆê°€
     if (target.type != BLOCK_AIR)
         return false;
 
-    // 4. (¼±ÅÃ) ¼³Ä¡ ºÒ°¡ ºí·Ï À§¿¡´Â ¼³Ä¡ Á¦ÇÑ (¿¹: BEDROCK)
-    // ¼³Ä¡ÇÒ ºí·ÏÀÌ °ø±âÀÎ °Ç ÀÌ ÇÔ¼ö°¡ ÆÇ´ÜÇÏÁö ¾ÊÀ½
-    // ÇÊ¿ä ½Ã ÁÖº¯ ºí·Ï±îÁö °Ë»ç °¡´É
+    // 4. (ì„ íƒ) ì„¤ì¹˜ ë¶ˆê°€ ë¸”ë¡ ìœ„ì—ëŠ” ì„¤ì¹˜ ì œí•œ (ì˜ˆ: BEDROCK)
+    // ì„¤ì¹˜í•  ë¸”ë¡ì´ ê³µê¸°ì¸ ê±´ ì´ í•¨ìˆ˜ê°€ íŒë‹¨í•˜ì§€ ì•ŠìŒ
+    // í•„ìš” ì‹œ ì£¼ë³€ ë¸”ë¡ê¹Œì§€ ê²€ì‚¬ ê°€ëŠ¥
 
     return true;
 }
@@ -141,10 +143,10 @@ bool ConsumeEquippedBlockItem(Inventory* inv, const ItemDB* db)
     if (!info || !info->isplaceable)
         return false;
 
-    // ¼ö·® °¨¼Ò
+    // ìˆ˜ëŸ‰ ê°ì†Œ
     equipped->quantity--;
 
-    // 0°³ µÇ¸é Á¦°Å
+    // 0ê°œ ë˜ë©´ ì œê±°
     if (equipped->quantity == 0)
     {
         equipped->Item_Index = -1;
@@ -155,13 +157,13 @@ bool ConsumeEquippedBlockItem(Inventory* inv, const ItemDB* db)
     return true;
 }
 
-// item_index·ÎºÎÅÍ ´ëÀÀÇÏ´Â block_t ¹İÈ¯ (¾øÀ¸¸é BLOCK_AIR)
+// item_indexë¡œë¶€í„° ëŒ€ì‘í•˜ëŠ” block_t ë°˜í™˜ (ì—†ìœ¼ë©´ BLOCK_AIR)
 block_t GetBlockTypeFromItem(const ItemDB* db, int item_index)
 {
     const Item_Info* info = FindItemByIndex(db, item_index);
     if (!info || !info->isplaceable) return BLOCK_AIR;
 
-    // ¾ÆÀÌÅÛ ÀÎµ¦½º == ºí·Ï Å¸ÀÔÀÌ¶ó°í °¡Á¤ (¿¬µ¿ ¹æ½Ä¿¡ µû¶ó ¼öÁ¤ °¡´É)
+    // ì•„ì´í…œ ì¸ë±ìŠ¤ == ë¸”ë¡ íƒ€ì…ì´ë¼ê³  ê°€ì • (ì—°ë™ ë°©ì‹ì— ë”°ë¼ ìˆ˜ì • ê°€ëŠ¥)
     return (block_t)(info->blockID);
 }
 

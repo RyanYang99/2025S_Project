@@ -1,6 +1,6 @@
-#pragma once
+ï»¿#pragma once
 
-#define _CRT_SECURE_NO_WARNINGS
+//#define _CRT_SECURE_NO_WARNINGS
 
 #include "stdio.h"
 #include "stdlib.h"
@@ -11,34 +11,34 @@
 #include "stdbool.h"
 
 typedef enum ItemType {
-	ITEM_CONSUMABLE = 0, // 0: ¼Ò¸ğÇ°
-	ITEM_WEAPON,     // 1: ¹«±â
-	ITEM_TOOL,       // 2: µµ±¸
-	ITEM_ARMOR,      // 3: ¹æ¾î±¸
-	ITEM_MATERIAL,   // 4: Á¦ÀÛ Àç·á
-	ITEM_MISC        // 5: ¼Ò¸ğÇ°
+    ITEM_CONSUMABLE = 0, // 0: ì†Œëª¨í’ˆ
+    ITEM_WEAPON,     // 1: ë¬´ê¸°
+    ITEM_TOOL,       // 2: ë„êµ¬
+    ITEM_ARMOR,      // 3: ë°©ì–´êµ¬
+    ITEM_MATERIAL,   // 4: ì œì‘ ì¬ë£Œ
+    ITEM_MISC        // 5: ì†Œëª¨í’ˆ
 } ItemType;
 
 typedef struct Item_Info {
-	int index; //¾ÆÀÌÅÛ ÀÎµ¦½º
-	char name[32]; //¾ÆÀÌÅÛ ÀÌ¸§
-	int maxStack; //¾ÆÀÌÅÛ ÃÖ´ë°¹¼ö(Àåºñ´Â 1·Î °íÁ¤)
-	ItemType type; // ¾ÆÀÌÅÛ Á¾·ù
-	int BaseDurability; // ¾ÆÀÌÅÛ ³»±¸µµ
+    int index; //ì•„ì´í…œ ì¸ë±ìŠ¤
+    char name[32]; //ì•„ì´í…œ ì´ë¦„
+    int maxStack; //ì•„ì´í…œ ìµœëŒ€ê°¯ìˆ˜(ì¥ë¹„ëŠ” 1ë¡œ ê³ ì •)
+    ItemType type; // ì•„ì´í…œ ì¢…ë¥˜
+    int BaseDurability; // ì•„ì´í…œ ë‚´êµ¬ë„
 
-	int toolkind;
-	int materialTier;
-	int blockID;
-	bool isplaceable;
+    int toolkind;
+    int materialTier;
+    int blockID;
+    bool isplaceable;
 }Item_Info;
 
 typedef struct ItemDB {
-	Item_Info* item;
-	size_t count;
+    Item_Info* item;
+    size_t count;
 }ItemDB;
 
 void InitItemDB(ItemDB* db);
-int AddItemToDB(ItemDB* db, int index, const char* name, int maxStack, int type, int baseDurability);
+int AddItemToDB(ItemDB* db, int index, const char* name, int maxStack, int type, int baseDurability, int toolkind, int materialTier, int isplaceable, int blockID);
 void PrintItemDB(const ItemDB* db);
 void FreeItemDB(ItemDB* db);
 void SaveItemDBToCSV(const ItemDB* db, const char* filename);

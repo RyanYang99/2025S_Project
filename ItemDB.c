@@ -1,12 +1,13 @@
+ï»¿#include "leak.h"
 #include "ItemDB.h"
 
 Item_Info* FindItemByIndex(const ItemDB* db, int index) {
     for (size_t i = 0; i < db->count; ++i) {
         if (db->item[i].index == index) {
-            return &db->item[i]; // ¾ÆÀÌÅÛÀ» Ã£¾ÒÀ¸¹Ç·Î ÁÖ¼Ò¸¦ ¹İÈ¯
+            return &db->item[i]; // ì•„ì´í…œì„ ì°¾ì•˜ìœ¼ë¯€ë¡œ ì£¼ì†Œë¥¼ ë°˜í™˜
         }
     }
-    return NULL; // ³¡±îÁö Ã£¾Æµµ ¾øÀ¸¸é NULL ¹İÈ¯
+    return NULL; // ëê¹Œì§€ ì°¾ì•„ë„ ì—†ìœ¼ë©´ NULL ë°˜í™˜
 }
 
 void InitItemDB(ItemDB* db) {
@@ -15,19 +16,22 @@ void InitItemDB(ItemDB* db) {
 }
 
 int AddItemToDB(ItemDB* db, int index, const char* name, int maxStack, int type, int baseDurability, int toolkind, int materialTier, int isplaceable, int blockID) {
-    // Å©±â Áõ°¡¸¦ À§ÇÑ ÀçÇÒ´ç
+    // í¬ê¸° ì¦ê°€ë¥¼ ìœ„í•œ ì¬í• ë‹¹
     Item_Info* resized = realloc(db->item, sizeof(Item_Info) * (db->count + 1));
     if (resized == NULL) {
-        return -1; // ¸Ş¸ğ¸® ºÎÁ·
+        return -1; // ë©”ëª¨ë¦¬ ë¶€ì¡±
     }
 
     db->item = resized;
 
-    // ¾ÆÀÌÅÛ ¼³Á¤
+    // ì•„ì´í…œ ì„¤ì •
     Item_Info* item = &db->item[db->count];
     item->index = index;
-    strncpy(item->name, name, sizeof(item->name) - 1);
-    item->name[sizeof(item->name) - 1] = '\0'; // ³Î Á¾°á º¸Àå
+
+    const size_t name_length = sizeof(item->name) - 1;
+    strncpy_s(item->name, sizeof(char) * name_length, name, name_length);
+    item->name[name_length] = '\0'; // ë„ ì¢…ê²° ë³´ì¥
+
     item->maxStack = maxStack;
     item->type = type;
     item->BaseDurability = baseDurability;
@@ -44,50 +48,50 @@ void InputItemFromUser(ItemDB* db) {
     int index, maxStack, type, baseDurability, toolkind, materialTier, isplaceable, blockID;
     char name[32];
 
-    printf("»õ ¾ÆÀÌÅÛÀ» Ãß°¡ÇÕ´Ï´Ù.\n");
+    printf("ìƒˆ ì•„ì´í…œì„ ì¶”ê°€í•©ë‹ˆë‹¤.\n");
 
-    // ===== ÀÎµ¦½º ÀÔ·Â ¹× Áßº¹ °Ë»ç ·çÇÁ (¼öÁ¤µÈ ºÎºĞ) =====
+    // ===== ì¸ë±ìŠ¤ ì…ë ¥ ë° ì¤‘ë³µ ê²€ì‚¬ ë£¨í”„ (ìˆ˜ì •ëœ ë¶€ë¶„) =====
     while (1) {
-        printf("ÀÎµ¦½º : ");
+        printf("ì¸ë±ìŠ¤ : ");
 
-        // »ç¿ëÀÚ°¡ ¼ıÀÚ°¡ ¾Æ´Ñ °ªÀ» ÀÔ·ÂÇÏ´Â °æ¿ì¿¡ ´ëÇÑ ¹æ¾î ÄÚµå
-        if (scanf("%d", &index) != 1) {
-            printf("¿À·ù: À¯È¿ÇÑ ¼ıÀÚ¸¦ ÀÔ·ÂÇØÁÖ¼¼¿ä.\n");
-            // ÀÔ·Â ¹öÆÛ¸¦ ºñ¿ö ¹«ÇÑ ·çÇÁ ¹æÁö
+        // ì‚¬ìš©ìê°€ ìˆ«ìê°€ ì•„ë‹Œ ê°’ì„ ì…ë ¥í•˜ëŠ” ê²½ìš°ì— ëŒ€í•œ ë°©ì–´ ì½”ë“œ
+        if (scanf_s("%d", &index) != 1) {
+            printf("ì˜¤ë¥˜: ìœ íš¨í•œ ìˆ«ìë¥¼ ì…ë ¥í•´ì£¼ì„¸ìš”.\n");
+            // ì…ë ¥ ë²„í¼ë¥¼ ë¹„ì›Œ ë¬´í•œ ë£¨í”„ ë°©ì§€
             while (getchar() != '\n');
-            continue; // ·çÇÁÀÇ Ã³À½À¸·Î µ¹¾Æ°¨
+            continue; // ë£¨í”„ì˜ ì²˜ìŒìœ¼ë¡œ ëŒì•„ê°
         }
 
-        getchar(); // scanf°¡ ³²±ä °³Çà ¹®ÀÚ Á¦°Å
+        getchar(); // scanfê°€ ë‚¨ê¸´ ê°œí–‰ ë¬¸ì ì œê±°
 
-        // FindItemByIndex ÇÔ¼ö·Î Áßº¹ °Ë»ç
+        // FindItemByIndex í•¨ìˆ˜ë¡œ ì¤‘ë³µ ê²€ì‚¬
         if (FindItemByIndex(db, index) != NULL) {
-            printf("¿À·ù: ÀÌ¹Ì »ç¿ë ÁßÀÎ ÀÎµ¦½º(%d)ÀÔ´Ï´Ù. ´Ù¸¥ ÀÎµ¦½º¸¦ ÀÔ·ÂÇØÁÖ¼¼¿ä.\n\n", index);
+            printf("ì˜¤ë¥˜: ì´ë¯¸ ì‚¬ìš© ì¤‘ì¸ ì¸ë±ìŠ¤(%d)ì…ë‹ˆë‹¤. ë‹¤ë¥¸ ì¸ë±ìŠ¤ë¥¼ ì…ë ¥í•´ì£¼ì„¸ìš”.\n\n", index);
         }
         else {
-            // Áßº¹µÇÁö ¾ÊÀº À¯È¿ÇÑ ÀÎµ¦½ºÀÌ¹Ç·Î ·çÇÁ Å»Ãâ
+            // ì¤‘ë³µë˜ì§€ ì•Šì€ ìœ íš¨í•œ ì¸ë±ìŠ¤ì´ë¯€ë¡œ ë£¨í”„ íƒˆì¶œ
             break;
         }
     }
     // =======================================================
 
-    printf("ÀÌ¸§ : ");
+    printf("ì´ë¦„ : ");
     fgets(name, sizeof(name), stdin);
-    name[strcspn(name, "\n")] = '\0'; // °³Çà ¹®ÀÚ Á¦°Å
+    name[strcspn(name, "\n")] = '\0'; // ê°œí–‰ ë¬¸ì ì œê±°
 
-    printf("ÃÖ´ë °¹¼ö : ");
-    scanf("%d", &maxStack);
+    printf("ìµœëŒ€ ê°¯ìˆ˜ : ");
+    scanf_s("%d", &maxStack);
 
-    printf("Å¸ÀÔ (0:¼Ò¸ğÇ°, 1:¹«±â, 2:µµ±¸, 3:¹æ¾î±¸, 4:Àç·á, 5:±âÅ¸) : ");
-    scanf("%d", &type);
+    printf("íƒ€ì… (0:ì†Œëª¨í’ˆ, 1:ë¬´ê¸°, 2:ë„êµ¬, 3:ë°©ì–´êµ¬, 4:ì¬ë£Œ, 5:ê¸°íƒ€) : ");
+    scanf_s("%d", &type);
 
-    printf("±âº» ³»±¸µµ : ");
-    scanf("%d", &baseDurability);
+    printf("ê¸°ë³¸ ë‚´êµ¬ë„ : ");
+    scanf_s("%d", &baseDurability);
 
     if (type == 2)
     {
-        printf("µµ±¸ Á¾·ù (0:°î±ªÀÌ, 1:µµ³¢, 2:»ğ): ");
-        scanf("%d", &toolkind);
+        printf("ë„êµ¬ ì¢…ë¥˜ (0:ê³¡ê´­ì´, 1:ë„ë¼, 2:ì‚½): ");
+        scanf_s("%d", &toolkind);
 
     }
     else
@@ -95,35 +99,35 @@ void InputItemFromUser(ItemDB* db) {
 
     if (toolkind != -1)
     {
-        printf("Àç·á Æ¼¾î (1:³ª¹«, 2:µ¹, 3:Ã¶): ");
-        scanf("%d", &materialTier);
+        printf("ì¬ë£Œ í‹°ì–´ (1:ë‚˜ë¬´, 2:ëŒ, 3:ì² ): ");
+        scanf_s("%d", &materialTier);
     }
     else
         materialTier = -1;
 
-    printf("¼³Ä¡ °¡´É ¿©ºÎ (1:¼³Ä¡ °¡´É, 0:¼³Ä¡ ºÒ°¡): ");
-    scanf("%d", &isplaceable);
+    printf("ì„¤ì¹˜ ê°€ëŠ¥ ì—¬ë¶€ (1:ì„¤ì¹˜ ê°€ëŠ¥, 0:ì„¤ì¹˜ ë¶ˆê°€): ");
+    scanf_s("%d", &isplaceable);
 
     if (isplaceable)
     {
-        printf("¼³Ä¡ÇÒ ºí·Ï ID (block_t enum¹øÈ£): ");
-        scanf("%d", &blockID);
+        printf("ì„¤ì¹˜í•  ë¸”ë¡ ID (block_t enumë²ˆí˜¸): ");
+        scanf_s("%d", &blockID);
     }
     else
         blockID = -1;
 
     if (AddItemToDB(db, index, name, maxStack, type, baseDurability, toolkind, materialTier, isplaceable, blockID) == 0) {
-        printf("Ãß°¡ ¿Ï·á!\n\n");
+        printf("ì¶”ê°€ ì™„ë£Œ!\n\n");
     }
     else {
-        printf("¾ÆÀÌÅÛ Ãß°¡ ½ÇÆĞ (¸Ş¸ğ¸® ºÎÁ·)\n");
+        printf("ì•„ì´í…œ ì¶”ê°€ ì‹¤íŒ¨ (ë©”ëª¨ë¦¬ ë¶€ì¡±)\n");
     }
 }
 
 void PrintItemDB(const ItemDB* db) {
     printf("=== Item Database (%zu items) ===\n", db->count);
     for (size_t i = 0; i < db->count; ++i) {
-        printf("[%d] ÀÌ¸§ : %s | ÃÖ´ë °¹¼ö: %d | ¾ÆÀÌÅÛ Á¾·ù : %d | ³»±¸µµ: %d\n",
+        printf("[%d] ì´ë¦„ : %s | ìµœëŒ€ ê°¯ìˆ˜: %d | ì•„ì´í…œ ì¢…ë¥˜ : %d | ë‚´êµ¬ë„: %d | ì¢…ë¥˜: %d | í‹°ì–´: %d | ì„¤ì¹˜ ê°€ëŠ¥: %d | ID: %d\n",
             db->item[i].index,
             db->item[i].name,
             db->item[i].maxStack,
@@ -146,18 +150,18 @@ void FreeItemDB(ItemDB* db) {
 void SaveItemDBToCSV(const ItemDB* db, const char* filename) {
     FILE* fp = fopen(filename, "w");
     if (!fp) {
-        perror("ÆÄÀÏ ÀúÀå ½ÇÆĞ");
+        perror("íŒŒì¼ ì €ì¥ ì‹¤íŒ¨");
         return;
     }
 
-    // UTF-8 BOM Ãß°¡ (¿¢¼¿ÀÌ ÀÌ°É ºÁ¾ß ÇÑ±Û ÀÎ½Ä °¡´É)
+    // UTF-8 BOM ì¶”ê°€ (ì—‘ì…€ì´ ì´ê±¸ ë´ì•¼ í•œê¸€ ì¸ì‹ ê°€ëŠ¥)
     unsigned char bom[] = { 0xEF, 0xBB, 0xBF };
     fwrite(bom, sizeof(bom), 1, fp);
 
-    // Çì´õ
+    // í—¤ë”
     fprintf(fp, "index,name,maxStack,type,baseDurability,toolkind,materialTier,isplaceable,blockID\n");
 
-    // ³»¿ë
+    // ë‚´ìš©
     for (size_t i = 0; i < db->count; ++i) {
         const Item_Info* item = &db->item[i];
         fprintf(fp, "%d,%s,%d,%d,%d,%d,%d,%d,%d\n",
@@ -178,20 +182,20 @@ void SaveItemDBToCSV(const ItemDB* db, const char* filename) {
 void LoadItemDBFromCSV(ItemDB* db, const char* filename) {
     FILE* fp = fopen(filename, "r");
     if (!fp) {
-        perror("ÆÄÀÏ ºÒ·¯¿À±â ½ÇÆĞ");
+        perror("íŒŒì¼ ë¶ˆëŸ¬ì˜¤ê¸° ì‹¤íŒ¨");
         return;
     }
 
     char line[128];
-    fgets(line, sizeof(line), fp); // Çì´õ ½ºÅµ
+    fgets(line, sizeof(line), fp); // í—¤ë” ìŠ¤í‚µ
 
     while (fgets(line, sizeof(line), fp)) {
         int index, maxStack, type, baseDurability, toolkind, materialTier, isplaceable, blockID;
         char name[32];
 
-        // ¹®ÀÚ¿­ ÆÄ½Ì (CSV Çü½Ä: Á¤¼ö,¹®ÀÚ¿­,Á¤¼ö,Á¤¼ö,Á¤¼ö)
-        if (sscanf(line, "%d,%31[^,],%d,%d,%d,%d,%d,%d,%d",
-            &index, name, &maxStack, &type, &baseDurability, &toolkind, &materialTier, &isplaceable, &blockID) == 9) {
+        // ë¬¸ìì—´ íŒŒì‹± (CSV í˜•ì‹: ì •ìˆ˜,ë¬¸ìì—´,ì •ìˆ˜,ì •ìˆ˜,ì •ìˆ˜)
+        if (sscanf_s(line, "%d,%31[^,],%d,%d,%d,%d,%d,%d,%d",
+            &index, name, (unsigned int)sizeof(name), &maxStack, &type, &baseDurability, &toolkind, &materialTier, &isplaceable, &blockID) == 9) {
             AddItemToDB(db, index, name, maxStack, type, baseDurability, toolkind, materialTier, isplaceable, blockID);
             printf("\n");
         }
@@ -200,19 +204,19 @@ void LoadItemDBFromCSV(ItemDB* db, const char* filename) {
     fclose(fp);
 }
 
-void SelectMode(ItemDB* db) // mainÀ¸·ÎºÎÅÍ ¹ŞÀº ÁÖ¼Ò(Æ÷ÀÎÅÍ) db
+void SelectMode(ItemDB* db) // mainìœ¼ë¡œë¶€í„° ë°›ì€ ì£¼ì†Œ(í¬ì¸í„°) db
 {
     int mode = -1;
 
-    // ¹«ÇÑ ·çÇÁ. case 0ÀÇ 'return'À¸·Î Å»Ãâ.
+    // ë¬´í•œ ë£¨í”„. case 0ì˜ 'return'ìœ¼ë¡œ íƒˆì¶œ.
     while (1)
     {
         printf("===========================================\n");
-        printf("¸ğµå¸¦ ¼±ÅÃÇÏ¼¼¿ä (1: ¾ÆÀÌÅÛ Ãß°¡, 2: DB ¸ñ·Ï ¿­¶÷, 0: Á¾·á ¹× ÀúÀå)\n");
-        printf("ÀÔ·Â: ");
+        printf("ëª¨ë“œë¥¼ ì„ íƒí•˜ì„¸ìš” (1: ì•„ì´í…œ ì¶”ê°€, 2: DB ëª©ë¡ ì—´ëŒ, 0: ì¢…ë£Œ ë° ì €ì¥)\n");
+        printf("ì…ë ¥: ");
 
-        if (scanf("%d", &mode) != 1) {
-            printf("¿À·ù: À¯È¿ÇÑ ¼ıÀÚ¸¦ ÀÔ·ÂÇØÁÖ¼¼¿ä.\n");
+        if (scanf_s("%d", &mode) != 1) {
+            printf("ì˜¤ë¥˜: ìœ íš¨í•œ ìˆ«ìë¥¼ ì…ë ¥í•´ì£¼ì„¸ìš”.\n");
             while (getchar() != '\n');
             continue;
         }
@@ -222,19 +226,19 @@ void SelectMode(ItemDB* db) // mainÀ¸·ÎºÎÅÍ ¹ŞÀº ÁÖ¼Ò(Æ÷ÀÎÅÍ) db
         switch (mode)
         {
         case 1:
-            // Æ÷ÀÎÅÍ º¯¼ö db¸¦ ±×´ë·Î Àü´Ş
+            // í¬ì¸í„° ë³€ìˆ˜ dbë¥¼ ê·¸ëŒ€ë¡œ ì „ë‹¬
             InputItemFromUser(db);
             break;
         case 2:
-            // Æ÷ÀÎÅÍ º¯¼ö db¸¦ ±×´ë·Î Àü´Ş
+            // í¬ì¸í„° ë³€ìˆ˜ dbë¥¼ ê·¸ëŒ€ë¡œ ì „ë‹¬
             PrintItemDB(db);
             break;
         case 0:
-            printf("¸ğµå ¼±ÅÃÀ» Á¾·áÇÕ´Ï´Ù.\n");
-            // void ÇÔ¼öÀÌ¹Ç·Î °ª ¾øÀÌ return;
+            printf("ëª¨ë“œ ì„ íƒì„ ì¢…ë£Œí•©ë‹ˆë‹¤.\n");
+            // void í•¨ìˆ˜ì´ë¯€ë¡œ ê°’ ì—†ì´ return;
             return;
         default:
-            printf("¿À·ù: 0, 1, 2 Áß¿¡¼­ ¼±ÅÃÇØÁÖ¼¼¿ä.\n");
+            printf("ì˜¤ë¥˜: 0, 1, 2 ì¤‘ì—ì„œ ì„ íƒí•´ì£¼ì„¸ìš”.\n");
             break;
         }
     }
@@ -242,26 +246,26 @@ void SelectMode(ItemDB* db) // mainÀ¸·ÎºÎÅÍ ¹ŞÀº ÁÖ¼Ò(Æ÷ÀÎÅÍ) db
 
 void CallItemDB(ItemDB* db)
 {
-    // UTF-8 È¯°æ ¼³Á¤
+    // UTF-8 í™˜ê²½ ì„¤ì •
     //setlocale(LC_ALL, ".UTF8");
     //SetConsoleOutputCP(CP_UTF8);
     //SetConsoleCP(CP_UTF8);
 
-    // 1. ÇÁ·Î±×·¥ ½ÃÀÛ ½Ã DB ÃÊ±âÈ­ ¹× µ¥ÀÌÅÍ ·Îµå (µü ÇÑ ¹ø!)
-    InitItemDB(db); // mainÀÇ db º¯¼ö ÁÖ¼Ò¸¦ ³Ñ±è
-    printf("±âÁ¸ ¾ÆÀÌÅÛ Á¤º¸¸¦ 'items.csv'¿¡¼­ ºÒ·¯¿É´Ï´Ù...\n");
+    // 1. í”„ë¡œê·¸ë¨ ì‹œì‘ ì‹œ DB ì´ˆê¸°í™” ë° ë°ì´í„° ë¡œë“œ (ë”± í•œ ë²ˆ!)
+    InitItemDB(db); // mainì˜ db ë³€ìˆ˜ ì£¼ì†Œë¥¼ ë„˜ê¹€
+    printf("ê¸°ì¡´ ì•„ì´í…œ ì •ë³´ë¥¼ 'items.csv'ì—ì„œ ë¶ˆëŸ¬ì˜µë‹ˆë‹¤...\n");
     LoadItemDBFromCSV(db, "items.csv");
-    printf("·Îµå ¿Ï·á! ÇöÀç ¾ÆÀÌÅÛ ¼ö: %zu\n\n", db->count);
+    printf("ë¡œë“œ ì™„ë£Œ! í˜„ì¬ ì•„ì´í…œ ìˆ˜: %zu\n\n", db->count);
 
-    // 2. »ç¿ëÀÚ ¿äÃ» Ã³¸® ·çÇÁ ½ÇÇà
+    // 2. ì‚¬ìš©ì ìš”ì²­ ì²˜ë¦¬ ë£¨í”„ ì‹¤í–‰
     SelectMode(db);
 
-    // 3. ·çÇÁ°¡ ³¡³ª°í ÇÁ·Î±×·¥ÀÌ Á¾·áµÇ±â Á÷Àü, ÃÖÁ¾ µ¥ÀÌÅÍ¸¦ ÀúÀå (µü ÇÑ ¹ø!)
-    printf("\nº¯°æµÈ ¾ÆÀÌÅÛ Á¤º¸¸¦ 'items.csv'¿¡ ÀúÀåÇÕ´Ï´Ù.\n");
+    // 3. ë£¨í”„ê°€ ëë‚˜ê³  í”„ë¡œê·¸ë¨ì´ ì¢…ë£Œë˜ê¸° ì§ì „, ìµœì¢… ë°ì´í„°ë¥¼ ì €ì¥ (ë”± í•œ ë²ˆ!)
+    printf("\në³€ê²½ëœ ì•„ì´í…œ ì •ë³´ë¥¼ 'items.csv'ì— ì €ì¥í•©ë‹ˆë‹¤.\n");
     SaveItemDBToCSV(db, "items.csv");
 
-    // 4. ¸Ş¸ğ¸® ÇØÁ¦
+    // 4. ë©”ëª¨ë¦¬ í•´ì œ
     FreeItemDB(db);
 
-    printf("ÇÁ·Î±×·¥À» Á¾·áÇÕ´Ï´Ù.\n");
+    printf("í”„ë¡œê·¸ë¨ì„ ì¢…ë£Œí•©ë‹ˆë‹¤.\n");
 }

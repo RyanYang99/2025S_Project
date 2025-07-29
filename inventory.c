@@ -1,4 +1,7 @@
+ï»¿#include "leak.h"
 #include "Inventory.h"
+
+#include <conio.h>
 
 Inventory* g_inv;
 ItemDB* g_db;
@@ -11,18 +14,18 @@ void gotoxy(int x, int y) {
 
 void InitInventory(Inventory* inv) {
     for (int i = 0; i < INVENTORY_SIZE; ++i) {
-        inv->item[i].Item_Index = 0; // 0Àº ºó Ä­À» ÀÇ¹Ì
+        inv->item[i].Item_Index = 0; // 0ì€ ë¹ˆ ì¹¸ì„ ì˜ë¯¸
         inv->item[i].quantity = 0;
         inv->item[i].durability = 0;
         inv->item[i].isEquipped = false;
     }
 }
 
-// ÀÎº¥Åä¸®¿¡ ¾ÆÀÌÅÛÀ» Ãß°¡ÇÏ´Â ÇÔ¼ö
-// (ÀÌ¹Ì ÀÖ´Â ¾ÆÀÌÅÛÀÌ¸é °³¼ö Ãß°¡, ¾øÀ¸¸é ºó Ä­¿¡ Ãß°¡)
+// ì¸ë²¤í† ë¦¬ì— ì•„ì´í…œì„ ì¶”ê°€í•˜ëŠ” í•¨ìˆ˜
+// (ì´ë¯¸ ìˆëŠ” ì•„ì´í…œì´ë©´ ê°œìˆ˜ ì¶”ê°€, ì—†ìœ¼ë©´ ë¹ˆ ì¹¸ì— ì¶”ê°€)
 bool AddItemToInventory(Inventory* inv, ItemDB* db, int itemIndex, int quantityToAdd) {
     Item_Info* itemInfo = FindItemByIndex(db, itemIndex);
-    assert(itemInfo != NULL && "DB¿¡ Á¸ÀçÇÏÁö ¾Ê´Â ¾ÆÀÌÅÛÀ» Ãß°¡ÇÏ·Á°í ½ÃµµÇß½À´Ï´Ù!");
+    assert(itemInfo != NULL && "DBì— ì¡´ì¬í•˜ì§€ ì•ŠëŠ” ì•„ì´í…œì„ ì¶”ê°€í•˜ë ¤ê³  ì‹œë„í–ˆìŠµë‹ˆë‹¤!");
 
     while (quantityToAdd > 0) {
         bool stacked = false;
@@ -56,7 +59,7 @@ bool AddItemToInventory(Inventory* inv, ItemDB* db, int itemIndex, int quantityT
         }
 
         if (emptySlot == -1) {
-            printf("ÀÎº¥Åä¸®°¡ °¡µæ Â÷¼­ ¾ÆÀÌÅÛ [%s] %d°³¸¦ ´õ´Â ¾òÀ» ¼ö ¾ø½À´Ï´Ù.\n", itemInfo->name, quantityToAdd);
+            printf("ì¸ë²¤í† ë¦¬ê°€ ê°€ë“ ì°¨ì„œ ì•„ì´í…œ [%s] %dê°œë¥¼ ë”ëŠ” ì–»ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.\n", itemInfo->name, quantityToAdd);
             return false;
         }
 
@@ -79,44 +82,44 @@ bool AddItemToInventory(Inventory* inv, ItemDB* db, int itemIndex, int quantityT
 void PrintItemDetails(const Player_Item* pItem, const ItemDB* db) {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
-    //ÀÌÀü¿¡ ÀÖ´ø ±Û Á¦°Å ¹Ø °ø¹éÀ¸·Î µ¤¾î¾º¿ì±â
+    //ì´ì „ì— ìˆë˜ ê¸€ ì œê±° ë°‘ ê³µë°±ìœ¼ë¡œ ë®ì–´ì”Œìš°ê¸°
     printf("                                                                                \r");
 
     if (pItem->Item_Index == 0) {
-        // ºó Ä­ÀÏ °æ¿ì ¾Æ¹«°Íµµ Ãâ·ÂÇÏÁö ¾Ê°í ÇÔ¼ö Á¾·á
+        // ë¹ˆ ì¹¸ì¼ ê²½ìš° ì•„ë¬´ê²ƒë„ ì¶œë ¥í•˜ì§€ ì•Šê³  í•¨ìˆ˜ ì¢…ë£Œ
         return;
     }
 
     Item_Info* itemInfo = FindItemByIndex(db, pItem->Item_Index);
     if (!itemInfo) return;
 
-    // ÀÌÁ¦ »õ·Î¿î ³»¿ëÀ» Ãâ·ÂÇÕ´Ï´Ù.
+    // ì´ì œ ìƒˆë¡œìš´ ë‚´ìš©ì„ ì¶œë ¥í•©ë‹ˆë‹¤.
     printf("  > ");
     SetConsoleTextAttribute(hConsole, COLOR_INFO);
     printf("%s", itemInfo->name);
     if (pItem->isEquipped) {
         SetConsoleTextAttribute(hConsole, COLOR_EQUIPPED);
-        printf(" (ÀåÂøÁß)");
+        printf(" (ì¥ì°©ì¤‘)");
     }
     SetConsoleTextAttribute(hConsole, COLOR_INFO);
     printf(": ");
     switch (itemInfo->type) {
-    case ITEM_CONSUMABLE: printf("»ç¿ë ½Ã È¿°ú°¡ ¹ßµ¿µË´Ï´Ù."); break;
+    case ITEM_CONSUMABLE: printf("ì‚¬ìš© ì‹œ íš¨ê³¼ê°€ ë°œë™ë©ë‹ˆë‹¤."); break;
     case ITEM_WEAPON: case ITEM_TOOL: case ITEM_ARMOR:
-        printf("³»±¸µµ: %d/%d", pItem->durability, itemInfo->BaseDurability); break;
-    case ITEM_MATERIAL: printf("Á¦ÀÛ¿¡ »ç¿ëµÇ´Â Àç·áÀÔ´Ï´Ù."); break;
-    case ITEM_MISC: printf("Æ¯º°ÇÑ ¿ëµµ°¡ ÀÖ´Â ±âÅ¸ ¾ÆÀÌÅÛÀÔ´Ï´Ù."); break;
+        printf("ë‚´êµ¬ë„: %d/%d", pItem->durability, itemInfo->BaseDurability); break;
+    case ITEM_MATERIAL: printf("ì œì‘ì— ì‚¬ìš©ë˜ëŠ” ì¬ë£Œì…ë‹ˆë‹¤."); break;
+    case ITEM_MISC: printf("íŠ¹ë³„í•œ ìš©ë„ê°€ ìˆëŠ” ê¸°íƒ€ ì•„ì´í…œì…ë‹ˆë‹¤."); break;
     }
     SetConsoleTextAttribute(hConsole, COLOR_DEFAULT);
 }
 
 void RedrawLine(const Inventory* inv, const ItemDB* db, int y, int slotIndex, bool isSelected, bool isBlinkOn) {
-    gotoxy(0, y); // ÇØ´ç ÁÙÀÇ ½ÃÀÛÀ¸·Î Ä¿¼­ ÀÌµ¿
+    gotoxy(0, y); // í•´ë‹¹ ì¤„ì˜ ì‹œì‘ìœ¼ë¡œ ì»¤ì„œ ì´ë™
 
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     const Player_Item* pItem = &inv->item[slotIndex];
 
-    // ¼±ÅÃ ¿©ºÎ¿¡ µû¸¥ »ö»ó ¹× Ä¿¼­ ¸¶Ä¿(>) ¼³Á¤
+    // ì„ íƒ ì—¬ë¶€ì— ë”°ë¥¸ ìƒ‰ìƒ ë° ì»¤ì„œ ë§ˆì»¤(>) ì„¤ì •
     if (isSelected) {
         SetConsoleTextAttribute(hConsole, isBlinkOn ? COLOR_SELECT_BRIGHT : COLOR_SELECT_DARK);
         printf(" > ");
@@ -126,10 +129,10 @@ void RedrawLine(const Inventory* inv, const ItemDB* db, int y, int slotIndex, bo
         printf("   ");
     }
 
-    // ¾ÆÀÌÅÛ Á¤º¸ Ãâ·Â
+    // ì•„ì´í…œ ì •ë³´ ì¶œë ¥
     if (pItem->Item_Index != 0) {
         Item_Info* itemInfo = FindItemByIndex(db, pItem->Item_Index);
-        if (!itemInfo) return; // DB¿¡ ¾øÀ¸¸é ±×³É ³Ñ¾î°¨
+        if (!itemInfo) return; // DBì— ì—†ìœ¼ë©´ ê·¸ëƒ¥ ë„˜ì–´ê°
 
         printf("[%s]", itemInfo->name);
         if (itemInfo->maxStack > 1) printf(" (x%d)", pItem->quantity);
@@ -139,10 +142,10 @@ void RedrawLine(const Inventory* inv, const ItemDB* db, int y, int slotIndex, bo
         }
     }
     else {
-        printf("[ ºñ¾îÀÖÀ½ ]");
+        printf("[ ë¹„ì–´ìˆìŒ ]");
     }
 
-    // ÀÌÀü¿¡ ÀÖ´ø ±ÛÀÚ Âî²¨±â¸¦ Áö¿ì±â À§ÇØ ÁÙ ³¡±îÁö °ø¹éÀ¸·Î µ¤¾î¾¸
+    // ì´ì „ì— ìˆë˜ ê¸€ì ì°Œêº¼ê¸°ë¥¼ ì§€ìš°ê¸° ìœ„í•´ ì¤„ ëê¹Œì§€ ê³µë°±ìœ¼ë¡œ ë®ì–´ì”€
     printf("                                        ");
     SetConsoleTextAttribute(hConsole, COLOR_DEFAULT);
 }
@@ -150,23 +153,23 @@ void RedrawLine(const Inventory* inv, const ItemDB* db, int y, int slotIndex, bo
 
 void DrawInventory(const Inventory* inv, const ItemDB* db, int currentPage, int totalPages) {
 
-    // Çì´õ ¹× ÆäÀÌÁö Á¤º¸ Ãâ·Â
+    // í—¤ë” ë° í˜ì´ì§€ ì •ë³´ ì¶œë ¥
     gotoxy(0, 0);
-    printf("================= ÀÎº¥Åä¸® (%d/%d ÆäÀÌÁö) =================\n", currentPage + 1, totalPages);
+    printf("================= ì¸ë²¤í† ë¦¬ (%d/%d í˜ì´ì§€) =================\n", currentPage + 1, totalPages);
 
-    // ¾ÆÀÌÅÛ ¸ñ·Ï ÀüÃ¼ ±×¸®±â
+    // ì•„ì´í…œ ëª©ë¡ ì „ì²´ ê·¸ë¦¬ê¸°
     int start_index_inv = currentPage * ITEMS_PER_PAGE;
     for (int i = 0; i < ITEMS_PER_PAGE; ++i) {
-        int y = 1 + i; // Çì´õ°¡ 1ÁÙ ÀÖÀ¸¹Ç·Î yÁÂÇ¥´Â 1ºÎÅÍ ½ÃÀÛ
+        int y = 1 + i; // í—¤ë”ê°€ 1ì¤„ ìˆìœ¼ë¯€ë¡œ yì¢Œí‘œëŠ” 1ë¶€í„° ì‹œì‘
         int slotIndex = start_index_inv + i;
-        // ¼±ÅÃµÇÁö ¾ÊÀº »óÅÂ(isSelected=false)·Î ¸ğµç ÁÙÀ» ±×¸²
+        // ì„ íƒë˜ì§€ ì•Šì€ ìƒíƒœ(isSelected=false)ë¡œ ëª¨ë“  ì¤„ì„ ê·¸ë¦¼
         RedrawLine(inv, db, y, slotIndex, false, false);
     }
 
-    // ÇÏ´Ü ¸Ş´º Ãâ·Â
-    gotoxy(0, 1 + ITEMS_PER_PAGE + 2); // ¸ñ·Ï ¾Æ·¡¿¡ ±×¸®±â
+    // í•˜ë‹¨ ë©”ë‰´ ì¶œë ¥
+    gotoxy(0, 1 + ITEMS_PER_PAGE + 2); // ëª©ë¡ ì•„ë˜ì— ê·¸ë¦¬ê¸°
     printf("\n=========================================================\n");
-    printf("  (W/S: ÀÌµ¿, A/D: ÆäÀÌÁö, E: »ç¿ë/ÀåÂø, I/ESC: ´İ±â)\n");
+    printf("  (W/S: ì´ë™, A/D: í˜ì´ì§€, E: ì‚¬ìš©/ì¥ì°©, I/ESC: ë‹«ê¸°)\n");
 }
 
 void ShowInventory(Inventory* playerInventory, ItemDB* db) {
@@ -176,40 +179,40 @@ void ShowInventory(Inventory* playerInventory, ItemDB* db) {
 
     clock_t last_time = clock();
     bool isBlinkOn = true;
-    int oldSelectionOnPage = -1; // ÀÌÀü ¼±ÅÃ À§Ä¡¸¦ ÃßÀûÇÏ±â À§ÇÑ º¯¼ö
+    int oldSelectionOnPage = -1; // ì´ì „ ì„ íƒ ìœ„ì¹˜ë¥¼ ì¶”ì í•˜ê¸° ìœ„í•œ ë³€ìˆ˜
 
-    // 1. ÀÎº¥Åä¸® ÁøÀÔ ½Ã È­¸éÀ» µü ÇÑ ¹ø¸¸ Áö¿ì°í ÀüÃ¼¸¦ ±×¸²
+    // 1. ì¸ë²¤í† ë¦¬ ì§„ì… ì‹œ í™”ë©´ì„ ë”± í•œ ë²ˆë§Œ ì§€ìš°ê³  ì „ì²´ë¥¼ ê·¸ë¦¼
     system("cls");
     DrawInventory(playerInventory, db, currentPage, totalPages);
 
     while (1) {
-        // --- Á¡¸ê È¿°ú ¶Ç´Â Å° ÀÔ·Â¿¡ µû¸¥ ¾÷µ¥ÀÌÆ® ---
-        // ÀÌÀü ¼±ÅÃ À§Ä¡¿Í ÇöÀç ¼±ÅÃ À§Ä¡°¡ ´Ù¸£°Å³ª, Á¡¸ê »óÅÂ°¡ ¹Ù²î¾úÀ» ¶§¸¸ ±×¸²
+        // --- ì ë©¸ íš¨ê³¼ ë˜ëŠ” í‚¤ ì…ë ¥ì— ë”°ë¥¸ ì—…ë°ì´íŠ¸ ---
+        // ì´ì „ ì„ íƒ ìœ„ì¹˜ì™€ í˜„ì¬ ì„ íƒ ìœ„ì¹˜ê°€ ë‹¤ë¥´ê±°ë‚˜, ì ë©¸ ìƒíƒœê°€ ë°”ë€Œì—ˆì„ ë•Œë§Œ ê·¸ë¦¼
         if (oldSelectionOnPage != selectedIndexOnPage || (double)(clock() - last_time) / CLOCKS_PER_SEC > 0.4) {
             if ((double)(clock() - last_time) / CLOCKS_PER_SEC > 0.4) {
                 isBlinkOn = !isBlinkOn;
                 last_time = clock();
             }
 
-            // 2. ÀÌÀü¿¡ ¼±ÅÃµÆ´ø ÁÙÀ» ÀÏ¹İ »óÅÂ·Î µÇµ¹¸²
+            // 2. ì´ì „ì— ì„ íƒëë˜ ì¤„ì„ ì¼ë°˜ ìƒíƒœë¡œ ë˜ëŒë¦¼
             if (oldSelectionOnPage != -1) {
                 int oldSlotIndex = currentPage * ITEMS_PER_PAGE + oldSelectionOnPage;
                 RedrawLine(playerInventory, db, 1 + oldSelectionOnPage, oldSlotIndex, false, false);
             }
 
-            // 3. »õ·Î ¼±ÅÃµÈ ÁÙÀ» °­Á¶ÇØ¼­ ±×¸²
+            // 3. ìƒˆë¡œ ì„ íƒëœ ì¤„ì„ ê°•ì¡°í•´ì„œ ê·¸ë¦¼
             int currentSlotIndex = currentPage * ITEMS_PER_PAGE + selectedIndexOnPage;
             RedrawLine(playerInventory, db, 1 + selectedIndexOnPage, currentSlotIndex, true, isBlinkOn);
 
-            // 4. ¾ÆÀÌÅÛ »ó¼¼ Á¤º¸ Ã¢ ¾÷µ¥ÀÌÆ®
-            gotoxy(0, 1 + ITEMS_PER_PAGE); // ¸ñ·Ï ¹Ù·Î ¾Æ·¡·Î Ä¿¼­ ÀÌµ¿
+            // 4. ì•„ì´í…œ ìƒì„¸ ì •ë³´ ì°½ ì—…ë°ì´íŠ¸
+            gotoxy(0, 1 + ITEMS_PER_PAGE); // ëª©ë¡ ë°”ë¡œ ì•„ë˜ë¡œ ì»¤ì„œ ì´ë™
             PrintItemDetails(&playerInventory->item[currentSlotIndex], db);
-            oldSelectionOnPage = selectedIndexOnPage; // ÇöÀç ¼±ÅÃ À§Ä¡¸¦ 'ÀÌÀü À§Ä¡'·Î ±â·Ï
+            oldSelectionOnPage = selectedIndexOnPage; // í˜„ì¬ ì„ íƒ ìœ„ì¹˜ë¥¼ 'ì´ì „ ìœ„ì¹˜'ë¡œ ê¸°ë¡
         }
 
-        // --- »ç¿ëÀÚ Å° ÀÔ·Â Ã³¸® ---
+        // --- ì‚¬ìš©ì í‚¤ ì…ë ¥ ì²˜ë¦¬ ---
         if (_kbhit()) {
-            char input = _getch();
+            char input = (char)_getch();
             switch (input) {
             case 'w': case 'W': if (selectedIndexOnPage > 0) selectedIndexOnPage--; break;
             case 's': case 'S': if (selectedIndexOnPage < ITEMS_PER_PAGE - 1) selectedIndexOnPage++; break;
@@ -223,11 +226,11 @@ void ShowInventory(Inventory* playerInventory, ItemDB* db) {
                 }
                 selectedIndexOnPage = 0;
                 oldSelectionOnPage = -1;
-                DrawInventory(playerInventory, db, currentPage, totalPages); // ÆäÀÌÁö°¡ ¹Ù²î¸é ÀüÃ¼¸¦ ´Ù½Ã ±×¸²
+                DrawInventory(playerInventory, db, currentPage, totalPages); // í˜ì´ì§€ê°€ ë°”ë€Œë©´ ì „ì²´ë¥¼ ë‹¤ì‹œ ê·¸ë¦¼
                 break;
 
             case 'e': case 'E':
-                oldSelectionOnPage = -1; // »óÈ£ÀÛ¿ë ÈÄ »óÅÂ°¡ ¹Ù²î¾úÀ» ¼ö ÀÖÀ¸¹Ç·Î °­Á¦ ¾÷µ¥ÀÌÆ®
+                oldSelectionOnPage = -1; // ìƒí˜¸ì‘ìš© í›„ ìƒíƒœê°€ ë°”ë€Œì—ˆì„ ìˆ˜ ìˆìœ¼ë¯€ë¡œ ê°•ì œ ì—…ë°ì´íŠ¸
                 DrawInventory(playerInventory, db, currentPage, totalPages);
                 break;
 
@@ -237,17 +240,17 @@ void ShowInventory(Inventory* playerInventory, ItemDB* db) {
             }
         }
         else {
-            Sleep(50); // Å° ÀÔ·ÂÀÌ ¾øÀ¸¸é Àá½Ã ´ë±â
+            Sleep(50); // í‚¤ ì…ë ¥ì´ ì—†ìœ¼ë©´ ì ì‹œ ëŒ€ê¸°
         }
     }
 }
 
-//IÅ° ÀÔ·Â½Ã ÀÎº¥Åä¸® È£Ãâ
+//Ií‚¤ ì…ë ¥ì‹œ ì¸ë²¤í† ë¦¬ í˜¸ì¶œ
 void HandleInventoryKeyInput()
 {
     char input;
     if (_kbhit()) {
-        input = _getch();
+        input = (char)_getch();
         switch (input) {
         case 'i': case 'I':
             ShowInventory(g_inv, g_db);

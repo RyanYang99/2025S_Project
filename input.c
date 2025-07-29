@@ -92,7 +92,7 @@ void initialize_input_handler(void)
     SetConsoleMode(input_handle, ENABLE_EXTENDED_FLAGS | ENABLE_MOUSE_INPUT);
 
     //디버깅 할때 주석 처리
-    hook = SetWindowsHookEx(WH_MOUSE_LL, LowLevelMouseProc, NULL, 0);
+    //hook = SetWindowsHookEx(WH_MOUSE_LL, LowLevelMouseProc, NULL, 0);
 }
 
 void destroy_input_handler(void)
