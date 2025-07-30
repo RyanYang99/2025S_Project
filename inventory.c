@@ -3,11 +3,14 @@
 
 #include <conio.h>
 #include "input.h"
+#include "delta.h"
 #include "console.h"
 #include "formatter.h"
 
 #define INVENTORY_BACKGROUND BACKGROUND_T_BLACK
 #define INVENTORY_FOREGROUND FOREGROUND_T_WHITE
+#define INVENTORY_FOREGROUND_DARK FOREGROUND_T_GRAY
+#define INVENTORY_FOREGROUND_BLINK FOREGROUND_T_WHITE
 #define FOREGROUND_EQUIPPED FOREGROUND_T_DARKBLUE
 
 Inventory g_inv = { 0 };
@@ -89,7 +92,8 @@ static void render_inventory_item(const Inventory * const pInventory,
                                   const ItemDB * const pDB,
                                   const int y,
                                   const int inventory_index,
-                                  const bool selected)
+                                  const bool selected,
+                                  const bool blink)
 {
     const Player_Item *pItem = &pInventory->item[inventory_index];
     COORD position =
@@ -97,8 +101,12 @@ static void render_inventory_item(const Inventory * const pInventory,
         .Y = (SHORT)y
     };
 
+    FOREGROUND_color_t foreground = INVENTORY_FOREGROUND_DARK;
+    if (selected && blink)
+        foreground = INVENTORY_FOREGROUND_BLINK;
+
     if (selected)
-        position.X += (SHORT)fprint_string("> ", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
+        position.X += (SHORT)fprint_string("> ", position, INVENTORY_BACKGROUND, foreground);
 
     if (pItem->Item_Index)
     {
@@ -106,25 +114,37 @@ static void render_inventory_item(const Inventory * const pInventory,
         if (!pItem_info)
             return;
 
-        position.X += (SHORT)fprint_string("[ %s", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND, pItem_info->name);
+        position.X += (SHORT)fprint_string("[ %s", position, INVENTORY_BACKGROUND, foreground, pItem_info->name);
 
         if (pItem_info->maxStack > 1)
-            position.X += (SHORT)fprint_string(" (x%d) ]", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND, pItem->quantity);
+            position.X += (SHORT)fprint_string(" (x%d) ]", position, INVENTORY_BACKGROUND, foreground, pItem->quantity);
 
         if (pItem_info->type == ITEM_WEAPON || pItem_info->type == ITEM_TOOL || pItem_info->type == ITEM_ARMOR)
-            position.X += (SHORT)fprint_string(" (내구성: %d/%d) ]", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND, pItem->durability, pItem_info->BaseDurability);
+            position.X += (SHORT)fprint_string(" (내구성: %d/%d) ]", position, INVENTORY_BACKGROUND, foreground, pItem->durability, pItem_info->BaseDurability);
 
         if (pItem->isEquipped)
             position.X += (SHORT)fprint_string(" [E] ", position, INVENTORY_BACKGROUND, FOREGROUND_EQUIPPED);
 
     }
     else
-        fprint_string("[ 비어있음 ]", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
+        fprint_string("[ 비어있음 ]", position, INVENTORY_BACKGROUND, foreground);
 }
 
 void RenderInventory(Inventory* inv, ItemDB* db) {
+    static float blink_time = 0.0f;
+    static bool blink = false;
+
     if (!isInventoryOpen)
         return;
+
+    blink_time += delta_time;
+    if (blink_time >= 0.5f && blink_time < 1.0f)
+        blink = true;
+    else if (blink_time >= 1.0f)
+    {
+        blink = false;
+        blink_time = 0.0f;
+    }
 
     COORD position = { 0 };
     fprint_string("=== 인벤토리 (%d / %d) ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND, current_page_index + 1, MAX_PAGES);
@@ -132,7 +152,7 @@ void RenderInventory(Inventory* inv, ItemDB* db) {
     const int start_index = current_page_index * ITEMS_PER_PAGE;
     for (int i = 0; i < ITEMS_PER_PAGE; ++i)
     {
-        render_inventory_item(inv, db, ++position.Y, start_index + i, i == current_selection_index);
+        render_inventory_item(inv, db, ++position.Y, start_index + i, i == current_selection_index, blink);
     }
 
     ++position.Y;
