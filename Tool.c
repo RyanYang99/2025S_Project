@@ -28,42 +28,42 @@ player_item_t* GetEquippedItem(inventory_t* inv, int selectedSlotIndex)
 
 
 const bool can_tool_break_block(const item_information_t * const pTool, const block_t block) {
-	int tool = TOOL_KIND_NONE, material = MATERIAL_TIER_NONE;
-	
-	if (pTool)
-	{
-		tool = pTool->tool_kind;
-		material = pTool->material_tier;
-	}
-
-    switch (block) {
-		case BLOCK_GRASS:
-		case BLOCK_LEAF:
-		    return true; //맨손, 모든 도구
-
-		case BLOCK_DIRT:
-		    return (tool == TOOL_KIND_NONE || tool == TOOL_KIND_SHOVEL || tool == TOOL_KIND_PICKAXE); //맨손, 삽, 곡괭이로만 가능
-
-		case BLOCK_SNOW:
-		case BLOCK_SAND:
-		    return (tool == TOOL_KIND_SHOVEL || tool == TOOL_KIND_NONE); //맨손, 삽으로만 가능
-
-		case BLOCK_LOG:
-		    return (tool == TOOL_KIND_AXE || tool == TOOL_KIND_NONE); //맨손, 도끼로만 가능
-
-		case BLOCK_STONE:
-		    return (tool == TOOL_KIND_PICKAXE && material >= MATERIAL_TIER_WOOD); //나무등급이상 and 곡괭이로만 가능
-
-		case BLOCK_IRON_ORE:
-		    return (tool == TOOL_KIND_PICKAXE && material >= MATERIAL_TIER_STONE); //돌등급이상 and 곡괭이로만 가능
-
-		case BLOCK_BEDROCK:
-		case BLOCK_AIR:
-		case BLOCK_WATER:
-		    return false; //어떤 도구로도 파괴불가
+    int tool = TOOL_KIND_NONE, material = MATERIAL_TIER_NONE;
+    
+    if (pTool)
+    {
+        tool = pTool->tool_kind;
+        material = pTool->material_tier;
     }
 
-	return false;
+    switch (block) {
+        case BLOCK_GRASS:
+        case BLOCK_LEAF:
+            return true; //맨손, 모든 도구
+
+        case BLOCK_DIRT:
+            return (tool == TOOL_KIND_NONE || tool == TOOL_KIND_SHOVEL || tool == TOOL_KIND_PICKAXE); //맨손, 삽, 곡괭이로만 가능
+
+        case BLOCK_SNOW:
+        case BLOCK_SAND:
+            return (tool == TOOL_KIND_SHOVEL || tool == TOOL_KIND_NONE); //맨손, 삽으로만 가능
+
+        case BLOCK_LOG:
+            return (tool == TOOL_KIND_AXE || tool == TOOL_KIND_NONE); //맨손, 도끼로만 가능
+
+        case BLOCK_STONE:
+            return (tool == TOOL_KIND_PICKAXE && material >= MATERIAL_TIER_WOOD); //나무등급이상 and 곡괭이로만 가능
+
+        case BLOCK_IRON_ORE:
+            return (tool == TOOL_KIND_PICKAXE && material >= MATERIAL_TIER_STONE); //돌등급이상 and 곡괭이로만 가능
+
+        case BLOCK_BEDROCK:
+        case BLOCK_AIR:
+        case BLOCK_WATER:
+            return false; //어떤 도구로도 파괴불가
+    }
+
+    return false;
 }
 
 //도구가 해당 블록에 주는 데미지를 계산하는 함수
@@ -74,72 +74,42 @@ const int get_tool_damage_to_block(const item_information_t * const tool, const 
     if (!tool || !can_tool_break_block(tool, block))
         return base_damage;
     
-	const int bonus_per_tier = 6; //도구 티어 1단계당 추가 데미지
+    const int bonus_per_tier = 6; //도구 티어 1단계당 추가 데미지
     return base_damage + (bonus_per_tier * tool->material_tier);
 }
 
 //블록파괴시 인벤토리에 알맞은 아이템 획득 
 const int get_drop_from_block(const block_t block) {
     switch (block) {
-		// 물, 베드락, 공기 등은 드롭 없음
-		case BLOCK_AIR:
-		case BLOCK_BEDROCK:
-		case BLOCK_WATER:
-			return -1;
+        // 물, 베드락, 공기 등은 드롭 없음
+        case BLOCK_AIR:
+        case BLOCK_BEDROCK:
+        case BLOCK_WATER:
+            return -1;
     }
 
-	return block;
+    return block;
 }
 
-////////////////
-
-/*
-bool CanPlaceBlock(int x, int y)
-{
-    // 1. 플레이어 위치에는 설치 불가
+const bool can_place_block(const int x, const int y) {
+    //1. 플레이어 위치에는 설치 불가
     if (x == player.x && y == player.y)
         return false;
 
-    // 2. 해당 위치의 블록 정보 가져오기
-    block_info_t target = get_block_info_at(x, y);
+    //2. 해당 위치의 블록 정보 가져오기
+    const block_info_t target = get_block_info_at(x, y);
 
-    // 3. 이미 블록이 존재하면 설치 불가
+    //3. 이미 블록이 존재하면 설치 불가
     if (target.type != BLOCK_AIR)
         return false;
 
-    // 4. (선택) 설치 불가 블록 위에는 설치 제한 (예: BEDROCK)
-    // 설치할 블록이 공기인 건 이 함수가 판단하지 않음
-    // 필요 시 주변 블록까지 검사 가능
-
+    /*
+        4. (선택) 설치 불가 블록 위에는 설치 제한 (예: BEDROCK)
+        설치할 블록이 공기인 건 이 함수가 판단하지 않음
+        필요 시 주변 블록까지 검사 가능
+    */
     return true;
 }
-*/
-
-/*
-bool ConsumeEquippedBlockItem(inventory_t* inv, const item_database_t* db)
-{
-    player_item_t* equipped = GetEquippedItem(&inventory, inventory.pHotbar[inventory.selected_hotbar_index].index_in_inventory);
-    if (!equipped || equipped->quantity <= 0)
-        return false;
-
-    const item_information_t* info = find_item_by_index(db, equipped->Item_Index);
-    if (!info || !info->isplaceable)
-        return false;
-
-    // 수량 감소
-    equipped->quantity--;
-
-    // 0개 되면 제거
-    if (equipped->quantity == 0)
-    {
-        equipped->Item_Index = -1;
-        equipped->durability = 0;
-        equipped->isEquipped = false;
-    }
-
-    return true;
-}
-*/
 
 const color_tchar_t get_tool_texture(const tool_t tool, const int x, const int y) {
     switch (tool) {

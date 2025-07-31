@@ -38,7 +38,7 @@ void initialize_inventory(void) {
 
     inventory.selected_hotbar_index = 0;
     for (int i = 0; i < HOTBAR_COUNT; ++i) {
-        inventory.pHotbar[i].index_in_inventory = 0;
+        inventory.pHotbar[i].index_in_inventory = -1;
         inventory.pHotbar[i].pPlayer_Item = NULL;
     }
 }
@@ -99,6 +99,32 @@ bool add_item_to_inventory(const int item_db_index, int quantity) {
     }
 
     return true;
+}
+
+static void remove_item_from_inventory(player_item_t * const pItem) {
+    hotbar_link_t *pHotbar = &inventory.pHotbar[inventory.selected_hotbar_index];
+
+    pItem->item_db_index = 0;
+    pItem->durability = 0;
+    pItem->quantity = 0;
+    pItem->passive_equipped = false;
+
+    if (pHotbar->pPlayer_Item->item_db_index == pItem->item_db_index) {
+        pHotbar->index_in_inventory = -1;
+        pHotbar->pPlayer_Item = NULL;
+    }
+}
+
+void decrement_item_from_inventory(player_item_t * const pItem) {
+    const item_information_t *pItem_information = find_item_by_index(pItem->item_db_index);
+    if (!pItem_information)
+        return;
+
+    if (pItem->quantity <= 0)
+        return;
+
+    if (!(--pItem->quantity))
+        remove_item_from_inventory(pItem);
 }
 
 static void render_inventory_item(const int y,
@@ -191,10 +217,9 @@ void render_inventory(void) {
 
 static bool should_skip(const int i, item_type_t * const poItem_type)
 {
-    if (inventory.pHotbar[i].pPlayer_Item == NULL)
-        return true;
-
-    if (inventory.item[inventory.pHotbar[i].index_in_inventory].quantity <= 0)
+    if (inventory.pHotbar[i].pPlayer_Item == NULL ||
+        inventory.pHotbar[i].index_in_inventory == -1 ||
+        inventory.item[inventory.pHotbar[i].index_in_inventory].quantity <= 0)
         return true;
 
     const int index = inventory.pHotbar[i].pPlayer_Item->item_db_index;

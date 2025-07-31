@@ -21,18 +21,18 @@ static void handle_mouse_click(const bool left) {
     if (block_x < 0 || block_x >= map.size.x || block_y < 0 || block_y >= map.size.y)
         return;
 
+    //1. 현재 장착된 아이템 가져오기
+    item_information_t *pItem_information = NULL;
+    player_item_t *pEquipped = NULL;
+    if (inventory.pHotbar[inventory.selected_hotbar_index].pPlayer_Item)
+    {
+        pEquipped = &inventory.item[inventory.pHotbar[inventory.selected_hotbar_index].index_in_inventory];
+        pItem_information = find_item_by_index(pEquipped->item_db_index);
+    }
+
     if (left) {
-		item_information_t *pItem_information = NULL;
-
-		if (inventory.pHotbar[inventory.selected_hotbar_index].pPlayer_Item)
-		{
-			//1. 현재 장착된 아이템 가져오기
-			player_item_t *pEquipped = &inventory.item[inventory.pHotbar[inventory.selected_hotbar_index].index_in_inventory];
-			pItem_information = find_item_by_index(pEquipped->item_db_index);
-		}
-
-		//2. 현재 블록 정보 확인
-		const block_info_t target_block = get_block_info_at(block_x, block_y);
+        //2. 현재 블록 정보 확인
+        const block_info_t target_block = get_block_info_at(block_x, block_y);
 
         //3. 도구가 해당 블록을 부술 수 있는지 확인
         if (!can_tool_break_block(pItem_information, target_block.type))
@@ -48,35 +48,17 @@ static void handle_mouse_click(const bool left) {
             if (drop != -1)
                 add_item_to_inventory(drop, 1);
         }
+    } else {
+        if (!pItem_information ||
+            !pItem_information->is_placeable || //2. 설치 불가능한 아이템은 무시
+            pEquipped->quantity <= 0 ||
+            !pItem_information->is_placeable ||
+            !can_place_block(block_x, block_y) || //3. 설치 가능한 위치인지 확인
+            !set_block_at(block_x, block_y, pItem_information->index)) //4. 설치 시도
+            return;
+
+        decrement_item_from_inventory(pEquipped);
     }
-    /*
-    else
-    {
-
-
-        // 1. 인벤토리에서 선택된 아이템 가져오기
-        Player_Item* equipped = GetEquippedItem(&g_inv, g_inv.pHotbar[g_inv.selected_hotbar_index].index_in_inventory);
-        if (!equipped || equipped->quantity <= 0) return;
-
-        // 2. 아이템 정보 가져오기
-        const Item_Info* info = FindItemByIndex(&g_db, equipped->Item_Index);
-        if (!info || !info->isplaceable) return;  // 설치 불가능한 아이템은 무시
-
-        // 3. 설치 가능한 위치인지 확인
-        if (!CanPlaceBlock(block_x, block_y)) return;
-
-        // 4. 아이템 인덱스로 설치할 블록 타입 추출
-        //block_t blockType = GetBlockTypeFromItem(&g_db, equipped->Item_Index);
-        //if (blockType == BLOCK_AIR) return;
-
-        // 5. 설치 시도
-        //bool success = set_block_at(block_x, block_y, blockType);
-        //if (!success) return;
-
-        // 6. 수량 차감
-        //ConsumeEquippedBlockItem(&g_inv, &g_db);
-    }
-    */
 }
 
 //마우스 이동 시 최신 위치 갱신

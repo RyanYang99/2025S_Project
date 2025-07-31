@@ -65,9 +65,13 @@ int main(void)
     initialize_block_control();
     initialize_inventory();
 
-    //add_item_to_inventory(201, 1);
-    //inventory.pHotbar[0].index_in_inventory = 0;
-    //inventory.pHotbar[0].pPlayer_Item = &inventory.item[0];
+    add_item_to_inventory(201, 1);
+    inventory.pHotbar[0].index_in_inventory = 0;
+    inventory.pHotbar[0].pPlayer_Item = &inventory.item[0];
+
+    add_item_to_inventory(101, 1);
+    inventory.pHotbar[0].index_in_inventory = 1;
+    inventory.pHotbar[0].pPlayer_Item = &inventory.item[1];
 
     clear();
     while (!game_exit)

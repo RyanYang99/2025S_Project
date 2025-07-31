@@ -16,7 +16,7 @@ typedef struct {
     int item_db_index; //DB를 참조하는 index
     int quantity; //현재 수량
     int durability; //현재 내구도
-	bool passive_equipped; //갑옷같이 항상 착용되있는 것, 도구는 selected_hotbar_index로 처리
+    bool passive_equipped; //갑옷같이 항상 착용되있는 것, 도구는 selected_hotbar_index로 처리
 } player_item_t;
 
 typedef struct {
@@ -36,6 +36,7 @@ extern inventory_t inventory;
 void initialize_inventory(void);
 
 bool add_item_to_inventory(const int item_db_index, int quantity);
+void decrement_item_from_inventory(player_item_t * const pItem);
 
 void render_inventory(void);
 void render_hotbar(void);
