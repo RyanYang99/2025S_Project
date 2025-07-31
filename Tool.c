@@ -13,20 +13,6 @@ const color_tchar_t pWooden_pickaxe[TEXTURE_SIZE][TEXTURE_SIZE] = {
     { { ' ', BACKGROUND_T_TRANSPARENT, 0 }, { ' ', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_BLACK }, { ' ', BACKGROUND_T_TRANSPARENT, 0 } }
 };
 
-/*
-// 현재 선택된 인벤토리 칸의 아이템 포인터를 반환
-player_item_t* GetEquippedItem(inventory_t* inv, int selectedSlotIndex)
-{
-    if (selectedSlotIndex < 0 || selectedSlotIndex >= INVENTORY_SIZE) return NULL;
-
-    player_item_t* item = &inv->item[selectedSlotIndex];
-    if (item->Item_Index == 0 || item->quantity == 0) return NULL; // 빈 칸
-
-    return item;
-}
-*/
-
-
 const bool can_tool_break_block(const item_information_t * const pTool, const block_t block) {
     int tool = TOOL_KIND_NONE, material = MATERIAL_TIER_NONE;
     

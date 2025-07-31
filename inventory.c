@@ -215,8 +215,7 @@ void render_inventory(void) {
     fprint_string("%s", position, INVENTORY_BACKGROUND, FOREGROUND_T_YELLOW, pDescription);
 }
 
-static bool should_skip(const int i, item_type_t * const poItem_type)
-{
+static bool should_skip(const int i, item_type_t * const poItem_type) {
     if (inventory.pHotbar[i].pPlayer_Item == NULL ||
         inventory.pHotbar[i].index_in_inventory == -1 ||
         inventory.item[inventory.pHotbar[i].index_in_inventory].quantity <= 0)
@@ -231,8 +230,7 @@ static bool should_skip(const int i, item_type_t * const poItem_type)
     return false;
 }
 
-void render_hotbar(void)
-{
+void render_hotbar(void) {
     COORD position = {
         .X = console.size.X / 2 - HOTBAR_SIZE_IN_CHARACTERS_X / 2
     };
@@ -251,13 +249,11 @@ void render_hotbar(void)
         item_type_t item_type = ITEM_TYPE_NONE;
         bool skip = should_skip(i, &item_type);
 
+        color_tchar_t character = {
+            .character = ' '
+        };
         for (int ty = 0; ty < TEXTURE_SIZE; ++ty) {
-            position.Y = (SHORT)ty;
-
             for (int tx = 0; tx < TEXTURE_SIZE; ++tx) {
-                color_tchar_t character = {
-                    .character = ' '
-                };
                 if (!skip) {
                     const color_tchar_t texture = item_type == ITEM_TYPE_MATERIAL ?
                                                   get_block_texture(selected_block, tx, ty) :
@@ -267,9 +263,9 @@ void render_hotbar(void)
                     character.character = texture.character;
                 }
 
-                COORD new_position = {
+                const COORD new_position = {
                     .X = (WORD)(position.X + tx),
-                    .Y = position.Y
+                    .Y = (WORD)(position.Y + ty)
                 };
                 print_color_tchar(character, new_position);
             }
@@ -288,15 +284,21 @@ void inventory_input(void) {
         return;
 
     const char character = (char)tolower(input_character);
+
+    bool is_number = false;
+    int number = character - '0';
+    if (number > 0 && number < 10) {
+        is_number = true;
+        --number;
+    } else if (number == 0) {
+        is_number = true;
+        number = 9;
+    }
+    
     if (character == 'i')
         is_inventory_open = !is_inventory_open;
-    else {
-        const int number = character - '0';
-        if (number > 0 && number < 10)
-            inventory.selected_hotbar_index = number - 1;
-        else if (number == 0)
-            inventory.selected_hotbar_index = 9;
-    }
+    else if (is_number && number <= max_hotbar_index)
+        inventory.selected_hotbar_index = number;
 
     if (!is_inventory_open)
         return;
@@ -319,5 +321,14 @@ void inventory_input(void) {
             return;
 
         //사용 / 장착
+    } else if (is_number && number <= max_hotbar_index) {
+        const int index = current_page_index * ITEMS_PER_PAGE + current_selection_index;
+
+        for (int i = 0; i < max_hotbar_index; ++i)
+            if (inventory.pHotbar[i].index_in_inventory == index)
+                return;
+
+        inventory.pHotbar[number].index_in_inventory = index;
+        inventory.pHotbar[number].pPlayer_Item = &inventory.item[index];
     }
 }

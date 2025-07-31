@@ -21,7 +21,7 @@ static void render_debug_text(void)
     const BACKGROUND_color_t background = BACKGROUND_T_BLACK;
     const FOREGROUND_color_t foreground = FOREGROUND_T_WHITE;
 
-    COORD position = { 0, 0 };
+    COORD position = { 0, console.size.Y - 3 };
 
     int fps = -1;
     if (delta_time > 0.0f)
@@ -46,7 +46,7 @@ static void render(void)
     render_hotbar();
 
 #if _DEBUG
-    //render_debug_text();
+    render_debug_text();
 #endif
 }
 
@@ -64,14 +64,6 @@ int main(void)
     player_init(map.size.x / 2);
     initialize_block_control();
     initialize_inventory();
-
-    add_item_to_inventory(201, 1);
-    inventory.pHotbar[0].index_in_inventory = 0;
-    inventory.pHotbar[0].pPlayer_Item = &inventory.item[0];
-
-    add_item_to_inventory(101, 1);
-    inventory.pHotbar[0].index_in_inventory = 1;
-    inventory.pHotbar[0].pPlayer_Item = &inventory.item[1];
 
     clear();
     while (!game_exit)
