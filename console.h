@@ -22,7 +22,8 @@ typedef enum \
     X##_T_RED = X##_INTENSITY | X##_RED, \
     X##_T_MAGENTA = X##_INTENSITY | X##_RED | X##_BLUE, \
     X##_T_YELLOW = X##_INTENSITY | X##_RED | X##_GREEN, \
-    X##_T_WHITE = X##_INTENSITY | X##_RED | X##_GREEN | X##_BLUE \
+    X##_T_WHITE = X##_INTENSITY | X##_RED | X##_GREEN | X##_BLUE, \
+    X##_T_TRANSPARENT = -1 \
 } \
 X##_color_t
 
@@ -45,7 +46,7 @@ console_t;
 
 extern console_t console;
 
-void initialize_console(const bool use_double_buffering);
+void initialize_console(const bool use_double_buffering, const bool should_switch_font);
 void update_console(void);
 void write(const COORD position, const TCHAR character, const WORD attribute);
 void clear(void);

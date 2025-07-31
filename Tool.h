@@ -1,18 +1,20 @@
 ﻿#pragma once
 
-#include "inventory.h"
+#include "map.h"
+#include "ItemDB.h"
+#include "console.h"
+//#include "inventory.h"
 
+const bool can_tool_break_block(const item_information_t * const pTool, const block_t block);
+const int get_tool_damage_to_block(const item_information_t * const tool, const block_t block);
+const int get_drop_from_block(const block_t block);
 
-bool CanToolBreakBlock(const Item_Info* tool, int blockType);
-
-int GetToolDamageToBlock(const Item_Info* tool, int blockType);
-
-Player_Item* GetEquippedItem(Inventory* inv, int selectedSlotIndex);
-
-int GetDropItemFromBlockType(block_t blockType);
+/*
+player_item_t* GetEquippedItem(inventory_t* inv, int selectedSlotIndex);
 
 bool CanPlaceBlock(int x, int y);
 
-block_t GetBlockTypeFromItem(const ItemDB* db, int item_index);
+bool ConsumeEquippedBlockItem(inventory_t* inv, const item_database_t* db);
+*/
 
-bool ConsumeEquippedBlockItem(Inventory* inv, const ItemDB* db);
+const color_tchar_t get_tool_texture(const tool_t tool, const int x, const int y);

@@ -95,7 +95,6 @@ void initialize_input_handler(void)
     GetConsoleMode(input_handle, &original_mode);
     SetConsoleMode(input_handle, ENABLE_EXTENDED_FLAGS | ENABLE_MOUSE_INPUT);
 
-    //디버깅 할때 주석 처리
     hook = SetWindowsHookEx(WH_MOUSE_LL, LowLevelMouseProc, NULL, 0);
 }
 
@@ -140,3 +139,13 @@ void unsubscribe_mouse_position(const mouse_position_t callback)
 {
     CALLBACK_UNSUBSCRIBE_IMPLEMENTATION(pMousePosition_callbacks, mouse_position_callback_count);
 }
+
+#if _DEBUG
+void pause_hook(void) {
+    UnhookWindowsHookEx(hook);
+}
+
+void resume_hook(void) {
+    hook = SetWindowsHookEx(WH_MOUSE_LL, LowLevelMouseProc, NULL, 0);
+}
+#endif

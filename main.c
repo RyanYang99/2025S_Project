@@ -42,8 +42,8 @@ static void render(void)
     render_player();
     render_virtual_cursor();
     Mob_render();
-    RenderInventory(&g_inv, &g_db);
-    //render_hotbar();
+    render_inventory();
+    render_hotbar();
 
 #if _DEBUG
     //render_debug_text();
@@ -57,13 +57,17 @@ int main(void)
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-    CallItemDB(&g_db);
-    initialize_console(true);
+    call_database(false);
+    initialize_console(true, false);
     initialize_input_handler();
     create_map();
     player_init(map.size.x / 2);
-    BlockControl_Init();
-    InitInventory(&g_inv);
+    initialize_block_control();
+    initialize_inventory();
+
+    //add_item_to_inventory(201, 1);
+    //inventory.pHotbar[0].index_in_inventory = 0;
+    //inventory.pHotbar[0].pPlayer_Item = &inventory.item[0];
 
     clear();
     while (!game_exit)
@@ -80,15 +84,15 @@ int main(void)
         update_input();
 
         player_update();
-        HandleInventoryKeyInput();
+        inventory_input();
         Mob_Spawn_Time();
         update_mob_ai();
 
         render();
     }
 
-    BlockControl_Destroy();
-    FreeItemDB(&g_db);
+    destroy_block_control();
+    destroy_database();
     destroy_map();
     destroy_input_handler();
     destroy_console();

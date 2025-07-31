@@ -1,115 +1,99 @@
 ﻿#include "leak.h"
+#include "Tool.h"
 
-#include "ItemDB.h"
-#include "blockctrl.h"
 #include <stdbool.h>
-#include "inventory.h"
+#include "ItemDB.h"
 #include "player.h"
+#include "blockctrl.h"
+#include "inventory.h"
 
-// 도구 종류 상수 (toolkind 값에 대응)
-#define TOOL_KIND_NONE     -1
-#define TOOL_KIND_PICKAXE  0
-#define TOOL_KIND_AXE      1
-#define TOOL_KIND_SHOVEL   2
+const color_tchar_t pWooden_pickaxe[TEXTURE_SIZE][TEXTURE_SIZE] = {
+    { { ' ', BACKGROUND_T_DARKYELLOW, 0 }, { ' ', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_BLACK }, { ' ', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_BLACK } },
+    { { ' ', BACKGROUND_T_TRANSPARENT, 0 }, { ' ', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_BLACK }, { ' ', BACKGROUND_T_TRANSPARENT, 0 } },
+    { { ' ', BACKGROUND_T_TRANSPARENT, 0 }, { ' ', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_BLACK }, { ' ', BACKGROUND_T_TRANSPARENT, 0 } }
+};
 
-// 재료 티어 상수 (materialTier 값에 대응)
-#define TIER_HAND   0  // 맨손
-#define TIER_WOOD   1
-#define TIER_STONE  2
-#define TIER_IRON   3
-
-
+/*
 // 현재 선택된 인벤토리 칸의 아이템 포인터를 반환
-Player_Item* GetEquippedItem(Inventory* inv, int selectedSlotIndex)
+player_item_t* GetEquippedItem(inventory_t* inv, int selectedSlotIndex)
 {
     if (selectedSlotIndex < 0 || selectedSlotIndex >= INVENTORY_SIZE) return NULL;
 
-    Player_Item* item = &inv->item[selectedSlotIndex];
+    player_item_t* item = &inv->item[selectedSlotIndex];
     if (item->Item_Index == 0 || item->quantity == 0) return NULL; // 빈 칸
 
     return item;
 }
+*/
 
 
+const bool can_tool_break_block(const item_information_t * const pTool, const block_t block) {
+	int tool = TOOL_KIND_NONE, material = MATERIAL_TIER_NONE;
+	
+	if (pTool)
+	{
+		tool = pTool->tool_kind;
+		material = pTool->material_tier;
+	}
 
-bool CanToolBreakBlock(const Item_Info* tool, int blockType)
-{
-    int toolKind = (tool != NULL) ? tool->toolkind : TOOL_KIND_NONE;
-    int toolTier = (tool != NULL) ? tool->materialTier : TIER_HAND;
+    switch (block) {
+		case BLOCK_GRASS:
+		case BLOCK_LEAF:
+		    return true; //맨손, 모든 도구
 
-    switch (blockType)
-    {
-    case BLOCK_GRASS:
-    case BLOCK_LEAF:
-        return true; //맨손,모든 도구
+		case BLOCK_DIRT:
+		    return (tool == TOOL_KIND_NONE || tool == TOOL_KIND_SHOVEL || tool == TOOL_KIND_PICKAXE); //맨손, 삽, 곡괭이로만 가능
 
-    case BLOCK_DIRT:
-        return (toolKind == TOOL_KIND_NONE || toolKind == TOOL_KIND_SHOVEL || toolKind == TOOL_KIND_PICKAXE); //맨손,삽,곡괭이로만 가능
+		case BLOCK_SNOW:
+		case BLOCK_SAND:
+		    return (tool == TOOL_KIND_SHOVEL || tool == TOOL_KIND_NONE); //맨손, 삽으로만 가능
 
-    case BLOCK_SNOW:
-    case BLOCK_SAND:
-        return (toolKind == TOOL_KIND_SHOVEL || toolKind == TOOL_KIND_NONE); //맨손,삽으로만 가능
+		case BLOCK_LOG:
+		    return (tool == TOOL_KIND_AXE || tool == TOOL_KIND_NONE); //맨손, 도끼로만 가능
 
-    case BLOCK_LOG:
-        return (toolKind == TOOL_KIND_AXE || toolKind == TOOL_KIND_NONE); //맨손,도끼로만 가능
+		case BLOCK_STONE:
+		    return (tool == TOOL_KIND_PICKAXE && material >= MATERIAL_TIER_WOOD); //나무등급이상 and 곡괭이로만 가능
 
-    case BLOCK_STONE:
-        return (toolKind == TOOL_KIND_PICKAXE && toolTier >= TIER_WOOD); //나무등급이상 and 곡괭이로만 가능
+		case BLOCK_IRON_ORE:
+		    return (tool == TOOL_KIND_PICKAXE && material >= MATERIAL_TIER_STONE); //돌등급이상 and 곡괭이로만 가능
 
-    case BLOCK_IRON_ORE:
-        return (toolKind == TOOL_KIND_PICKAXE && toolTier >= TIER_STONE); //돌등급이상 and 곡괭이로만 가능
-
-    case BLOCK_BEDROCK:
-    case BLOCK_AIR:
-    case BLOCK_WATER:
-        return false; //어떤 도구로도 파괴불가
-
-    default:
-        return false; //어떤 도구로도 파괴불가
-    }
-}
-
-
-
-
-// 도구가 해당 블록에 주는 데미지를 계산하는 함수
-int GetToolDamageToBlock(const Item_Info* tool, int blockType)
-{
-    const int baseDamage = 3;         // 맨손 기본 데미지
-    const int bonusPerTier = 6;       // 도구 티어 1단계당 추가 데미지
-
-    // 도구가 없거나 해당 블록을 부술 수 없으면 맨손 데미지
-    if (tool == NULL || !CanToolBreakBlock(tool, blockType))
-    {
-        return baseDamage;
+		case BLOCK_BEDROCK:
+		case BLOCK_AIR:
+		case BLOCK_WATER:
+		    return false; //어떤 도구로도 파괴불가
     }
 
-    int toolTier = tool->materialTier;
-
-    return baseDamage + (bonusPerTier * toolTier);
+	return false;
 }
 
-// 블록파괴시 인벤토리에 알맞은 아이템 획득 
-int GetDropItemFromBlockType(block_t blockType)
-{
-    switch (blockType)
-    {
-    case BLOCK_GRASS: return 502;
-    case BLOCK_DIRT: return 402;
-    case BLOCK_STONE: return 403;
-    case BLOCK_IRON_ORE: return 503;
-    case BLOCK_LOG: return 405;
-    case BLOCK_LEAF: return 504;
-    case BLOCK_SNOW: return 505;
-    case BLOCK_SAND: return 408;
-        // 물, 베드락, 공기 등은 드롭 없음
-    default: return -1;
+//도구가 해당 블록에 주는 데미지를 계산하는 함수
+const int get_tool_damage_to_block(const item_information_t * const tool, const block_t block) {
+    const int base_damage = 3; //맨손 기본 데미지
+
+    //도구가 없거나 해당 블록을 부술 수 없으면 맨손 데미지
+    if (!tool || !can_tool_break_block(tool, block))
+        return base_damage;
+    
+	const int bonus_per_tier = 6; //도구 티어 1단계당 추가 데미지
+    return base_damage + (bonus_per_tier * tool->material_tier);
+}
+
+//블록파괴시 인벤토리에 알맞은 아이템 획득 
+const int get_drop_from_block(const block_t block) {
+    switch (block) {
+		// 물, 베드락, 공기 등은 드롭 없음
+		case BLOCK_AIR:
+		case BLOCK_BEDROCK:
+		case BLOCK_WATER:
+			return -1;
     }
-}
 
+	return block;
+}
 
 ////////////////
 
+/*
 bool CanPlaceBlock(int x, int y)
 {
     // 1. 플레이어 위치에는 설치 불가
@@ -129,14 +113,16 @@ bool CanPlaceBlock(int x, int y)
 
     return true;
 }
+*/
 
-bool ConsumeEquippedBlockItem(Inventory* inv, const ItemDB* db)
+/*
+bool ConsumeEquippedBlockItem(inventory_t* inv, const item_database_t* db)
 {
-    Player_Item* equipped = GetEquippedItem(&g_inv, g_inv.selectedIndex);
+    player_item_t* equipped = GetEquippedItem(&inventory, inventory.pHotbar[inventory.selected_hotbar_index].index_in_inventory);
     if (!equipped || equipped->quantity <= 0)
         return false;
 
-    const Item_Info* info = FindItemByIndex(db, equipped->Item_Index);
+    const item_information_t* info = find_item_by_index(db, equipped->Item_Index);
     if (!info || !info->isplaceable)
         return false;
 
@@ -153,14 +139,13 @@ bool ConsumeEquippedBlockItem(Inventory* inv, const ItemDB* db)
 
     return true;
 }
+*/
 
-// item_index로부터 대응하는 block_t 반환 (없으면 BLOCK_AIR)
-block_t GetBlockTypeFromItem(const ItemDB* db, int item_index)
-{
-    const Item_Info* info = FindItemByIndex(db, item_index);
-    if (!info || !info->isplaceable) return BLOCK_AIR;
+const color_tchar_t get_tool_texture(const tool_t tool, const int x, const int y) {
+    switch (tool) {
+        case TOOL_WOODEN_PICKAXE:
+            return pWooden_pickaxe[y][x];
+    }
 
-    // 아이템 인덱스 == 블록 타입이라고 가정 (연동 방식에 따라 수정 가능)
-    return (block_t)(info->blockID);
+    return (color_tchar_t){ 0 };
 }
-

@@ -31,3 +31,9 @@ void subscribe_mouse_click(const mouse_click_t callback);
 void unsubscribe_mouse_click(const mouse_click_t callback);
 void subscribe_mouse_position(const mouse_position_t callback);
 void unsubscribe_mouse_position(const mouse_position_t callback);
+
+//디버깅 할때 사용
+#if _DEBUG
+void pause_hook(void);
+void resume_hook(void);
+#endif

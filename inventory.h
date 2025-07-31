@@ -1,37 +1,42 @@
 ﻿#pragma once
 
-
-#include "stdio.h"
-#include "stdlib.h"
-#include "stdbool.h"
+#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
 #include "ItemDB.h"
-#include "time.h"
 
-#define ITEMS_PER_PAGE 10   // 한 페이지에 보여줄 아이템 수
-#define MAX_PAGES 5         // 최대 페이지 수
-#define INVENTORY_SIZE (ITEMS_PER_PAGE * MAX_PAGES) // 총 인벤토리 칸 수
+#define ITEMS_PER_PAGE 10 //한 페이지에 보여줄 아이템 수
+#define MAX_PAGES 5 //최대 페이지 수
+#define INVENTORY_SIZE (ITEMS_PER_PAGE * MAX_PAGES) //총 인벤토리 칸 수
 
-#define COLOR_DEFAULT 7
-#define COLOR_SELECT_DARK 8
-#define COLOR_SELECT_BRIGHT 15
-#define COLOR_INFO 14
-#define COLOR_EQUIPPED 10
+#define HOTBAR_COUNT 10
 
-typedef struct Player_Item {
-    int Item_Index;  //DB를 참조하는 index
+typedef struct {
+    int item_db_index; //DB를 참조하는 index
     int quantity; //현재 수량
     int durability; //현재 내구도
-    bool isEquipped; //장착여부   
-}Player_Item;
+	bool passive_equipped; //갑옷같이 항상 착용되있는 것, 도구는 selected_hotbar_index로 처리
+} player_item_t;
 
-typedef struct Inventory {
-    Player_Item item[INVENTORY_SIZE];
-    int selectedIndex; //인벤토리 현재 선택 된 칸
-}Inventory;
+typedef struct {
+    int index_in_inventory;
+    player_item_t *pPlayer_Item;
+} hotbar_link_t;
 
-extern Inventory g_inv;
+typedef struct {
+    player_item_t item[INVENTORY_SIZE];
 
-void InitInventory(Inventory* inv);
-bool AddItemToInventory(Inventory* inv, ItemDB* db, int itemIndex, int quantityToAdd);
-void RenderInventory(Inventory* inv, ItemDB *db);
-void HandleInventoryKeyInput();
+    int selected_hotbar_index; //핫바 현재 선택 된 칸
+    hotbar_link_t pHotbar[HOTBAR_COUNT];
+} inventory_t;
+
+extern inventory_t inventory;
+
+void initialize_inventory(void);
+
+bool add_item_to_inventory(const int item_db_index, int quantity);
+
+void render_inventory(void);
+void render_hotbar(void);
+void inventory_input(void);
