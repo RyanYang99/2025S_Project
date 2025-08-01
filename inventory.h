@@ -42,4 +42,6 @@ void render_inventory(void);
 void render_hotbar(void);
 void inventory_input(void);
 
+int get_inventory_count(int item_db_index);
+
 void destroy_inventory(void);

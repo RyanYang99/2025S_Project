@@ -70,6 +70,10 @@ const color_tchar_t pAir[TEXTURE_SIZE][TEXTURE_SIZE] = {
     { { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE } },
     { { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE } },
     { { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE } }
+}, pWorkbench[TEXTURE_SIZE][TEXTURE_SIZE] = {
+    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW } },
+    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW } },
+    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW },          { ' ', BACKGROUND_T_TRANSPARENT, 0 },         { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW } }
 };
 
 block_info_t get_block_info_at(int x, int y)
@@ -127,6 +131,9 @@ color_tchar_t get_block_texture(const block_t block, const int x, const int y)
 
         case BLOCK_WATER:
             return pWater[y][x];
+            
+        case BLOCK_WORKBENCH:
+            return pWorkbench[y][x];
     }
 
     return (color_tchar_t){ 0 };

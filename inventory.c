@@ -177,7 +177,6 @@ static void render_inventory_item(const int y,
 
         if (pItem->passive_equipped)
             position.X += (SHORT)fprint_string(" [E] ", position, INVENTORY_BACKGROUND, FOREGROUND_EQUIPPED);
-
     } else
         fprint_string("[ 비어있음 ]", position, INVENTORY_BACKGROUND, foreground);
 }
@@ -298,6 +297,16 @@ void render_hotbar(void) {
 
         position.X += TEXTURE_SIZE;
     }
+}
+
+int get_inventory_count(int item_db_index) {
+    int count = 0;
+    for (int i = 0; i < INVENTORY_SIZE; ++i) {
+        if (inventory.item[i].item_db_index == item_db_index) {
+            count += inventory.item[i].quantity;
+        }
+    }
+    return count;
 }
 
 //I키 입력시 인벤토리 호출

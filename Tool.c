@@ -8,7 +8,7 @@
 #include "inventory.h"
 
 const color_tchar_t pWooden_pickaxe[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { ' ', BACKGROUND_T_DARKYELLOW, 0 }, { ' ', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_BLACK }, { ' ', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_BLACK } },
+    { { ' ', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_BLACK }, { ' ', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_BLACK }, { ' ', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_BLACK } },
     { { ' ', BACKGROUND_T_TRANSPARENT, 0 }, { ' ', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_BLACK }, { ' ', BACKGROUND_T_TRANSPARENT, 0 } },
     { { ' ', BACKGROUND_T_TRANSPARENT, 0 }, { ' ', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_BLACK }, { ' ', BACKGROUND_T_TRANSPARENT, 0 } }
 };
@@ -26,6 +26,9 @@ const bool can_tool_break_block(const item_information_t * const pTool, const bl
         case BLOCK_GRASS:
         case BLOCK_LEAF:
             return true; //맨손, 모든 도구
+
+        case BLOCK_WORKBENCH:
+            return (tool == TOOL_KIND_PICKAXE || tool == TOOL_KIND_AXE); // 곡괭이,도끼로만 가능
 
         case BLOCK_DIRT:
             return (tool == TOOL_KIND_NONE || tool == TOOL_KIND_SHOVEL || tool == TOOL_KIND_PICKAXE); //맨손, 삽, 곡괭이로만 가능

@@ -7,7 +7,6 @@
 106,Leaf_Block,99,1,7,0,0,1
 107,Snow_Block,99,1,6,0,0,1
 108,Sand_Block,99,1,8,0,0,1
-<<<<<<< HEAD
 109,Workbench,1,1,10,0,0,1
 201,Wooden_Sword,1,2,50,1,1,0
 202,Stone_Sword,1,1,70,1,2,0
@@ -29,7 +28,3 @@
 306,Iron_Greaves,1,3,120,0,0,0
 401,Apple,30,4,0,0,0,0
 402,Healing_Potion,10,4,0,0,0,0
-=======
-201,Wooden_Pickaxe,1,2,50,2,1,0
-301,Health_Potion,10,4,0,0,0,0
->>>>>>> 3f95d373cd803d2d857701f9d8fe79dc4234d9ff

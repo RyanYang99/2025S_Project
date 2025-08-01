@@ -14,6 +14,7 @@
 #include "global_state.h"
 #include "ItemDB.h"
 #include "inventory.h"
+#include "Crafting_UI.h"
 
 #if _DEBUG
 static void render_debug_text(void)
@@ -64,8 +65,8 @@ int main(void)
     player_init(map.size.x / 2);
     initialize_block_control();
     initialize_inventory();
-
-    add_item_to_inventory(301, 1);
+    initialize_crafting_ui();
+    add_item_to_inventory(402, 1);
 
     clear();
     while (!game_exit)
@@ -81,8 +82,11 @@ int main(void)
         update_console();
         update_input();
 
+        //dd
+
         player_update();
         inventory_input();
+        Crafting_UI_input();
         Mob_Spawn_Time();
         update_mob_ai();
 

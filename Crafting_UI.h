@@ -4,8 +4,9 @@
 #include "ItemDB.h"
 #include "inventory.h"
 #include "console.h"
+#include "player.h"
 
-#define CRAFTING_MAX_RECIPES 16
+#define CRAFTING_MAX_RECIPES 32
 #define CRAFTING_SLOTS 3
 
 typedef struct {
@@ -29,3 +30,6 @@ extern crafting_ui_t crafting_ui;
 void initialize_crafting_ui(void);
 void update_crafting_ui(void);
 void render_crafting_ui(void);
+
+void ShowCraftingUI(player_t* pPlayer);
+void Crafting_UI_input();

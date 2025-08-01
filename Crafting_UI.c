@@ -11,11 +11,7 @@
 #include "player.h"
 #include "map.h"
 
-#define BG_COLOR BACKGROUND_T_BLACK
-#define FG_COLOR FOREGROUND_T_WHITE
-#define FG_HIGHLIGHT FOREGROUND_T_YELLOW
-#define FG_DISABLED FOREGROUND_T_GRAY
-#define FG_SELECTED FOREGROUND_T_CYAN
+
 
 
 crafting_ui_t crafting_ui = { 0 };
@@ -33,23 +29,31 @@ static bool is_workbench_nearby(const player_t *pPlayer) {
 }
 
 static void load_recipes_from_csv(const char* filename) {
-    FILE* file = fopen(filename, "r, ccs=UTF-8");
+    FILE* file = fopen(filename, "r");
     if (!file) return;
 
     char line[256];
+
+    // 헤더 무시
+    fgets(line, sizeof(line), file);
+
     while (fgets(line, sizeof(line), file)) {
+        line[strcspn(line, "\r\n")] = '\0';
         if (crafting_ui.recipe_count >= CRAFTING_MAX_RECIPES) break;
 
         crafting_recipe_t* recipe = &crafting_ui.recipes[crafting_ui.recipe_count];
         memset(recipe, 0, sizeof(*recipe));
 
         int material_count;
-        char material_str[128];
-        sscanf(line, "%d,%*[^,],%d,%d,%s",
+        char material_str[128] = { 0 };
+
+        if (sscanf(line, "%d,%*[^,],%d,%d,%127s",
             &recipe->result_index,
             &recipe->result_count,
             &material_count,
-            material_str);
+            material_str) != 4) {
+            continue;
+        }
 
         char* token = strtok(material_str, "@");
         for (int i = 0; i < material_count && token && i < CRAFTING_SLOTS; ++i) {
@@ -61,8 +65,10 @@ static void load_recipes_from_csv(const char* filename) {
 
         crafting_ui.recipe_count++;
     }
+
     fclose(file);
 }
+
 
 static bool can_craft(const crafting_recipe_t* recipe) {
     for (int i = 0; i < CRAFTING_SLOTS; ++i) {
@@ -149,12 +155,33 @@ void render_crafting_ui(void) {
         bool selected = (i == crafting_ui.selected_recipe_index);
         bool craftable = can_craft(recipe);
 
-        FOREGROUND_color_t color = selected ? FOREGROUND_T_WHITE : FOREGROUND_T_GRAY;
-        if (!craftable) color = FOREGROUND_T_DARKGRAY;
+        BACKGROUND_color_t bg = BACKGROUND_T_BLACK;
+        FOREGROUND_color_t fg = selected ? FOREGROUND_T_WHITE : FOREGROUND_T_GRAY;
 
-        fprint_string(selected ? "> %s x%d %s" : "  %s x%d %s", pos, BACKGROUND_T_BLACK, color, item ? item->name : "???", recipe->result_count, craftable ? "V" : "X");
+        fprint_string(selected ? "> %s x%d %s" : "  %s x%d %s", pos, bg, fg, item ? item->name : "???", recipe->result_count, craftable ? "O" : "X");
 
         pos.Y++;
+
+        // 선택된 레시피의 재료 표시
+        if (selected) {
+            for (int j = 0; j < CRAFTING_SLOTS; ++j) {
+                if (recipe->ingredient_indices[j] == 0) break;
+
+                const item_information_t* ingredient_item = find_item_by_index(recipe->ingredient_indices[j]);
+                int have_count = get_inventory_count(recipe->ingredient_indices[j]);  // 인벤토리에서 가지고 있는 수량 조회
+                int need_count = recipe->ingredient_counts[j];
+
+                // 재료명 + (가지고있는수량/필요한수량) 표시
+                fprint_string("    - %s (%d/%d)",
+                    pos,
+                    BACKGROUND_T_BLACK,
+                    FOREGROUND_T_CYAN,
+                    ingredient_item ? ingredient_item->name : "???",
+                    have_count,
+                    need_count);
+                pos.Y++;
+            }
+        }
     }
 
     pos.Y += 2;
@@ -170,4 +197,13 @@ void ShowCraftingUI(player_t *pPlayer) {
     }
     crafting_ui.is_open = true;
     update_crafting_ui();
+}
+
+void Crafting_UI_input()
+{
+    if (keyboard_pressed) {
+        if (input_character == 'C' || input_character == 'c') {
+            ShowCraftingUI(&player);  // 제작 UI 호출
+        }
+    }
 }
