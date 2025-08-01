@@ -314,7 +314,7 @@ void inventory_input(void) {
     else if (character == 'e') {
         const player_item_t *pItem = &inventory.item[(current_page_index * ITEMS_PER_PAGE) + current_selection_index];
         if (!pItem->item_db_index)
-            return;
+            return; 
 
         const item_information_t *pItem_info = find_item_by_index(pItem->item_db_index);
         if (!pItem_info)

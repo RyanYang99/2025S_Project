@@ -79,6 +79,7 @@
     <ClCompile Include="astar.c" />
     <ClCompile Include="BlockCtrl.c" />
     <ClCompile Include="console.c" />
+    <ClCompile Include="Crafting_UI.c" />
     <ClCompile Include="delta.c" />
     <ClCompile Include="formatter.c" />
     <ClCompile Include="global_state.c" />
@@ -96,6 +97,7 @@
     <ClInclude Include="astar.h" />
     <ClInclude Include="BlockCtrl.h" />
     <ClInclude Include="console.h" />
+    <ClInclude Include="Crafting_UI.h" />
     <ClInclude Include="delta.h" />
     <ClInclude Include="formatter.h" />
     <ClInclude Include="global_state.h" />
@@ -110,7 +112,9 @@
     <ClInclude Include="Tool.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="base_recipes.csv" />
     <None Include="items.csv" />
+    <None Include="workbench_recipes.csv" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
