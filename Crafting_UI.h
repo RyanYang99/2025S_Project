@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <stdbool.h>
 #include "ItemDB.h"
@@ -9,10 +9,10 @@
 #define CRAFTING_SLOTS 3
 
 typedef struct {
-    int ingredient_indices[CRAFTING_SLOTS]; // ¾ÆÀÌÅÛDB ÀÎµ¦½º (Àç·á)
-    int ingredient_counts[CRAFTING_SLOTS];  // °¢ Àç·á ÇÊ¿ä °¹¼ö
-    int result_index;                       // °á°ú ¾ÆÀÌÅÛ DB ÀÎµ¦½º
-    int result_count;                       // °á°ú ¾ÆÀÌÅÛ ¼ö·®
+    int ingredient_indices[CRAFTING_SLOTS]; // ì•„ì´í…œDB ì¸ë±ìŠ¤ (ì¬ë£Œ)
+    int ingredient_counts[CRAFTING_SLOTS];  // ê° ì¬ë£Œ í•„ìš” ê°¯ìˆ˜
+    int result_index;                       // ê²°ê³¼ ì•„ì´í…œ DB ì¸ë±ìŠ¤
+    int result_count;                       // ê²°ê³¼ ì•„ì´í…œ ìˆ˜ëŸ‰
 } crafting_recipe_t;
 
 typedef struct {

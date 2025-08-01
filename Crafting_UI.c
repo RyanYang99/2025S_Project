@@ -9,6 +9,7 @@
 #include "map.h"
 #include <conio.h>
 #include "player.h"
+#include "map.h"
 
 #define BG_COLOR BACKGROUND_T_BLACK
 #define FG_COLOR FOREGROUND_T_WHITE
@@ -19,12 +20,12 @@
 
 crafting_ui_t crafting_ui = { 0 };
 
-static bool is_workbench_nearby(const player_t* player) {
+static bool is_workbench_nearby(const player_t *pPlayer) {
     for (int dy = -5; dy <= 5; ++dy) {
         for (int dx = -5; dx <= 5; ++dx) {
-            const int x = player->x + dx;
-            const int y = player->y + dy;
-            if (get_block_at(x, y) == BLOCK_WORKBENCH)
+            const int x = pPlayer->x + dx;
+            const int y = pPlayer->y + dy;
+            if (get_block_info_at(x, y).type == BLOCK_WORKBENCH)
                 return true;
         }
     }
@@ -115,7 +116,7 @@ void update_crafting_ui(void) {
         render_crafting_ui();
 
         if (_kbhit()) {
-            char key = _getch();
+            char key = (char)_getch();
             switch (key) {
             case 'w':
                 if (crafting_ui.selected_recipe_index > 0)
@@ -161,10 +162,10 @@ void render_crafting_ui(void) {
     update_console();
 }
 
-void ShowCraftingUI(player_t* player) {
+void ShowCraftingUI(player_t *pPlayer) {
     initialize_crafting_ui();
     load_recipes_from_csv("base_recipes.csv");
-    if (is_workbench_nearby(player)) {
+    if (is_workbench_nearby(pPlayer)) {
         load_recipes_from_csv("workbench_recipes.csv");
     }
     crafting_ui.is_open = true;
