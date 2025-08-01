@@ -31,3 +31,5 @@ bool is_walkable(int x, int y);
 
 // 플레이어 렌더링
 void render_player(void);
+
+void add_health_to_player(const int additional_health);

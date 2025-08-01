@@ -229,3 +229,7 @@ int find_ground_pos(int x)
 
     return map.size.y / 2; //블록을 찾지 못하면 맵 높이의 절반 반환;
 }
+
+void add_health_to_player(const int additional_health) {
+    player.hp += additional_health;
+}
