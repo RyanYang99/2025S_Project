@@ -3,6 +3,7 @@
 
 #include <conio.h>
 #include "map.h"
+#include "item.h"
 #include "Tool.h"
 #include "input.h"
 #include "delta.h"
@@ -28,6 +29,22 @@ static bool is_inventory_open = false;
 static int current_selection_index = 0,
            current_page_index = 0;
 
+static void inventory_mouse_click(const bool left) {
+    if (left || !inventory.pHotbar[inventory.selected_hotbar_index].pPlayer_Item)
+        return;
+
+    player_item_t * const pItem = &inventory.item[inventory.pHotbar[inventory.selected_hotbar_index].index_in_inventory];
+    if (!pItem->item_db_index)
+        return;
+
+    const item_information_t * const pItem_info = find_item_by_index(pItem->item_db_index);
+    if (!pItem_info)
+        return;
+
+    if (use_item(pItem->item_db_index))
+        decrement_item_from_inventory(pItem);
+}
+
 void initialize_inventory(void) {
     for (int i = 0; i < INVENTORY_SIZE; ++i) {
         inventory.item[i].item_db_index = 0; // 0은 빈 칸을 의미
@@ -41,6 +58,8 @@ void initialize_inventory(void) {
         inventory.pHotbar[i].index_in_inventory = -1;
         inventory.pHotbar[i].pPlayer_Item = NULL;
     }
+
+    subscribe_mouse_click(inventory_mouse_click);
 }
 
 /*
@@ -188,7 +207,7 @@ void render_inventory(void) {
     }
 
     ++position.Y;
-    fprint_string("=== (W / S: 선택, A / D: 페이지, E: 사용 / 장착, I: 닫기) ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
+    fprint_string("=== (W / S: 선택, A / D: 페이지, E: 장착, I: 닫기) ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
 
     const player_item_t * const pItem = &inventory.item[start_index + current_selection_index];
     if (!pItem->item_db_index)
@@ -244,8 +263,6 @@ void render_hotbar(void) {
             item_index = inventory.pHotbar[i].pPlayer_Item->item_db_index;
         }
 
-        const block_t selected_block = item_index;
-        const tool_t selected_tool = item_index;
         item_type_t item_type = ITEM_TYPE_NONE;
         bool skip = should_skip(i, &item_type);
 
@@ -255,9 +272,14 @@ void render_hotbar(void) {
         for (int ty = 0; ty < TEXTURE_SIZE; ++ty) {
             for (int tx = 0; tx < TEXTURE_SIZE; ++tx) {
                 if (!skip) {
-                    const color_tchar_t texture = item_type == ITEM_TYPE_MATERIAL ?
-                                                  get_block_texture(selected_block, tx, ty) :
-                                                  get_tool_texture(selected_tool, tx, ty);
+                    color_tchar_t texture = { 0 };
+                    if (item_type == ITEM_TYPE_MATERIAL)
+                        texture = get_block_texture(item_index, tx, ty);
+                    else if (item_type == ITEM_TYPE_TOOL)
+                        texture = get_tool_texture(item_index, tx, ty);
+                    else if (item_type == ITEM_TYPE_MISC)
+                        texture = get_item_texture(item_index, tx, ty);
+
                     character.background = texture.background;
                     character.foreground = texture.foreground;
                     character.character = texture.character;
@@ -312,15 +334,15 @@ void inventory_input(void) {
     else if (character == 'd' && current_page_index < max_page_index)
         ++current_page_index;
     else if (character == 'e') {
-        const player_item_t *pItem = &inventory.item[(current_page_index * ITEMS_PER_PAGE) + current_selection_index];
+        const player_item_t * const pItem = &inventory.item[(current_page_index * ITEMS_PER_PAGE) + current_selection_index];
         if (!pItem->item_db_index)
             return;
 
-        const item_information_t *pItem_info = find_item_by_index(pItem->item_db_index);
+        const item_information_t * const pItem_info = find_item_by_index(pItem->item_db_index);
         if (!pItem_info)
             return;
 
-        //사용 / 장착
+        //갑옷 착용
     } else if (is_number && number <= max_hotbar_index) {
         const int index = current_page_index * ITEMS_PER_PAGE + current_selection_index;
 
@@ -331,4 +353,8 @@ void inventory_input(void) {
         inventory.pHotbar[number].index_in_inventory = index;
         inventory.pHotbar[number].pPlayer_Item = &inventory.item[index];
     }
+}
+
+void destroy_inventory(void) {
+    unsubscribe_mouse_click(inventory_mouse_click);
 }

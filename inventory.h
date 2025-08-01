@@ -41,3 +41,5 @@ void decrement_item_from_inventory(player_item_t * const pItem);
 void render_inventory(void);
 void render_hotbar(void);
 void inventory_input(void);
+
+void destroy_inventory(void);

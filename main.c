@@ -65,6 +65,8 @@ int main(void)
     initialize_block_control();
     initialize_inventory();
 
+    add_item_to_inventory(301, 1);
+
     clear();
     while (!game_exit)
     {
@@ -88,6 +90,7 @@ int main(void)
     }
 
     destroy_block_control();
+    destroy_inventory();
     destroy_database();
     destroy_map();
     destroy_input_handler();
