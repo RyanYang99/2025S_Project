@@ -21,9 +21,19 @@
 typedef void (* mouse_click_t)(const bool left);
 typedef void (* mouse_position_t)(const COORD position);
 
+extern bool keyboard_pressed;
+extern char input_character;
+
 void initialize_input_handler(void);
+void update_input(void);
 void destroy_input_handler(void);
 void subscribe_mouse_click(const mouse_click_t callback);
 void unsubscribe_mouse_click(const mouse_click_t callback);
 void subscribe_mouse_position(const mouse_position_t callback);
 void unsubscribe_mouse_position(const mouse_position_t callback);
+
+//디버깅 할때 사용
+#if _DEBUG
+void pause_hook(void);
+void resume_hook(void);
+#endif

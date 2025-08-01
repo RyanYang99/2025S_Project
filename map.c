@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include "perlin.h"
 #include "player.h"
+#include "ItemDB.h"
 
 typedef enum
 {
@@ -25,150 +26,51 @@ int total_offsets = 0;
 int offset_callback_count = 0;
 offset_changed_t* pOffset_callbacks = NULL;
 
-const color_tchar_t pBlock_textures[BLOCKS][TEXTURE_SIZE][TEXTURE_SIZE] =
-{
-    {
-        {
-            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }
-        },
-        {
-            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }
-        },
-        {
-            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }
-        }
-    },
-    {
-        {
-            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }
-        },
-        {
-            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }
-        },
-        {
-            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }
-        }
-    },
-    {
-        {
-            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }
-        },
-        {
-            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }
-        },
-        {
-            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }
-        }
-    },
-    {
-        {
-            { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { '#' , BACKGROUND_T_GRAY, BACKGROUND_T_BLACK }
-        },
-        {
-            { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { '#' , BACKGROUND_T_GRAY, BACKGROUND_T_BLACK }
-        },
-        {
-            { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }
-        }
-    },
-    {
-        {
-            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ' , BACKGROUND_T_GRAY, BACKGROUND_T_BLACK }
-        },
-        {
-            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ' , BACKGROUND_T_GRAY, BACKGROUND_T_BLACK }
-        },
-        {
-            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }
-        }
-    },
-    {
-        {
-            { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }, { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }, { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }
-        },
-        {
-            { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }, { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }, { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }
-        },
-        {
-            { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }, { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }, { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }
-        }
-    },
-    {
-        {
-            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKRED }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }
-        },
-        {
-            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKRED }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }
-        },
-        {
-            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKRED }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }
-        }
-    },
-    {
-        {
-            { '.' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { '.' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { '.' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }
-        },
-        {
-            { '.' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { '.' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { '.' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }
-        },
-        {
-            { '.' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { '.' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { '.' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }
-        }
-    },
-    {
-        {
-            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE }
-        },
-        {
-            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE }
-        },
-        {
-            { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE }
-        }
-    },
-    {
-        {
-            { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }
-        },
-        {
-            { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }
-        },
-        {
-            { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }
-        }
-    },
-    {
-        {
-            { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }
-        },
-        {
-            { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }
-        },
-        {
-            { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }
-        }
-    }
+const color_tchar_t pAir[TEXTURE_SIZE][TEXTURE_SIZE] = {
+    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_BLUE } },
+    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_BLUE } },
+    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_BLUE } }
+}, pGrass[TEXTURE_SIZE][TEXTURE_SIZE] = {
+    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GREEN } },
+    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GREEN } },
+    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GREEN } }
+}, pDirt[TEXTURE_SIZE][TEXTURE_SIZE] = {
+    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW } },
+    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW } },
+    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW } }
+}, pBedrock[TEXTURE_SIZE][TEXTURE_SIZE] = {
+    { { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { '#' , BACKGROUND_T_GRAY, BACKGROUND_T_BLACK } },
+    { { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { '#' , BACKGROUND_T_GRAY, BACKGROUND_T_BLACK } },
+    { { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY } }
+}, pStone[TEXTURE_SIZE][TEXTURE_SIZE] = {
+    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ' , BACKGROUND_T_GRAY, BACKGROUND_T_BLACK } },
+    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ' , BACKGROUND_T_GRAY, BACKGROUND_T_BLACK } },
+    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY } }
+}, pIron_ore[TEXTURE_SIZE][TEXTURE_SIZE] = {
+    { { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }, { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }, { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY } },
+    { { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }, { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }, { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY } },
+    { { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }, { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }, { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY } }
+}, pLog[TEXTURE_SIZE][TEXTURE_SIZE] = {
+    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKRED }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW } },
+    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKRED }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW } },
+    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKRED }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW } }
+}, pLeaf[TEXTURE_SIZE][TEXTURE_SIZE] = {
+    { { '.' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { '.' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { '.' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN } },
+    { { '.' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { '.' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { '.' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN } },
+    { { '.' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { '.' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { '.' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN } }
+}, pSnow[TEXTURE_SIZE][TEXTURE_SIZE] = {
+    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE } },
+    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE } },
+    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE } }
+}, pSand[TEXTURE_SIZE][TEXTURE_SIZE] = {
+    { { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW } },
+    { { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW } },
+    { { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW } }
+}, pWater[TEXTURE_SIZE][TEXTURE_SIZE] = {
+    { { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE } },
+    { { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE } },
+    { { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE } }
 };
-
-// 블록 기본 체력 설정
-int get_block_max_health(block_t type)
-{
-    switch (type) //주먹=3데미지? 나무 곡=10 돌곡=17 철곡=30
-    {
-    case BLOCK_AIR:         return 0;
-    case BLOCK_DIRT:        return 5;
-    case BLOCK_STONE:       return 20;
-    case BLOCK_IRON_ORE:    return 30;
-    case BLOCK_GRASS:       return 3;
-    case BLOCK_LOG:         return 9;
-    case BLOCK_LEAF:        return 3;
-    case BLOCK_SNOW:        return 3;
-    case BLOCK_SAND:        return 3;
-    case BLOCK_BEDROCK:     return -1;
-    default:                return 1;
-    }
-}
-
 
 block_info_t get_block_info_at(int x, int y)
 {
@@ -180,14 +82,55 @@ block_info_t get_block_info_at(int x, int y)
     return map.ppBlocks[y][x];
 }
 
-void set_block_at(int x, int y, block_t type)
+bool set_block_at(int x, int y, block_t type)
 {
     if (x < 0 || x >= map.size.x || y < 0 || y >= map.size.y)
-        return;
+        return false;
 
     initialize_block(&map.ppBlocks[y][x], type); // 타입 설정 및 체력 초기화
+    return true;
 }
 
+color_tchar_t get_block_texture(const block_t block, const int x, const int y)
+{
+    switch (block)
+    {
+        case BLOCK_AIR:
+            return pAir[y][x];
+
+        case BLOCK_GRASS:
+            return pGrass[y][x];
+
+        case BLOCK_DIRT:
+            return pDirt[y][x];
+
+        case BLOCK_BEDROCK:
+            return pBedrock[y][x];
+
+        case BLOCK_STONE:
+            return pStone[y][x];
+
+        case BLOCK_IRON_ORE:
+            return pIron_ore[y][x];
+
+        case BLOCK_LOG:
+            return pLog[y][x];
+
+        case BLOCK_LEAF:
+            return pLeaf[y][x];
+
+        case BLOCK_SNOW:
+            return pSnow[y][x];
+
+        case BLOCK_SAND:
+            return pSand[y][x];
+
+        case BLOCK_WATER:
+            return pWater[y][x];
+    }
+
+    return (color_tchar_t){ 0 };
+}
 
 bool damage_block_at(map_t* pMap, int x, int y, int damage)
 {
@@ -208,9 +151,6 @@ bool damage_block_at(map_t* pMap, int x, int y, int damage)
     return false;
 }
 
-
-
-
 static void allocate_map(void)
 {
     if (!map.ppBlocks)
@@ -229,10 +169,12 @@ static void allocate_map(void)
 }
 
 // 블록 초기화 함수
-void initialize_block(block_info_t* block, block_t type)
-{
-    block->type = type;
-    block->hp = get_block_max_health(type);
+void initialize_block(block_info_t * const pBlock, const block_t type) {
+    pBlock->type = type;
+
+    const item_information_t * const pItem_information = find_item_by_index(type);
+    if (pItem_information)
+        pBlock->hp = pItem_information->base_durability;
 }
 
 static int find_top(const int x)
@@ -496,9 +438,10 @@ static COORD render_block(const POINT map_position, const COORD console_position
             size.X = (SHORT)tx + 1;
             size.Y = (SHORT)ty + 1;
 
-            print_color_tchar(pBlock_textures[map.ppBlocks[map_position.y][map_position.x].type]
-                [utd ? ty : (TEXTURE_SIZE - ty - 1)][ltr ? tx : (TEXTURE_SIZE - tx - 1)],
-                position);
+            print_color_tchar(get_block_texture(map.ppBlocks[map_position.y][map_position.x].type,
+                                                utd ? ty : (TEXTURE_SIZE - ty - 1),
+                                                ltr ? tx : (TEXTURE_SIZE - tx - 1)),
+                              position);
         }
 
         if (exit)
