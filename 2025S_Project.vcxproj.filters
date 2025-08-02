@@ -60,6 +60,9 @@
     <ClCompile Include="formatter.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BossMalakh.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="console.h">
@@ -105,6 +108,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="formatter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BossMalakh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -20,6 +20,17 @@ player_t player = { 0 };
 #define GRAVITY 50.0f         // 중력 가속도
 #define JUMP_STRENGTH -12.0f  // 점프 시 부여되는 초기 수직 속도
 
+
+void player_take_damage(int damage)
+{
+    player.hp -= damage;
+    if (player.hp < 0) {
+        player.hp = 0;
+    }
+}
+
+
+
 // 각 픽셀을 표현할 구조체
 typedef struct {
     wchar_t character; // 표시할 유니코드 문자

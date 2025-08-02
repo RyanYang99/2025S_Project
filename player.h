@@ -38,3 +38,6 @@ bool is_walkable(int x, int y);
 
 // 플레이어 렌더링
 void render_player(void);
+
+//플레이어 추가 - 승준 ( 전투 시스템 )
+extern void player_take_damage(int damage);
