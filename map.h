@@ -10,17 +10,17 @@ typedef void (*offset_changed_t)(void);
 
 typedef enum
 {
-    BLOCK_AIR,
-    BLOCK_GRASS,
-    BLOCK_DIRT,
-    BLOCK_BEDROCK,
-    BLOCK_STONE,
-    BLOCK_IRON_ORE,
-    BLOCK_LOG,
-    BLOCK_LEAF,
-    BLOCK_SNOW,
-    BLOCK_SAND,
-    BLOCK_WATER
+    BLOCK_AIR = 0,
+    BLOCK_GRASS = 101,
+    BLOCK_DIRT = 102,
+    BLOCK_BEDROCK = 1,
+    BLOCK_STONE = 103,
+    BLOCK_IRON_ORE = 104,
+    BLOCK_LOG = 105,
+    BLOCK_LEAF = 106,
+    BLOCK_SNOW = 107,
+    BLOCK_SAND = 108,
+    BLOCK_WATER = 2
 } block_t;
 
 // ✅ 블록 정보 구조체: 종류 + 체력 포함
@@ -40,7 +40,6 @@ typedef struct
 } map_t;
 
 extern map_t map;
-extern const color_tchar_t pBlock_textures[BLOCKS][TEXTURE_SIZE][TEXTURE_SIZE];
 
 void create_map(void);
 void destroy_map(void);
@@ -51,9 +50,8 @@ int get_block_max_health(block_t type);
 void initialize_block(block_info_t* block, block_t type);
 bool damage_block_at(map_t* map, int x, int y, int damage);
 block_info_t get_block_info_at(int x, int y);
-void set_block_at(int x, int y, block_t type);
-
-
+bool set_block_at(int x, int y, block_t type);
+color_tchar_t get_block_texture(const block_t block, const int x, const int y);
 
 void subscribe_offset_change(const offset_changed_t callback);
 void unsubscribe_offset_change(const offset_changed_t callback);

@@ -1,6 +1,7 @@
 ﻿#include "leak.h"
 #include "input.h"
 
+#include <conio.h>
 #include <Windows.h>
 
 #define CALLBACK_SUBSCRIBE_IMPLEMENTATION(type, array, count) \
@@ -14,6 +15,9 @@
     for (int i = 0; i < count; ++i) \
         if (array[i] == callback) \
             array[i] = NULL
+
+bool keyboard_pressed = false;
+char input_character = 0;
 
 HANDLE input_handle = NULL;
 DWORD original_mode = 0;
@@ -43,6 +47,9 @@ static const COORD convert_to_console(const POINT point)
 
     CONSOLE_FONT_INFO font = { 0 };
     GetCurrentConsoleFont(GetStdHandle(STD_OUTPUT_HANDLE), false, &font);
+
+    if (font.dwFontSize.X == 0) font.dwFontSize.X = 8;
+    if (font.dwFontSize.Y == 0) font.dwFontSize.Y = 16;
 
     const COORD consoleCoord =
     {
@@ -88,8 +95,14 @@ void initialize_input_handler(void)
     GetConsoleMode(input_handle, &original_mode);
     SetConsoleMode(input_handle, ENABLE_EXTENDED_FLAGS | ENABLE_MOUSE_INPUT);
 
-    //디버깅 할때 주석 처리
     hook = SetWindowsHookEx(WH_MOUSE_LL, LowLevelMouseProc, NULL, 0);
+}
+
+void update_input(void)
+{
+    keyboard_pressed = _kbhit();
+    if (keyboard_pressed)
+        input_character = (char)_getch();
 }
 
 void destroy_input_handler(void)
@@ -126,3 +139,13 @@ void unsubscribe_mouse_position(const mouse_position_t callback)
 {
     CALLBACK_UNSUBSCRIBE_IMPLEMENTATION(pMousePosition_callbacks, mouse_position_callback_count);
 }
+
+#if _DEBUG
+void pause_hook(void) {
+    UnhookWindowsHookEx(hook);
+}
+
+void resume_hook(void) {
+    hook = SetWindowsHookEx(WH_MOUSE_LL, LowLevelMouseProc, NULL, 0);
+}
+#endif

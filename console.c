@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include "input.h"
+#include "formatter.h"
 
 bool use_double_buffer = false;
 
@@ -74,12 +75,13 @@ static void switch_font(void)
     SetCurrentConsoleFontEx(handle, FALSE, &cfi);
 }
 
-void initialize_console(const bool use_double_buffering)
+void initialize_console(const bool use_double_buffering, const bool should_switch_font)
 {
     handle = GetStdHandle(STD_OUTPUT_HANDLE);
     console.size = get_console_size(handle);
 
-    switch_font();
+    if (should_switch_font)
+        switch_font();
 
     use_double_buffer = use_double_buffering;
     if (use_double_buffer)
@@ -158,6 +160,13 @@ static int index(const int x, const int y)
 
 void write(const COORD position, const TCHAR character, const WORD attribute)
 {
+    WORD new_attribute = attribute;
+    if (attribute == (WORD)-1)
+    {
+        DWORD read = 0;
+        ReadConsoleOutputAttribute(handle, &new_attribute, 1, position, &read);
+    }
+
     if (use_double_buffer)
     {
         const int i = index(position.X, position.Y);
@@ -165,13 +174,16 @@ void write(const COORD position, const TCHAR character, const WORD attribute)
             return;
 
         character_buffer[i].Char.UnicodeChar = character;
-        character_buffer[i].Attributes = attribute;
+        character_buffer[i].Attributes = new_attribute;
     }
     else
     {
         SetConsoleCursorPosition(handle, position);
-        SetConsoleTextAttribute(handle, attribute);
-        WriteConsole(handle, &character, 1, NULL, NULL);
+
+        if (attribute != -1)
+            SetConsoleTextAttribute(handle, attribute);
+
+        putchar(character);
     }
 }
 
@@ -193,7 +205,37 @@ void clear(void)
 
 void print_color_tchar(const color_tchar_t character, const COORD position)
 {
-    write(position, character.character, (WORD)character.background | (WORD)character.foreground);
+    WORD attribute = (WORD)-1;
+    if (character.background != BACKGROUND_T_TRANSPARENT)
+        attribute = (WORD)character.background | (WORD)character.foreground;
+
+    write(position, character.character, attribute);
+}
+
+int fprint_string(const char * const pFormat, const COORD position, const BACKGROUND_color_t background, const FOREGROUND_color_t foreground, ...)
+{
+    va_list args = { 0 };
+    va_start(args, foreground);
+    char *pBuffer = format_string_v(pFormat, args);
+    va_end(args);
+
+    const int wide_length = MultiByteToWideChar(CP_UTF8, 0, pBuffer, -1, NULL, 0);
+    LPWSTR pWBuffer = malloc(sizeof(WCHAR) * wide_length);
+    MultiByteToWideChar(CP_UTF8, 0, pBuffer, -1, pWBuffer, wide_length);
+
+    const WORD attribute = (WORD)background | (WORD)foreground;
+
+    COORD print_position = position;
+    for (size_t i = 0; i < wcslen(pWBuffer); ++i)
+    {
+        write(print_position, pWBuffer[i], attribute);
+        ++print_position.X;
+    }
+
+    free(pBuffer);
+    free(pWBuffer);
+
+    return wide_length - 1;
 }
 
 void destroy_console(void)

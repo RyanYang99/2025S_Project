@@ -1,9 +1,12 @@
 ﻿#include "leak.h"
-
 #include "BlockCtrl.h"
+
+#include <math.h> //floorf 함수 사용
 #include "map.h"
+#include "Tool.h"
 #include "player.h"
-#include <math.h> // floorf 함수 사용
+#include "ItemDB.h"
+#include "inventory.h"
 
 static COORD latestMousePos;
 static float screen_cx = 0, screen_cy = 0, relative_mouse_x = 0, relative_mouse_y = 0;
@@ -13,9 +16,53 @@ static int block_x = 0, block_y = 0, draw_x = 0, draw_y = 0;
 int selected_block_x = -1, selected_block_y = -1;
 #endif
 
-// 마우스 이동 시 최신 위치 갱신
-static void BC_OnMouseMove(const COORD pos)
-{
+//마우스 클릭 시 상호작용 처리
+static void handle_mouse_click(const bool left) {
+    if (block_x < 0 || block_x >= map.size.x || block_y < 0 || block_y >= map.size.y)
+        return;
+
+    //1. 현재 장착된 아이템 가져오기
+    item_information_t *pItem_information = NULL;
+    player_item_t *pEquipped = NULL;
+    if (inventory.pHotbar[inventory.selected_hotbar_index].pPlayer_Item)
+    {
+        pEquipped = &inventory.item[inventory.pHotbar[inventory.selected_hotbar_index].index_in_inventory];
+        pItem_information = find_item_by_index(pEquipped->item_db_index);
+    }
+
+    if (left) {
+        //2. 현재 블록 정보 확인
+        const block_info_t target_block = get_block_info_at(block_x, block_y);
+
+        //3. 도구가 해당 블록을 부술 수 있는지 확인
+        if (!can_tool_break_block(pItem_information, target_block.type))
+            return;
+
+        //4. 도구의 데미지 계산
+        const int damage = get_tool_damage_to_block(pItem_information, target_block.type);
+
+        //5. 데미지를 주고 파괴 여부 확인
+        if (damage_block_at(&map, block_x, block_y, damage)) {
+            const int drop = get_drop_from_block(target_block.type);
+
+            if (drop != -1)
+                add_item_to_inventory(drop, 1);
+        }
+    } else {
+        if (!pItem_information ||
+            !pItem_information->is_placeable || //2. 설치 불가능한 아이템은 무시
+            pEquipped->quantity <= 0 ||
+            !pItem_information->is_placeable ||
+            !can_place_block(block_x, block_y) || //3. 설치 가능한 위치인지 확인
+            !set_block_at(block_x, block_y, pItem_information->index)) //4. 설치 시도
+            return;
+
+        decrement_item_from_inventory(pEquipped);
+    }
+}
+
+//마우스 이동 시 최신 위치 갱신
+static void handle_mouse_move(const COORD pos) {
     latestMousePos = pos;
 
     screen_cx = (float)console.size.X / 2.0f;
@@ -34,67 +81,34 @@ static void BC_OnMouseMove(const COORD pos)
 #endif
 }
 
-// 마우스 클릭 시 상호작용 처리
-static void BC_OnMouseClick(const bool left)
-{
-    if (block_x < 0 || block_x >= map.size.x || block_y < 0 || block_y >= map.size.y)
-        return;
-
-    if (left)
-    {
-        int damage = 3;  // 예: 손 데미지 (나중에 도구별로 바꿀 예정)
-
-        bool destroyed = damage_block_at(&map, block_x, block_y, damage);
-
-        if (destroyed)
-        {
-            // 블록이 부서졌을 때 추가 처리 있으면 여기서
-        }
-    }
-    else
-    {
-        if (block_x == player.x && block_y == player.y)
-            return;  // 1. 플레이어 위치에는 설치 금지
-
-        block_info_t target = get_block_info_at(block_x, block_y);
-        if (target.type != BLOCK_AIR)
-            return;  // 2. 이미 블록이 있는 곳에는 설치 금지
-
-        block_t held_block = BLOCK_DIRT; // 4. 나중에 인벤토리에서 선택한 블록으로 대체
-        if (held_block == BLOCK_AIR) return; // 공기 블록은 설치 불가
-
-        // 5. 도구가 들려 있다면 설치 불가 (가정: BLOCK_TOOL_*로 구분하거나 enum 값 등)
-        //if (held_block >= TOOL_BEGIN && held_block <= TOOL_END) return;
-
-        // 6. 맵 경계 체크는 get_block_info_at / set_block_at에서 이미 처리
-        set_block_at(block_x, block_y, held_block); // 3. 자동으로 체력 초기화됨
-    }
+//초기화 및 해제
+void initialize_block_control(void) {
+    subscribe_mouse_click(handle_mouse_click);
+    subscribe_mouse_position(handle_mouse_move);
 }
 
-// 가상 커서 렌더링 (모서리 스타일)
-void render_virtual_cursor(void)
-{
-    // 각 모서리에 문자를 출력
-    color_tchar_t tl = {L'┌', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE };
-    color_tchar_t tr = {L'┐', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE };
-    color_tchar_t bl = {L'└', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE };
-    color_tchar_t br = {L'┘', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE };
+//가상 커서 렌더링 (모서리 스타일)
+void render_virtual_cursor(void) {
+    color_tchar_t character = {
+        .character = L'┌',
+        .background = BACKGROUND_T_TRANSPARENT,
+        .foreground = FOREGROUND_T_WHITE
+    };
 
-    print_color_tchar(tl, (COORD) { (SHORT)draw_x, (SHORT)draw_y });
-    print_color_tchar(tr, (COORD) { (SHORT)(draw_x + TEXTURE_SIZE - 1), (SHORT)draw_y });
-    print_color_tchar(bl, (COORD) { (SHORT)draw_x, (SHORT)(draw_y + TEXTURE_SIZE - 1) });
-    print_color_tchar(br, (COORD) { (SHORT)(draw_x + TEXTURE_SIZE - 1), (SHORT)(draw_y + TEXTURE_SIZE - 1) });
+    //각 모서리에 문자를 출력
+    print_color_tchar(character, (COORD) { (SHORT)draw_x, (SHORT)draw_y });
+
+    character.character = L'┐';
+    print_color_tchar(character, (COORD) { (SHORT)(draw_x + TEXTURE_SIZE - 1), (SHORT)draw_y });
+
+    character.character = L'└';
+    print_color_tchar(character, (COORD) { (SHORT)draw_x, (SHORT)(draw_y + TEXTURE_SIZE - 1) });
+
+    character.character = L'┘';
+    print_color_tchar(character, (COORD) { (SHORT)(draw_x + TEXTURE_SIZE - 1), (SHORT)(draw_y + TEXTURE_SIZE - 1) });
 }
 
-// 초기화 및 해제
-void BlockControl_Init(void)
-{
-    subscribe_mouse_position(BC_OnMouseMove);
-    subscribe_mouse_click(BC_OnMouseClick);
-}
-
-void BlockControl_Destroy(void)
-{
-    unsubscribe_mouse_click(BC_OnMouseClick);
-    unsubscribe_mouse_position(BC_OnMouseMove);
+void destroy_block_control(void) {
+    unsubscribe_mouse_click(handle_mouse_click);
+    unsubscribe_mouse_position(handle_mouse_move);
 }

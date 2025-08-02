@@ -59,19 +59,25 @@ static const PlayerSpritePixel player_sprite_walk[2][PLAYER_SPRITE_HEIGHT][PLAYE
     }
 };
 
+extern bool keyboard_pressed;
+extern char input_character;
 
 static void movement(void) {
 
     // 키 입력이 있으면 '이동중' 상태로 변경
+    if (!keyboard_pressed) {
+        player.is_moving = 0;
+        return;
+    }
+
+    const char character = input_character;
+
     player.is_moving = 0;
 
-    if (!_kbhit())
-        return;
-
-    const char character = (char)_getch();
-
-    if (character == 'q')
+    if (character == 'q') {
         game_exit = true;
+        return;
+    }
 
     // 점프
     if (character == ' ' && player.is_on_ground) {
