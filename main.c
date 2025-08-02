@@ -66,7 +66,13 @@ int main(void)
     initialize_block_control();
     initialize_inventory();
     initialize_crafting_ui();
-    add_item_to_inventory(402, 1);
+    
+    add_item_to_inventory(207, 1);
+    add_item_to_inventory(208, 1);
+    add_item_to_inventory(209, 1);
+    add_item_to_inventory(210, 1);
+    add_item_to_inventory(211, 1);
+    add_item_to_inventory(212, 1);
 
     clear();
     while (!game_exit)
@@ -81,8 +87,6 @@ int main(void)
         }
         update_console();
         update_input();
-
-        //dd
 
         player_update();
         inventory_input();
