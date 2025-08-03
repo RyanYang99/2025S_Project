@@ -60,6 +60,9 @@ int main(void)
     call_database(false);
     initialize_console(true, false);
     initialize_input_handler();
+
+    register_mob_click_handler();
+
     create_map();
     player_init(map.size.x / 2);
     initialize_block_control();

@@ -13,6 +13,7 @@
 #include "astar.h"
 #include "delta.h"
 
+
 #define GRAVITY 25.0f // 중력 가속도
 // #define MOB_DRAW_SCALE 3 // 이 매크로는 더 이상 사용하지 않습니다.
 
@@ -295,4 +296,38 @@ void update_mob_ai() {
             mobs[i].last_move_time = current_time;
         }
     }
+}
+
+//전투 시스템 마우스 콜백
+void handle_mob_click(const bool left_click, const COORD mouse_pos)
+{
+    if (!left_click) return; // 왼쪽 클릭만 처리합니다.
+
+    COORD center_m = console_c();
+
+    for (int i = 0; i < mob_count; i++)
+    {
+        // 몬스터의 화면 좌표(픽셀)를 계산
+        int mob_screen_x_start = center_m.X + (mobs[i].x - player.x);
+        int mob_screen_y_start = center_m.Y + (mobs[i].y - player.y);
+
+        // 마우스 클릭이 몬스터 스프라이트 영역 내에 있는지 확인
+        if (mouse_pos.X >= mob_screen_x_start && mouse_pos.X < mob_screen_x_start + MOB_SPRITE_WIDTH &&
+            mouse_pos.Y >= mob_screen_y_start && mouse_pos.Y < mob_screen_y_start + MOB_SPRITE_HEIGHT)
+        {
+            // 몬스터가 플레이어로부터 5칸 이내에 있는지 확인합니다.
+            double distance = sqrt(pow(mobs[i].x - player.x, 2) + pow(mobs[i].y - player.y, 2));
+
+            if (distance <= 5.0)
+            {
+                mobs[i].HP -= 5; // 몬스터 체력 5 감소
+                return; // 한 몬스터만 대미지를 입히고 함수를 종료합니다.
+            }
+        }
+    }
+}
+
+// 이 함수를 게임 초기화 함수(예: main.c의 initialize_game)에서 호출해야 합니다.
+void register_mob_click_handler() {
+    subscribe_mouse_click_with_pos(handle_mob_click);
 }

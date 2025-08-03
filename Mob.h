@@ -7,10 +7,12 @@
 #include <stdbool.h>
 #include <windows.h> // COORD를 사용하기 위해 추가
 
+#include "input.h"
 #include "player.h"
 #include "map.h"
 #include "console.h"
 #include "astar.h"
+
 
 #define Max_Mob 5
 
@@ -19,10 +21,7 @@ typedef struct {
     int y;  // 월드 좌표 Y
     int HP;
     int atk;
-    int state; // 현재 상태
-    // 1 :
-    // 2 :
-    // 3 :
+    int state; // 현재 상태 
     int despawn_check; //디스폰 체크
 
     // 물리 상태 변수
@@ -42,9 +41,6 @@ extern int mob_level; // 난이도
 //좀비 그래픽 스프라이트 데이터
 extern const color_tchar_t zombie_sprite_date[5][5];
 
-
-
-
 void Mob_Spawn_Time();
 void MobSpawn(int x, int y);
 void Mob_render();
@@ -55,3 +51,7 @@ void Mob_deadcheck();
 void Mob_physics();
 
 void update_mob_ai(void);
+
+//마우스 콜백 
+extern void handle_mob_click(const bool left_click, const COORD mouse_pos);
+extern void register_mob_click_handler();
