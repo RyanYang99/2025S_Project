@@ -21,6 +21,16 @@
 typedef void (* mouse_click_t)(const bool left);
 typedef void (* mouse_position_t)(const COORD position);
 
+//전투 시스템을 위한 마우스 콜백  -->mob.c 적용 위함 
+typedef void (*mouse_click_with_pos_t)(const bool left, const COORD position);
+
+static void mouse_click_with_pos_callback(const bool left, const COORD position);
+void subscribe_mouse_click_with_pos(const mouse_click_with_pos_t callback);
+void unsubscribe_mouse_click_with_pos(const mouse_click_with_pos_t callback);
+
+//=========================================================승준 추가 
+
+
 extern bool keyboard_pressed;
 extern char input_character;
 
