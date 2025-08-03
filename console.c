@@ -18,7 +18,18 @@ SMALL_RECT written = { 0 };
 
 HANDLE handle = NULL;
 
+HWND window = NULL;
+float dpi_scale = 0.0f;
+
 console_t console = { 0 };
+
+bool is_new_console(void)
+{
+    CONSOLE_FONT_INFO font = { 0 };
+    GetCurrentConsoleFont(GetStdHandle(STD_OUTPUT_HANDLE), false, &font);
+
+    return font.dwFontSize.X <= 0;
+}
 
 static void hide_console_cursor(const HANDLE cursor_handle)
 {
@@ -79,6 +90,10 @@ void initialize_console(const bool use_double_buffering, const bool should_switc
 {
     handle = GetStdHandle(STD_OUTPUT_HANDLE);
     console.size = get_console_size(handle);
+    window = GetConsoleWindow();
+
+    SetProcessDPIAware();
+    dpi_scale = (float)GetDpiForWindow(window) / 96.0f;
 
     if (should_switch_font)
         switch_font();
@@ -95,7 +110,7 @@ static void flip_double_buffer(void)
     if (!use_double_buffer)
         return;
 
-    WriteConsoleOutput(buffer[current_buffer], character_buffer, console.size, (COORD){ 0, 0 }, &written);
+    WriteConsoleOutput(buffer[current_buffer], character_buffer, console.size, (COORD) { 0, 0 }, & written);
     SetConsoleActiveScreenBuffer(buffer[current_buffer]);
 
     if (!current_buffer)
@@ -134,7 +149,7 @@ static bool update_console_size(void)
 
         written.Right = console.size.X - 1;
         written.Bottom = console.size.Y - 1;
-            
+
         for (int i = 0; i < 2; ++i)
             resize(buffer[i]);
     }
@@ -212,11 +227,11 @@ void print_color_tchar(const color_tchar_t character, const COORD position)
     write(position, character.character, attribute);
 }
 
-int fprint_string(const char * const pFormat, const COORD position, const BACKGROUND_color_t background, const FOREGROUND_color_t foreground, ...)
+int fprint_string(const char* const pFormat, const COORD position, const BACKGROUND_color_t background, const FOREGROUND_color_t foreground, ...)
 {
     va_list args = { 0 };
     va_start(args, foreground);
-    char *pBuffer = format_string_v(pFormat, args);
+    char* pBuffer = format_string_v(pFormat, args);
     va_end(args);
 
     const int wide_length = MultiByteToWideChar(CP_UTF8, 0, pBuffer, -1, NULL, 0);
@@ -236,6 +251,26 @@ int fprint_string(const char * const pFormat, const COORD position, const BACKGR
     free(pWBuffer);
 
     return wide_length - 1;
+}
+
+const COORD convert_monitor_to_console(const POINT point)
+{
+    POINT client_point =
+    {
+        .x = point.x,
+        .y = point.y
+    };
+    ScreenToClient(window, &client_point);
+
+    CONSOLE_FONT_INFO font = { 0 };
+    GetCurrentConsoleFont(GetStdHandle(STD_OUTPUT_HANDLE), false, &font);
+
+    const COORD consoleCoord =
+    {
+        .X = (SHORT)(client_point.x / (font.dwFontSize.X * dpi_scale)),
+        .Y = (SHORT)(client_point.y / (font.dwFontSize.Y * dpi_scale))
+    };
+    return consoleCoord;
 }
 
 void destroy_console(void)

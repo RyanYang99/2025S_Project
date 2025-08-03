@@ -46,10 +46,12 @@ console_t;
 
 extern console_t console;
 
+bool is_new_console(void);
 void initialize_console(const bool use_double_buffering, const bool should_switch_font);
 void update_console(void);
 void write(const COORD position, const TCHAR character, const WORD attribute);
 void clear(void);
 void print_color_tchar(const color_tchar_t character, const COORD position);
-int fprint_string(const char * const pFormat, const COORD position, const BACKGROUND_color_t background, const FOREGROUND_color_t foreground, ...);
+const COORD convert_monitor_to_console(const POINT point);
+int fprint_string(const char* const pFormat, const COORD position, const BACKGROUND_color_t background, const FOREGROUND_color_t foreground, ...);
 void destroy_console(void);

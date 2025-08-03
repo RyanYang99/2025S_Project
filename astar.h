@@ -6,6 +6,8 @@
 
 
 #define MAX_PATH_LENGTH 50 
+#define MAX_NODES_FOR_ASTAR_SEARCH 2000
+#define MAX_HEAP_SIZE MAX_NODES_FOR_ASTAR_SEARCH
 
 
 // A* 경로 탐색의 결과를 담는 구조체
@@ -37,3 +39,8 @@ typedef bool (*IsMovableFunc)(int, int);
 // A* 경로 찾기 함수: 이제 이동 가능 여부 함수(is_movable)를 인수로 받습니다.
 path_t find_path(int start_x, int start_y, int target_x, int target_y, IsMovableFunc is_movable);
 
+void heap_push(PathNode** heap, int* heap_size, PathNode* node, int** open_list_index);
+PathNode* heap_pop(PathNode** heap, int* heap_size, int** open_list_index);
+void heapify_down(PathNode** heap, int heap_size, int index, int** open_list_index);
+void heapify_up(PathNode** heap, int heap_size, int index, int** open_list_index);
+void swap_nodes(PathNode** a, PathNode** b, int** open_list_index);

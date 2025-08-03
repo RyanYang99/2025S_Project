@@ -1,10 +1,10 @@
 ﻿#include "leak.h"
-
 #include <stdio.h>
 #include <conio.h>
 #include <stdbool.h>
 #include <time.h>
 #include "map.h"
+#include "astar.h"
 #include "Mob.h"
 #include "input.h"
 #include "delta.h"
@@ -21,7 +21,7 @@ static void render_debug_text(void)
     const BACKGROUND_color_t background = BACKGROUND_T_BLACK;
     const FOREGROUND_color_t foreground = FOREGROUND_T_WHITE;
 
-    COORD position = { 0, console.size.Y - 3 };
+    COORD position = { 0, console.size.Y - 5 };
 
     int fps = -1;
     if (delta_time > 0.0f)
@@ -33,15 +33,22 @@ static void render_debug_text(void)
     ++position.Y;
 
     fprint_string("Mouse: (%d, %d)", position, background, foreground, selected_block_x, selected_block_y);
+    ++position.Y;
+    fprint_string(mob_debug_message, position, background, FOREGROUND_T_RED);
 }
 #endif
+
+
+
 
 static void render(void)
 {
     render_map();
     render_player();
     render_virtual_cursor();
-    Mob_render();
+
+    mob_update();
+
     render_inventory();
     render_hotbar();
 
@@ -50,6 +57,7 @@ static void render(void)
 #endif
 }
 
+
 int main(void)
 {
 #if _DEBUG
@@ -57,13 +65,55 @@ int main(void)
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
+    if (is_new_console())
+    {
+        printf_s("Attempting to launch in conhost.exe.\n");
+
+        int argc = 0;
+        LPWSTR* pArgv = CommandLineToArgvW(GetCommandLine(), &argc);
+
+        STARTUPINFO startup_info =
+        {
+            .cb = sizeof(startup_info)
+        };
+        PROCESS_INFORMATION process_information = { 0 };
+
+        const int path_character = (int)wcslen(pArgv[0]) + 4, path_size = sizeof(WCHAR) * path_character;
+        LPWSTR pArgument = calloc(path_size, sizeof(WCHAR));
+        wcscat_s(pArgument, path_size, L"-- ");
+        wcscat_s(pArgument, path_size, pArgv[0]);
+
+        const BOOL success = CreateProcess(TEXT("C:\\Windows\\System32\\conhost.exe"),
+            pArgument,
+            NULL,
+            NULL,
+            false,
+            0,
+            NULL,
+            NULL,
+            &startup_info,
+            &process_information);
+
+        LocalFree(pArgv);
+        free(pArgument);
+        if (success)
+        {
+            WaitForSingleObject(process_information.hProcess, INFINITE);
+            CloseHandle(process_information.hProcess);
+            CloseHandle(process_information.hThread);
+            return 0;
+        }
+    }
+
     call_database(false);
     initialize_console(true, false);
     initialize_input_handler();
-
     register_mob_click_handler();
-
+    
     create_map();
+    mob_init();
+
+
     player_init(map.size.x / 2);
     initialize_block_control();
     initialize_inventory();
@@ -81,12 +131,8 @@ int main(void)
         }
         update_console();
         update_input();
-
         player_update();
         inventory_input();
-        Mob_Spawn_Time();
-        update_mob_ai();
-
         render();
     }
 

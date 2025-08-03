@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+
 /*
     input.h 사용법:
         마우스 클릭:
@@ -18,21 +19,14 @@
 /*
     left: true 일때 왼쪽 마우스 버튼, false 일때 오른쪽 마우스 버튼
 */
-typedef void (* mouse_click_t)(const bool left);
-typedef void (* mouse_position_t)(const COORD position);
-
-//전투 시스템을 위한 마우스 콜백  -->mob.c 적용 위함 
-typedef void (*mouse_click_with_pos_t)(const bool left, const COORD position);
-
-static void mouse_click_with_pos_callback(const bool left, const COORD position);
-void subscribe_mouse_click_with_pos(const mouse_click_with_pos_t callback);
-void unsubscribe_mouse_click_with_pos(const mouse_click_with_pos_t callback);
-
-//=========================================================승준 추가 
-
+typedef void (*mouse_click_t)(const bool left);
+typedef void (*mouse_position_t)(const COORD position);
 
 extern bool keyboard_pressed;
 extern char input_character;
+
+// 키보드 상태를 직접 확인하는 함수
+bool is_key_down(int virtual_key_code);
 
 void initialize_input_handler(void);
 void update_input(void);
@@ -47,3 +41,14 @@ void unsubscribe_mouse_position(const mouse_position_t callback);
 void pause_hook(void);
 void resume_hook(void);
 #endif
+
+
+
+//전투 시스템을 위한 마우스 콜백  -->mob.c 적용 위함 
+typedef void (*mouse_click_with_pos_t)(const bool left, const COORD position);
+
+static void mouse_click_with_pos_callback(const bool left, const COORD position);
+void subscribe_mouse_click_with_pos(const mouse_click_with_pos_t callback);
+void unsubscribe_mouse_click_with_pos(const mouse_click_with_pos_t callback);
+
+//=========================================================승준 추가 

@@ -3,6 +3,7 @@
 
 #include <conio.h>
 #include <Windows.h>
+#include "console.h"
 
 #define CALLBACK_SUBSCRIBE_IMPLEMENTATION(type, array, count) \
     if (!array) \
@@ -16,7 +17,7 @@
         if (array[i] == callback) \
             array[i] = NULL
 
-bool keyboard_pressed = false;
+    bool keyboard_pressed = false;
 char input_character = 0;
 
 HANDLE input_handle = NULL;
@@ -28,20 +29,6 @@ int mouse_click_callback_count = 0;
 
 mouse_position_t* pMousePosition_callbacks = NULL;
 int mouse_position_callback_count = 0;
-
-//새로운 콜백 함수 포인터 배열 ->승준 추가 ================
-mouse_click_with_pos_t* pMouseClickWithPos_callbacks = NULL;
-int mouse_click_with_pos_callback_count = 0; 
-
-// 새로운 콜백 함수 추가
-static void mouse_click_with_pos_callback(const bool left, const COORD position)
-{
-    for (int i = 0; i < mouse_click_with_pos_callback_count; ++i)
-        if (pMouseClickWithPos_callbacks[i])
-            pMouseClickWithPos_callbacks[i](left, position);
-}
-
-//===============
 
 static void mouse_click_callback(const bool left)
 {
@@ -84,19 +71,19 @@ static LRESULT CALLBACK LowLevelMouseProc(const int nCode, const WPARAM wParam, 
 {
     if (nCode == HC_ACTION)
     {
-        const MSLLHOOKSTRUCT *pMouse_struct = (MSLLHOOKSTRUCT *)lParam;
-        const COORD position = convert_to_console(pMouse_struct->pt);
+        const MSLLHOOKSTRUCT* pMouse_struct = (MSLLHOOKSTRUCT*)lParam;
+        const COORD position = convert_monitor_to_console(pMouse_struct->pt);
         mouse_position_callback(position);
 
         switch (wParam)
         {
-            case WM_LBUTTONUP:
-                mouse_click_callback(true);
-                break;
+        case WM_LBUTTONUP:
+            mouse_click_callback(true);
+            break;
 
-            case WM_RBUTTONUP:
-                mouse_click_callback(false);
-                break;
+        case WM_RBUTTONUP:
+            mouse_click_callback(false);
+            break;
         }
     }
 
@@ -117,6 +104,27 @@ void update_input(void)
     keyboard_pressed = _kbhit();
     if (keyboard_pressed)
         input_character = (char)_getch();
+}
+
+
+
+//새로운 콜백 함수 포인터 배열 ->승준 추가 ================
+mouse_click_with_pos_t* pMouseClickWithPos_callbacks = NULL;
+int mouse_click_with_pos_callback_count = 0;
+
+// 새로운 콜백 함수 추가
+static void mouse_click_with_pos_callback(const bool left, const COORD position)
+{
+    for (int i = 0; i < mouse_click_with_pos_callback_count; ++i)
+        if (pMouseClickWithPos_callbacks[i])
+            pMouseClickWithPos_callbacks[i](left, position);
+}
+
+// GetAsyncKeyState를 사용하여 키의 현재 상태를 반환
+// 0x8000 비트가 설정되어 있으면 키가 현재 눌려있다는 의미
+bool is_key_down(int virtual_key_code)
+{
+    return (GetAsyncKeyState(virtual_key_code) & 0x8000) != 0;
 }
 
 void destroy_input_handler(void)
@@ -171,10 +179,6 @@ void unsubscribe_mouse_click_with_pos(const mouse_click_with_pos_t callback)
 {
     CALLBACK_UNSUBSCRIBE_IMPLEMENTATION(pMouseClickWithPos_callbacks, mouse_click_with_pos_callback_count);
 }
-//========================= 
-
-
-
 
 
 
