@@ -10,6 +10,7 @@
 #include <wchar.h>
 #include <time.h>
 #include <conio.h>
+#include <Windows.h> // VK_SPACE 사용을 위해 추가
 
 player_t player = { 0 };
 
@@ -19,6 +20,9 @@ player_t player = { 0 };
 
 #define GRAVITY 50.0f         // 중력 가속도
 #define JUMP_STRENGTH -12.0f  // 점프 시 부여되는 초기 수직 속도
+
+// 수평 이동 속도 조절 (값이 작을수록 빨라짐)
+#define HORIZONTAL_MOVE_COOLDOWN 0.08f  // 약 1초에 12.5칸 이동
 
 // 각 픽셀을 표현할 구조체
 typedef struct {
@@ -59,42 +63,57 @@ static const PlayerSpritePixel player_sprite_walk[2][PLAYER_SPRITE_HEIGHT][PLAYE
     }
 };
 
-extern bool keyboard_pressed;
-extern char input_character;
-
 static void movement(void) {
-
-    // 키 입력이 있으면 '이동중' 상태로 변경
-    if (!keyboard_pressed) {
-        player.is_moving = 0;
-        return;
-    }
-
-    const char character = input_character;
-
-    player.is_moving = 0;
-
-    if (character == 'q') {
+    // 종료 키 확인
+    if (is_key_down('Q')) {
         game_exit = true;
         return;
     }
 
-    // 점프
-    if (character == ' ' && player.is_on_ground) {
+    // 점프 키 확인
+    if (is_key_down(VK_SPACE) && player.is_on_ground) {
         player.velocity_y = JUMP_STRENGTH;
         player.is_on_ground = false;
-        // 점프 시에는 걷는 애니메이션을 하지 않도록 is_moving을 설정하지 않음
     }
 
-    // 수평 이동
-    if (character == 'a' || character == 'd') {
-        int new_x = player.x;
-        if (character == 'a') new_x--;
-        else if (character == 'd') new_x++;
+    // 쿨다운 타이머 업데이트
+    player.move_cooldown_timer += delta_time;
 
-        if (is_walkable(new_x, player.y)) {
-            player.x = new_x;
-            player.is_moving = 1;
+    bool is_a_down = is_key_down('A');
+    bool is_d_down = is_key_down('D');
+
+    // 키가 눌렸는지 여부에 따라 애니메이션 상태 설정
+    if (is_a_down || is_d_down) {
+        player.is_moving = 1;
+    }
+    else {
+        player.is_moving = 0;
+    }
+
+    // 쿨타임이 다 되었는지 확인
+    if (player.move_cooldown_timer >= HORIZONTAL_MOVE_COOLDOWN) {
+        bool moved_horizontally = false;
+
+        // 왼쪽 이동 (D키와 동시에 눌리면 무시)
+        if (is_a_down && !is_d_down) {
+            int new_x = player.x - 1;
+            if (is_walkable(new_x, player.y)) {
+                player.x = new_x;
+                moved_horizontally = true;
+            }
+        }
+        // 오른쪽 이동 (A키와 동시에 눌리면 무시)
+        else if (is_d_down && !is_a_down) {
+            int new_x = player.x + 1;
+            if (is_walkable(new_x, player.y)) {
+                player.x = new_x;
+                moved_horizontally = true;
+            }
+        }
+
+        // 실제로 이동이 일어났다면 타이머를 리셋
+        if (moved_horizontally) {
+            player.move_cooldown_timer = 0.0f;
         }
     }
 }
@@ -186,6 +205,9 @@ void player_init(int x) {
     player.current_frame = 0;
     player.animation_timer = 0.0f;
 
+    // 이동 쿨다운 타이머 초기화
+    player.move_cooldown_timer = 0.0f;
+
     //subscribe_keyhit(movement);
     subscribe_offset_change(update_player_offset);
 }
@@ -211,18 +233,6 @@ bool is_walkable(int x, int y) {
 
     return false;
 }
-
-//void player_move(int dx, int dy) {
-//    int new_x = player.x + dx;
-//    int new_y = player.y + dy;
-//
-//    // 충돌 체크 후 이동
-//    if (is_walkable(new_x, new_y)) {
-//        player.x = new_x;
-//        player.y = new_y;
-//        player.is_moving = 1;
-//    }
-//}
 
 void render_player(void) {
     // 플레이어의 중심이 될 콘솔 위치 (화면 중앙)
