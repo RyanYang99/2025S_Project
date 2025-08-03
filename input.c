@@ -3,6 +3,7 @@
 
 #include <conio.h>
 #include <Windows.h>
+#include "console.h"
 
 #define CALLBACK_SUBSCRIBE_IMPLEMENTATION(type, array, count) \
     if (!array) \
@@ -71,7 +72,7 @@ static LRESULT CALLBACK LowLevelMouseProc(const int nCode, const WPARAM wParam, 
     if (nCode == HC_ACTION)
     {
         const MSLLHOOKSTRUCT *pMouse_struct = (MSLLHOOKSTRUCT *)lParam;
-        const COORD position = convert_to_console(pMouse_struct->pt);
+        const COORD position = convert_monitor_to_console(pMouse_struct->pt);
         mouse_position_callback(position);
 
         switch (wParam)
