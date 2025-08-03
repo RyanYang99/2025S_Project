@@ -1,0 +1,10 @@
+﻿index,name,max_stack,type,base_durability,tool_kind,material_tier,is_placeable
+101,Grass_Block,99,1,6,0,0,1
+102,Dirt_Block,99,1,12,0,0,1
+103,Stone_Block,99,1,21,0,0,1
+104,Iron_Ore_Block,99,1,35,0,0,1
+105,Log_Block,99,1,12,0,0,1
+106,Leaf_Block,99,1,7,0,0,1
+107,Snow_Block,99,1,6,0,0,1
+108,Sand_Block,99,1,8,0,0,1
+201,Wooden_Pickaxe,1,2,50,2,1,0

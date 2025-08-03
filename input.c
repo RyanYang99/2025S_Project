@@ -1,6 +1,7 @@
 ﻿#include "leak.h"
 #include "input.h"
 
+#include <conio.h>
 #include <Windows.h>
 #include "console.h"
 
@@ -15,6 +16,9 @@
     for (int i = 0; i < count; ++i) \
         if (array[i] == callback) \
             array[i] = NULL
+
+bool keyboard_pressed = false;
+char input_character = 0;
 
 HANDLE input_handle = NULL;
 DWORD original_mode = 0;
@@ -31,6 +35,29 @@ static void mouse_click_callback(const bool left)
     for (int i = 0; i < mouse_click_callback_count; ++i)
         if (pMouseClick_callbacks[i])
             pMouseClick_callbacks[i](left);
+}
+
+static const COORD convert_to_console(const POINT point)
+{
+    POINT client_point =
+    {
+        .x = point.x,
+        .y = point.y
+    };
+    ScreenToClient(GetConsoleWindow(), &client_point);
+
+    CONSOLE_FONT_INFO font = { 0 };
+    GetCurrentConsoleFont(GetStdHandle(STD_OUTPUT_HANDLE), false, &font);
+
+    if (font.dwFontSize.X == 0) font.dwFontSize.X = 8;
+    if (font.dwFontSize.Y == 0) font.dwFontSize.Y = 16;
+
+    const COORD consoleCoord =
+    {
+        .X = (SHORT)(client_point.x / font.dwFontSize.X),
+        .Y = (SHORT)(client_point.y / font.dwFontSize.Y)
+    };
+    return consoleCoord;
 }
 
 static void mouse_position_callback(const COORD position)
@@ -69,8 +96,14 @@ void initialize_input_handler(void)
     GetConsoleMode(input_handle, &original_mode);
     SetConsoleMode(input_handle, ENABLE_EXTENDED_FLAGS | ENABLE_MOUSE_INPUT);
 
-    //디버깅 할때 주석 처리
     hook = SetWindowsHookEx(WH_MOUSE_LL, LowLevelMouseProc, NULL, 0);
+}
+
+void update_input(void)
+{
+    keyboard_pressed = _kbhit();
+    if (keyboard_pressed)
+        input_character = (char)_getch();
 }
 
 void destroy_input_handler(void)
@@ -107,3 +140,13 @@ void unsubscribe_mouse_position(const mouse_position_t callback)
 {
     CALLBACK_UNSUBSCRIBE_IMPLEMENTATION(pMousePosition_callbacks, mouse_position_callback_count);
 }
+
+#if _DEBUG
+void pause_hook(void) {
+    UnhookWindowsHookEx(hook);
+}
+
+void resume_hook(void) {
+    hook = SetWindowsHookEx(WH_MOUSE_LL, LowLevelMouseProc, NULL, 0);
+}
+#endif
