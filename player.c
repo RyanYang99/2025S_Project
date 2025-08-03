@@ -197,12 +197,13 @@ bool is_walkable(int x, int y) {
         return false;
     }
 
-    // 블록 정보 가져오기 (map.c의 함수 사용)
+    // 블록 정보 가져오기 
     block_info_t block = get_block_info_at(x, y);
 
     // 블록 타입에 따른 이동 가능 여부 판단
     switch (block.type) {
         case BLOCK_AIR:
+        case BLOCK_LOG:
         case BLOCK_LEAF:
         case BLOCK_WATER:
             return true;
