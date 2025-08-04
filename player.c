@@ -205,6 +205,7 @@ bool is_walkable(int x, int y) {
         case BLOCK_AIR:
         case BLOCK_LEAF:
         case BLOCK_WATER:
+		case BLOCK_STAR:
             return true;
     }
 

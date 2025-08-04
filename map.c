@@ -11,6 +11,7 @@
 #include "perlin.h"
 #include "player.h"
 #include "ItemDB.h"
+#include "date_time.h"
 
 typedef enum
 {
@@ -26,51 +27,9 @@ int total_offsets = 0;
 int offset_callback_count = 0;
 offset_changed_t* pOffset_callbacks = NULL;
 
-const color_tchar_t pAir[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_BLUE } },
-    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_BLUE } },
-    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_BLUE }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_BLUE } }
-}, pGrass[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GREEN } },
-    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GREEN } },
-    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GREEN } }
-}, pDirt[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW } },
-    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW } },
-    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW } }
-}, pBedrock[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { '#' , BACKGROUND_T_GRAY, BACKGROUND_T_BLACK } },
-    { { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { '#' , BACKGROUND_T_GRAY, BACKGROUND_T_BLACK } },
-    { { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { '#' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY } }
-}, pStone[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ' , BACKGROUND_T_GRAY, BACKGROUND_T_BLACK } },
-    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ' , BACKGROUND_T_GRAY, BACKGROUND_T_BLACK } },
-    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_GRAY } }
-}, pIron_ore[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }, { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }, { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY } },
-    { { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }, { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }, { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY } },
-    { { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }, { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY }, { '.' , FOREGROUND_T_DARKGRAY, BACKGROUND_T_GRAY } }
-}, pLog[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKRED }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW } },
-    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKRED }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW } },
-    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKRED }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW } }
-}, pLeaf[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { '.' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { '.' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { '.' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN } },
-    { { '.' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { '.' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { '.' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN } },
-    { { '.' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { '.' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN }, { '.' , FOREGROUND_T_BLACK, BACKGROUND_T_GREEN } }
-}, pSnow[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE } },
-    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE } },
-    { { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE }, { ' ' , FOREGROUND_T_BLACK, BACKGROUND_T_WHITE } }
-}, pSand[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW } },
-    { { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW } },
-    { { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW }, { '.' , BACKGROUND_T_YELLOW, BACKGROUND_T_DARKYELLOW } }
-}, pWater[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE } },
-    { { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE } },
-    { { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE }, { '.' , FOREGROUND_T_BLUE, BACKGROUND_T_DARKBLUE } }
-};
+static block_t air_or_star(void) {
+    return !(rand() % 500) ? BLOCK_STAR : BLOCK_AIR;
+}
 
 block_info_t get_block_info_at(int x, int y)
 {
@@ -93,11 +52,93 @@ bool set_block_at(int x, int y, block_t type)
 
 color_tchar_t get_block_texture(const block_t block, const int x, const int y)
 {
+    const color_tchar_t pAir_midnight[TEXTURE_SIZE][TEXTURE_SIZE] = {
+        { { ' ' , BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_T_BLACK, 0 } },
+        { { ' ' , BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_T_BLACK, 0 } },
+        { { ' ' , BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_T_BLACK, 0 } }
+    }, pAir_dawn[TEXTURE_SIZE][TEXTURE_SIZE] = {
+        { { ' ' , BACKGROUND_T_DARKBLUE, 0 }, { ' ', BACKGROUND_T_DARKBLUE, 0 }, { ' ', BACKGROUND_T_DARKBLUE, 0 } },
+        { { ' ' , BACKGROUND_T_DARKBLUE, 0 }, { ' ', BACKGROUND_T_DARKBLUE, 0 }, { ' ', BACKGROUND_T_DARKBLUE, 0 } },
+        { { ' ' , BACKGROUND_T_DARKBLUE, 0 }, { ' ', BACKGROUND_T_DARKBLUE, 0 }, { ' ', BACKGROUND_T_DARKBLUE, 0 } }
+    }, pAir_sun[TEXTURE_SIZE][TEXTURE_SIZE] = {
+        { { ' ' , BACKGROUND_T_YELLOW, 0 }, { ' ', BACKGROUND_T_YELLOW, 0 }, { ' ', BACKGROUND_T_YELLOW, 0 } },
+        { { ' ' , BACKGROUND_T_YELLOW, 0 }, { ' ', BACKGROUND_T_YELLOW, 0 }, { ' ', BACKGROUND_T_YELLOW, 0 } },
+        { { ' ' , BACKGROUND_T_YELLOW, 0 }, { ' ', BACKGROUND_T_YELLOW, 0 }, { ' ', BACKGROUND_T_YELLOW, 0 } }
+    }, pAir_noon[TEXTURE_SIZE][TEXTURE_SIZE] = {
+        { { ' ' , BACKGROUND_T_BLUE, 0 }, { ' ', BACKGROUND_T_BLUE, 0 }, { ' ', BACKGROUND_T_BLUE, 0 } },
+        { { ' ' , BACKGROUND_T_BLUE, 0 }, { ' ', BACKGROUND_T_BLUE, 0 }, { ' ', BACKGROUND_T_BLUE, 0 } },
+        { { ' ' , BACKGROUND_T_BLUE, 0 }, { ' ', BACKGROUND_T_BLUE, 0 }, { ' ', BACKGROUND_T_BLUE, 0 } }
+    }, pAir_afternoon[TEXTURE_SIZE][TEXTURE_SIZE] = {
+        { { ' ' , BACKGROUND_T_CYAN, 0 }, { ' ', BACKGROUND_T_CYAN, 0 }, { ' ', BACKGROUND_T_CYAN, 0 } },
+        { { ' ' , BACKGROUND_T_CYAN, 0 }, { ' ', BACKGROUND_T_CYAN, 0 }, { ' ', BACKGROUND_T_CYAN, 0 } },
+        { { ' ' , BACKGROUND_T_CYAN, 0 }, { ' ', BACKGROUND_T_CYAN, 0 }, { ' ', BACKGROUND_T_CYAN, 0 } }
+    }, pGrass[TEXTURE_SIZE][TEXTURE_SIZE] = {
+        { { ' ' , BACKGROUND_T_GREEN, 0 }, { ' ', BACKGROUND_T_GREEN, 0 }, { ' ', BACKGROUND_T_GREEN, 0 } },
+        { { ' ' , BACKGROUND_T_GREEN, 0 }, { ' ', BACKGROUND_T_GREEN, 0 }, { ' ', BACKGROUND_T_GREEN, 0 } },
+        { { ' ' , BACKGROUND_T_GREEN, 0 }, { ' ', BACKGROUND_T_GREEN, 0 }, { ' ', BACKGROUND_T_GREEN, 0 } }
+    }, pDirt[TEXTURE_SIZE][TEXTURE_SIZE] = {
+        { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ', BACKGROUND_T_DARKYELLOW, 0 }, { ' ', BACKGROUND_T_DARKYELLOW, 0 } },
+        { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ', BACKGROUND_T_DARKYELLOW, 0 }, { ' ', BACKGROUND_T_DARKYELLOW, 0 } },
+        { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ', BACKGROUND_T_DARKYELLOW, 0 }, { ' ', BACKGROUND_T_DARKYELLOW, 0 } }
+    }, pBedrock[TEXTURE_SIZE][TEXTURE_SIZE] = {
+        { { '#' , BACKGROUND_T_GRAY, FOREGROUND_T_BLACK }, { '#' , BACKGROUND_T_GRAY, FOREGROUND_T_BLACK }, { '#' , BACKGROUND_T_GRAY, FOREGROUND_T_BLACK } },
+        { { '#' , BACKGROUND_T_GRAY, FOREGROUND_T_BLACK }, { '#' , BACKGROUND_T_GRAY, FOREGROUND_T_BLACK }, { '#' , BACKGROUND_T_GRAY, FOREGROUND_T_BLACK } },
+        { { '#' , BACKGROUND_T_GRAY, FOREGROUND_T_BLACK }, { '#' , BACKGROUND_T_GRAY, FOREGROUND_T_BLACK }, { '#' , BACKGROUND_T_GRAY, FOREGROUND_T_BLACK } }
+    }, pStone[TEXTURE_SIZE][TEXTURE_SIZE] = {
+        { { ' ' , BACKGROUND_T_GRAY, 0 }, { ' ' , BACKGROUND_T_GRAY, 0 }, { ' ' , BACKGROUND_T_GRAY, 0 } },
+        { { ' ' , BACKGROUND_T_GRAY, 0 }, { ' ' , BACKGROUND_T_GRAY, 0 }, { ' ' , BACKGROUND_T_GRAY, 0 } },
+        { { ' ' , BACKGROUND_T_GRAY, 0 }, { ' ' , BACKGROUND_T_GRAY, 0 }, { ' ' , BACKGROUND_T_GRAY, 0 } }
+    }, pIron_ore[TEXTURE_SIZE][TEXTURE_SIZE] = {
+        { { '.' , BACKGROUND_T_GRAY, FOREGROUND_T_DARKGRAY }, { '.' , BACKGROUND_T_GRAY, FOREGROUND_T_DARKGRAY }, { '.' , BACKGROUND_T_GRAY, FOREGROUND_T_DARKGRAY } },
+        { { '.' , BACKGROUND_T_GRAY, FOREGROUND_T_DARKGRAY }, { '.' , BACKGROUND_T_GRAY, FOREGROUND_T_DARKGRAY }, { '.' , BACKGROUND_T_GRAY, FOREGROUND_T_DARKGRAY } },
+        { { '.' , BACKGROUND_T_GRAY, FOREGROUND_T_DARKGRAY }, { '.' , BACKGROUND_T_GRAY, FOREGROUND_T_DARKGRAY }, { '.' , BACKGROUND_T_GRAY, FOREGROUND_T_DARKGRAY } }
+    }, pLog[TEXTURE_SIZE][TEXTURE_SIZE] = {
+        { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKRED, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 } },
+        { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKRED, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 } },
+        { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKRED, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 } }
+    }, pLeaf[TEXTURE_SIZE][TEXTURE_SIZE] = {
+        { { '.' , BACKGROUND_T_GREEN, FOREGROUND_T_BLACK }, { '.' , BACKGROUND_T_GREEN, FOREGROUND_T_BLACK }, { '.' , BACKGROUND_T_GREEN, FOREGROUND_T_BLACK } },
+        { { '.' , BACKGROUND_T_GREEN, FOREGROUND_T_BLACK }, { '.' , BACKGROUND_T_GREEN, FOREGROUND_T_BLACK }, { '.' , BACKGROUND_T_GREEN, FOREGROUND_T_BLACK } },
+        { { '.' , BACKGROUND_T_GREEN, FOREGROUND_T_BLACK }, { '.' , BACKGROUND_T_GREEN, FOREGROUND_T_BLACK }, { '.' , BACKGROUND_T_GREEN, FOREGROUND_T_BLACK } }
+    }, pSnow[TEXTURE_SIZE][TEXTURE_SIZE] = {
+        { { ' ' , BACKGROUND_T_WHITE, 0 }, { ' ' , BACKGROUND_T_WHITE, 0 }, { ' ' , BACKGROUND_T_WHITE, 0 } },
+        { { ' ' , BACKGROUND_T_WHITE, 0 }, { ' ' , BACKGROUND_T_WHITE, 0 }, { ' ' , BACKGROUND_T_WHITE, 0 } },
+        { { ' ' , BACKGROUND_T_WHITE, 0 }, { ' ' , BACKGROUND_T_WHITE, 0 }, { ' ' , BACKGROUND_T_WHITE, 0 } }
+    }, pSand[TEXTURE_SIZE][TEXTURE_SIZE] = {
+        { { '.' , BACKGROUND_T_DARKYELLOW, FOREGROUND_T_YELLOW }, { '.' , BACKGROUND_T_DARKYELLOW, FOREGROUND_T_YELLOW }, { '.' , BACKGROUND_T_DARKYELLOW, FOREGROUND_T_YELLOW } },
+        { { '.' , BACKGROUND_T_DARKYELLOW, FOREGROUND_T_YELLOW }, { '.' , BACKGROUND_T_DARKYELLOW, FOREGROUND_T_YELLOW }, { '.' , BACKGROUND_T_DARKYELLOW, FOREGROUND_T_YELLOW } },
+        { { '.' , BACKGROUND_T_DARKYELLOW, FOREGROUND_T_YELLOW }, { '.' , BACKGROUND_T_DARKYELLOW, FOREGROUND_T_YELLOW }, { '.' , BACKGROUND_T_DARKYELLOW, FOREGROUND_T_YELLOW } }
+    }, pWater[TEXTURE_SIZE][TEXTURE_SIZE] = {
+        { { '.' , BACKGROUND_T_DARKBLUE, FOREGROUND_T_BLUE }, { '.' , BACKGROUND_T_DARKBLUE, FOREGROUND_T_BLUE }, { '.' , BACKGROUND_T_DARKBLUE, FOREGROUND_T_BLUE } },
+        { { '.' , BACKGROUND_T_DARKBLUE, FOREGROUND_T_BLUE }, { '.' , BACKGROUND_T_DARKBLUE, FOREGROUND_T_BLUE }, { '.' , BACKGROUND_T_DARKBLUE, FOREGROUND_T_BLUE } },
+        { { '.' , BACKGROUND_T_DARKBLUE, FOREGROUND_T_BLUE }, { '.' , BACKGROUND_T_DARKBLUE, FOREGROUND_T_BLUE }, { '.' , BACKGROUND_T_DARKBLUE, FOREGROUND_T_BLUE } }
+    }, pStar[TEXTURE_SIZE][TEXTURE_SIZE] = {
+        { { ' ' , BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_T_BLACK, 0 } },
+        { { ' ' , BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_T_WHITE, 0 }, { ' ', BACKGROUND_T_BLACK, 0 } },
+        { { ' ' , BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_T_BLACK, 0 } }
+    };
+
+    if (is_air_or_star(block)) {
+        if (date_time_elapsed_since_start.hour >= 0 && date_time_elapsed_since_start.hour <= 4 ||
+            date_time_elapsed_since_start.hour >= 20 && date_time_elapsed_since_start.hour <= 24) {
+            if (block == BLOCK_AIR)
+                return pAir_midnight[y][x];
+            else
+                return pStar[y][x];
+        }
+        else if (date_time_elapsed_since_start.hour >= 5 && date_time_elapsed_since_start.hour <= 6)
+            return pAir_dawn[y][x];
+        else if (date_time_elapsed_since_start.hour >= 7 && date_time_elapsed_since_start.hour <= 8 ||
+            date_time_elapsed_since_start.hour >= 18 && date_time_elapsed_since_start.hour <= 19)
+            return pAir_sun[y][x];
+        else if (date_time_elapsed_since_start.hour >= 9 && date_time_elapsed_since_start.hour <= 15)
+            return pAir_noon[y][x];
+        else if (date_time_elapsed_since_start.hour >= 16 && date_time_elapsed_since_start.hour <= 17)
+            return pAir_afternoon[y][x];
+    }
+
     switch (block)
     {
-        case BLOCK_AIR:
-            return pAir[y][x];
-
         case BLOCK_GRASS:
             return pGrass[y][x];
 
@@ -132,19 +173,23 @@ color_tchar_t get_block_texture(const block_t block, const int x, const int y)
     return (color_tchar_t){ 0 };
 }
 
+const bool is_air_or_star(const block_t block) {
+    return block == BLOCK_AIR || block == BLOCK_STAR;
+}
+
 bool damage_block_at(map_t* pMap, int x, int y, int damage)
 {
     if (x < 0 || x >= pMap->size.x || y < 0 || y >= pMap->size.y)
         return false;
 
-    if (pMap->ppBlocks[y][x].type == BLOCK_AIR)
+    if (is_air_or_star(pMap->ppBlocks[y][x].type))
         return false;
 
     pMap->ppBlocks[y][x].hp -= damage;
 
     if (pMap->ppBlocks[y][x].hp <= 0)
     {
-        initialize_block(&pMap->ppBlocks[y][x], BLOCK_AIR);
+        initialize_block(&pMap->ppBlocks[y][x], air_or_star());
         return true;
     }
 
@@ -183,7 +228,7 @@ static int find_top(const int x)
         return -1;
 
     for (int y = 0; y < map.size.y; ++y)
-        if (map.ppBlocks[y][x].type != BLOCK_AIR)
+        if (is_air_or_star(map.ppBlocks[y][x].type))
             return y;
 
     return -1;
@@ -191,8 +236,9 @@ static int find_top(const int x)
 
 static void generate_strip(const int x, const biome_t biome, const bool override_height, const int height_to_use)
 {
+    srand((unsigned int)(time(NULL) + x));
     for (int y = 0; y < map.size.y; ++y)
-        initialize_block(&map.ppBlocks[y][x], BLOCK_AIR);
+        initialize_block(&map.ppBlocks[y][x], air_or_star());
 
     int height = height_to_use;
     if (!override_height)
@@ -255,7 +301,7 @@ static void generate_strip(const int x, const biome_t biome, const bool override
     {
         for (int wy = 150; wy < height; ++wy)
         {
-            if (map.ppBlocks[wy][x].type == BLOCK_AIR)
+            if (is_air_or_star(map.ppBlocks[wy][x].type))
                 initialize_block(&map.ppBlocks[wy][x], BLOCK_WATER);
         }
     }
@@ -317,7 +363,7 @@ static void place_leaves(const int x, const int width_to_sides, const int lower,
 {
     for (int tx = x + (right ? 1 : -1); right ? (tx <= x + width_to_sides) : (tx >= x - width_to_sides); right ? ++tx : --tx)
         for (int ty = upper; ty <= lower; ++ty)
-            if (map.ppBlocks[ty][tx].type == BLOCK_AIR)
+            if (is_air_or_star(map.ppBlocks[ty][tx].type))
                 initialize_block(&map.ppBlocks[ty][tx], BLOCK_LEAF);
 }
 
@@ -332,10 +378,8 @@ static void place_tree(const int x, const int y, const int width_to_sides, const
 
     const int half = (int)roundf(width_to_sides / 2.0f), top = leaves_upper - 1;
     for (int tx = x - half; tx <= x + half; ++tx)
-    {
-        if (map.ppBlocks[top][tx].type == BLOCK_AIR)
+        if (is_air_or_star(map.ppBlocks[top][tx].type))
             initialize_block(&map.ppBlocks[top][tx], BLOCK_LEAF);
-    }
 }
 
 static void generate_trees(const int start, const int end)
