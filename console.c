@@ -122,12 +122,20 @@ static void flip_double_buffer(void)
 static void resize(const HANDLE size_handle)
 {
     SMALL_RECT rect = { 0, 0, 1, 1 };
+
+    const bool maximized = IsZoomed(window);
+    if (maximized)
+        ShowWindow(window, SW_NORMAL);
+
     SetConsoleWindowInfo(size_handle, TRUE, &rect);
     SetConsoleScreenBufferSize(size_handle, console.size);
 
     rect.Right = console.size.X - 1;
     rect.Bottom = console.size.Y - 1;
     SetConsoleWindowInfo(size_handle, TRUE, &rect);
+
+    if (maximized)
+        ShowWindow(window, SW_MAXIMIZE);
 }
 
 static bool update_console_size(void)
