@@ -81,6 +81,7 @@
     <ClCompile Include="console.c" />
     <ClCompile Include="delta.c" />
     <ClCompile Include="formatter.c" />
+    <ClCompile Include="game.c" />
     <ClCompile Include="global_state.c" />
     <ClCompile Include="input.c" />
     <ClCompile Include="inventory.c" />
@@ -92,6 +93,7 @@
     <ClCompile Include="perlin.c" />
     <ClCompile Include="player.c" />
     <ClCompile Include="date_time.c" />
+    <ClCompile Include="save.c" />
     <ClCompile Include="Tool.c" />
   </ItemGroup>
   <ItemGroup>
@@ -101,6 +103,7 @@
     <ClInclude Include="date_time.h" />
     <ClInclude Include="delta.h" />
     <ClInclude Include="formatter.h" />
+    <ClInclude Include="game.h" />
     <ClInclude Include="global_state.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="inventory.h" />
@@ -111,6 +114,7 @@
     <ClInclude Include="Mob.h" />
     <ClInclude Include="perlin.h" />
     <ClInclude Include="player.h" />
+    <ClInclude Include="save.h" />
     <ClInclude Include="Tool.h" />
   </ItemGroup>
   <ItemGroup>

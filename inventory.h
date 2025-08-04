@@ -12,12 +12,13 @@
 
 #define HOTBAR_COUNT 10
 
+#pragma pack(push, 1)
 typedef struct {
     int item_db_index; //DB를 참조하는 index
     int quantity; //현재 수량
     int durability; //현재 내구도
-    bool passive_equipped; //갑옷같이 항상 착용되있는 것, 도구는 selected_hotbar_index로 처리
 } player_item_t;
+#pragma pack(pop)
 
 typedef struct {
     int index_in_inventory;
@@ -41,3 +42,5 @@ void decrement_item_from_inventory(player_item_t * const pItem);
 void render_inventory(void);
 void render_hotbar(void);
 void inventory_input(void);
+
+void save_inventory(void);

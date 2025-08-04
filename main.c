@@ -16,42 +16,7 @@
 #include "ItemDB.h"
 #include "inventory.h"
 #include "date_time.h"
-
-#if _DEBUG
-static void render_debug_text(void)
-{
-    const BACKGROUND_color_t background = BACKGROUND_T_BLACK;
-    const FOREGROUND_color_t foreground = FOREGROUND_T_WHITE;
-
-    COORD position = { 0, console.size.Y - 3 };
-
-    int fps = -1;
-    if (delta_time > 0.0f)
-        fps = (int)(1.0f / delta_time);
-    fprint_string("FPS: %d", position, background, foreground, fps);
-    ++position.Y;
-
-    fprint_string("Player: (%d, %d)", position, background, foreground, player.x, player.y);
-    ++position.Y;
-
-    fprint_string("Mouse: (%d, %d)", position, background, foreground, selected_block_x, selected_block_y);
-}
-#endif
-
-static void render(void)
-{
-    render_map();
-    render_player();
-    render_virtual_cursor();
-    Mob_render();
-    render_inventory();
-    render_hotbar();
-    render_time();
-
-#if _DEBUG
-    render_debug_text();
-#endif
-}
+#include "game.h"
 
 static bool force_old_console(void) {
     if (is_new_console()) {
@@ -104,6 +69,7 @@ int main(void)
     if (force_old_console())
         return 0;
 
+    call_database(false);
     initialize_console(true, false);
 
     const main_menu_state_t main_menu_state = main_menu();
@@ -113,38 +79,13 @@ int main(void)
         //TODO: 로딩 추가
     }
 
-    call_database(false);
-    initialize_input_handler();
-    create_map();
-    player_init(map.size.x / 2);
-    initialize_block_control();
-    initialize_inventory();
+    initialize_game();
 
-    while (!game_exit) {
-        update_delta_time();
+    run_game();
 
-        MSG msg = { 0 };
-        while (PeekMessage(&msg, NULL, WM_MOUSEFIRST, WM_MOUSELAST, PM_REMOVE))
-        {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
-        update_console();
-        update_input();
+    destroy_game();
 
-        update_date_time();
-        player_update();
-        inventory_input();
-        Mob_Spawn_Time();
-        update_mob_ai();
-
-        render();
-    }
-
-    destroy_block_control();
     destroy_database();
-    destroy_map();
-    destroy_input_handler();
     destroy_console();
     return EXIT_SUCCESS;
 }

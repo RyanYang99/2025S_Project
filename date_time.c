@@ -2,13 +2,22 @@
 #include "date_time.h"
 
 #include <math.h>
+#include "save.h"
 #include "delta.h"
 #include "console.h"
 #include "formatter.h"
 
-date_time_t date_time_elapsed_since_start = {
-    .hour = 12
-};
+date_time_t date_time_elapsed_since_start = { 0 };
+
+void initialize_date_time(void) {
+    if (pCurrent_save)
+        date_time_elapsed_since_start = pCurrent_save->game_time;
+    else {
+        date_time_elapsed_since_start.second = 0.0f;
+        date_time_elapsed_since_start.minute = date_time_elapsed_since_start.day = 0;
+        date_time_elapsed_since_start.hour = 12;
+    }
+}
 
 void update_date_time(void) {
     //1분 = 1일
@@ -56,4 +65,11 @@ void render_time(void) {
 
     free(pDay);
     free(pTime);
+}
+
+void save_date_time(void) {
+    if (!pCurrent_save)
+        instantiate_save();
+
+    pCurrent_save->game_time = date_time_elapsed_since_start;
 }

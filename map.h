@@ -25,12 +25,13 @@ typedef enum
 } block_t;
 
 // ✅ 블록 정보 구조체: 종류 + 체력 포함
+#pragma pack(push, 1)
 typedef struct
 {
     block_t type;
     int hp;
 } block_info_t;
-
+#pragma pack(pop)
 
 typedef struct
 {
@@ -56,6 +57,8 @@ const bool is_air_or_star(const block_t block);
 
 void subscribe_offset_change(const offset_changed_t callback);
 void unsubscribe_offset_change(const offset_changed_t callback);
+
+void save_map(void);
 
 #if _DEBUG
 void debug_render_map(const bool pause);

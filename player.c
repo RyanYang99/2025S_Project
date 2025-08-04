@@ -2,6 +2,7 @@
 #include "player.h"
 
 #include "map.h"
+#include "save.h"
 #include "input.h"
 #include "delta.h"
 #include "console.h"
@@ -168,13 +169,19 @@ void player_update(void) {
 }
 
 
-void player_init(int x) {
-    player.x = x;
-    player.y = find_ground_pos(x);
-    if (player.y - 1 >= 0)
-        --player.y; // 가능할 시 찾은 블록 위로 설정
+void player_init(void) {
+    if (pCurrent_save) {
+        player.x = pCurrent_save->x;
+        player.y = pCurrent_save->y;
+        player.hp = pCurrent_save->hp;
+    } else {
+        player.x = map.size.x / 2;
+        player.y = find_ground_pos(player.x);
+        if (player.y - 1 >= 0)
+            --player.y; // 가능할 시 찾은 블록 위로 설정
 
-    player.hp = 1000; // 초기 체력
+        player.hp = 1000; // 초기 체력
+    }
 
     // 물리 변수 초기화
     player.precise_y = (float)player.y;
@@ -205,7 +212,7 @@ bool is_walkable(int x, int y) {
         case BLOCK_AIR:
         case BLOCK_LEAF:
         case BLOCK_WATER:
-		case BLOCK_STAR:
+        case BLOCK_STAR:
             return true;
     }
 
@@ -290,4 +297,13 @@ int find_ground_pos(int x)
             return y; //걷지 못하는 블록을 찾으면 y좌표 반환
 
     return map.size.y / 2; //블록을 찾지 못하면 맵 높이의 절반 반환;
+}
+
+void save_player(void) {
+    if (!pCurrent_save)
+        instantiate_save();
+
+    pCurrent_save->x = player.x;
+    pCurrent_save->y = player.y;
+    pCurrent_save->hp = player.hp;
 }

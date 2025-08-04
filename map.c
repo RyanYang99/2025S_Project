@@ -8,6 +8,7 @@
 #include <time.h>
 #include <math.h>
 #include <stdbool.h>
+#include "save.h"
 #include "perlin.h"
 #include "player.h"
 #include "ItemDB.h"
@@ -200,7 +201,7 @@ static void allocate_map(void)
 {
     if (!map.ppBlocks)
     {
-        const int y_size = sizeof(block_info_t*) * map.size.y;
+        const int y_size = sizeof(block_info_t *) * map.size.y;
         map.ppBlocks = malloc(y_size);
         memset(map.ppBlocks, 0, y_size);
     }
@@ -434,14 +435,25 @@ static void resize_map(const bool right)
 
 void create_map(void)
 {
-    fill_table((int)time(NULL));
+    if (pCurrent_save) {
+        for (int i = 0; i < PERLIN_SIZE; ++i)
+            permutation_table[i] = pCurrent_save->pPermuation_table[i];
 
-    map.size.y = MAP_MAX_Y;
-    player.y = map.size.y / 2;
+        map.size.x = pCurrent_save->map_x;
+        map.size.y = pCurrent_save->map_y;
 
-    const int x_size = 10;
-    resize_map(x_size);
-    player.x = x_size / 2;
+        allocate_map();
+        for (int y = 0; y < map.size.y; ++y)
+            for (int x = 0; x < map.size.x; ++x)
+                map.ppBlocks[y][x] = pCurrent_save->pBlocks[y * map.size.x + x];
+    } else {
+        fill_table((int)time(NULL));
+
+        map.size.y = MAP_MAX_Y;
+        player.y = map.size.y / 2;
+
+        resize_map(10);
+    }
 }
 
 void destroy_map(void)
@@ -564,6 +576,27 @@ void unsubscribe_offset_change(const offset_changed_t callback)
             pOffset_callbacks[i] = NULL;
             --offset_callback_count;
         }
+}
+
+void save_map(void) {
+    if (!pCurrent_save)
+        instantiate_save();
+
+    for (int i = 0; i < PERLIN_SIZE; ++i)
+        pCurrent_save->pPermuation_table[i] = permutation_table[i];
+
+    pCurrent_save->map_x = map.size.x;
+    pCurrent_save->map_y = map.size.y;
+
+    const int size = sizeof(block_info_t) * map.size.x * map.size.y;
+    if (!pCurrent_save->pBlocks)
+        pCurrent_save->pBlocks = malloc(size);
+    else
+        pCurrent_save->pBlocks = realloc(pCurrent_save->pBlocks, size);
+
+    for (int y = 0; y < map.size.y; ++y)
+        for (int x = 0; x < map.size.x; ++x)
+            pCurrent_save->pBlocks[y * map.size.x + x] = map.ppBlocks[y][x];
 }
 
 #if _DEBUG

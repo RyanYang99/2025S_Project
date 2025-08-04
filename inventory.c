@@ -3,6 +3,7 @@
 
 #include <conio.h>
 #include "map.h"
+#include "save.h"
 #include "Tool.h"
 #include "input.h"
 #include "delta.h"
@@ -29,16 +30,22 @@ static int current_selection_index = 0,
 
 void initialize_inventory(void) {
     for (int i = 0; i < INVENTORY_SIZE; ++i) {
-        inventory.item[i].item_db_index = 0; // 0은 빈 칸을 의미
-        inventory.item[i].quantity = 0;
-        inventory.item[i].durability = 0;
-        inventory.item[i].passive_equipped = false;
+        if (pCurrent_save)
+            inventory.item[i] = pCurrent_save->pInventory[i];
+        else
+            inventory.item[i].item_db_index = inventory.item[i].quantity = inventory.item[i].durability = 0; // 0은 빈 칸을 의미
     }
 
-    inventory.selected_hotbar_index = 0;
     for (int i = 0; i < HOTBAR_COUNT; ++i) {
-        inventory.pHotbar[i].index_in_inventory = -1;
-        inventory.pHotbar[i].pPlayer_Item = NULL;
+        if (pCurrent_save) {
+            inventory.pHotbar[i].index_in_inventory = pCurrent_save->pHotbar_linked_index[i];
+
+            if (inventory.pHotbar[i].index_in_inventory != -1)
+                inventory.pHotbar[i].pPlayer_Item = &inventory.item[inventory.pHotbar[i].index_in_inventory];
+        } else {
+            inventory.pHotbar[i].index_in_inventory = -1;
+            inventory.pHotbar[i].pPlayer_Item = NULL;
+        }
     }
 }
 
@@ -86,7 +93,6 @@ bool add_item_to_inventory(const int item_db_index, int quantity) {
 
         inventory.item[emptySlot].item_db_index = item_db_index; // items -> item
         inventory.item[emptySlot].durability = pItem_info->base_durability; // items -> item
-        inventory.item[emptySlot].passive_equipped = false; // items -> item
 
         if (quantity <= pItem_info->max_stack) {
             inventory.item[emptySlot].quantity = quantity; // items -> item
@@ -106,7 +112,6 @@ static void remove_item_from_inventory(player_item_t * const pItem) {
     pItem->item_db_index = 0;
     pItem->durability = 0;
     pItem->quantity = 0;
-    pItem->passive_equipped = false;
 
     if (pHotbar->pPlayer_Item->item_db_index == pItem->item_db_index) {
         pHotbar->index_in_inventory = -1;
@@ -305,6 +310,8 @@ void inventory_input(void) {
         ++current_page_index;
     else if (is_number && number <= max_hotbar_index) {
         const int index = current_page_index * ITEMS_PER_PAGE + current_selection_index;
+        if (!inventory.item[index].item_db_index)
+            return;
 
         for (int i = 0; i < max_hotbar_index; ++i)
             if (inventory.pHotbar[i].index_in_inventory == index)
@@ -313,4 +320,15 @@ void inventory_input(void) {
         inventory.pHotbar[number].index_in_inventory = index;
         inventory.pHotbar[number].pPlayer_Item = &inventory.item[index];
     }
+}
+
+void save_inventory(void) {
+    if (!pCurrent_save)
+        instantiate_save();
+
+    for (int i = 0; i < INVENTORY_SIZE; ++i)
+        pCurrent_save->pInventory[i] = inventory.item[i];
+    
+    for (int i = 0; i < HOTBAR_COUNT; ++i)
+        pCurrent_save->pHotbar_linked_index[i] = inventory.pHotbar[i].index_in_inventory;
 }
