@@ -88,7 +88,15 @@ void update_input(void) {
         input_character = (char)_getch();
 }
 
-void destroy_input_handler(void) {
+// GetAsyncKeyState를 사용하여 키의 현재 상태를 반환
+// 0x8000 비트가 설정되어 있으면 키가 현재 눌려있다는 의미
+bool is_key_down(int virtual_key_code)
+{
+    return (GetAsyncKeyState(virtual_key_code) & 0x8000) != 0;
+}
+
+void destroy_input_handler(void)
+{
     SetConsoleMode(input_handle, original_mode);
 
     CALLBACK_DESTROY(mouse_click_t);

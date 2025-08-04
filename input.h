@@ -29,6 +29,9 @@ typedef void (* mouse_in_console_t)(const bool in_console);
 extern bool keyboard_pressed;
 extern char input_character;
 
+// 키보드 상태를 직접 확인하는 함수
+bool is_key_down(int virtual_key_code);
+
 void initialize_input_handler(void);
 
 void update_input(void);

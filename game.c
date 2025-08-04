@@ -50,7 +50,7 @@ static void render(void) {
 }
 
 void initialize_game(void) {
-	pCurrent_save = load_save("test.bin");
+    pCurrent_save = load_save("test.bin");
 
     initialize_date_time();
     initialize_input_handler();
@@ -92,5 +92,5 @@ void destroy_game(void) {
     destroy_input_handler();
     destroy_map();
 
-	write_save("test.bin");
+    write_save("test.bin");
 }
