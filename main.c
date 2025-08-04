@@ -15,6 +15,7 @@
 #include "global_state.h"
 #include "ItemDB.h"
 #include "inventory.h"
+#include "date_time.h"
 
 #if _DEBUG
 static void render_debug_text(void)
@@ -45,6 +46,7 @@ static void render(void)
     Mob_render();
     render_inventory();
     render_hotbar();
+    render_time();
 
 #if _DEBUG
     render_debug_text();
@@ -132,6 +134,7 @@ int main(void)
         update_console();
         update_input();
 
+        update_date_time();
         player_update();
         inventory_input();
         Mob_Spawn_Time();

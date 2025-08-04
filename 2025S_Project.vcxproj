@@ -91,12 +91,14 @@
     <ClCompile Include="Mob.c" />
     <ClCompile Include="perlin.c" />
     <ClCompile Include="player.c" />
+    <ClCompile Include="date_time.c" />
     <ClCompile Include="Tool.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="astar.h" />
     <ClInclude Include="BlockCtrl.h" />
     <ClInclude Include="console.h" />
+    <ClInclude Include="date_time.h" />
     <ClInclude Include="delta.h" />
     <ClInclude Include="formatter.h" />
     <ClInclude Include="global_state.h" />
