@@ -1,15 +1,16 @@
 ﻿#include "leak.h"
 
+#include <time.h>
 #include <stdio.h>
 #include <conio.h>
 #include <stdbool.h>
-#include <time.h>
 #include "map.h"
 #include "Mob.h"
 #include "input.h"
 #include "delta.h"
 #include "player.h"
 #include "console.h"
+#include "main_menu.h"
 #include "BlockCtrl.h"
 #include "global_state.h"
 #include "ItemDB.h"
@@ -50,22 +51,14 @@ static void render(void)
 #endif
 }
 
-int main(void)
-{
-#if _DEBUG
-    //메모리 누수 체크
-    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-#endif
-
-    if (is_new_console())
-    {
+static bool force_old_console(void) {
+    if (is_new_console()) {
         printf_s("Attempting to launch in conhost.exe.\n");
 
         int argc = 0;
         LPWSTR *pArgv = CommandLineToArgvW(GetCommandLine(), &argc);
 
-        STARTUPINFO startup_info =
-        {
+        STARTUPINFO startup_info = {
             .cb = sizeof(startup_info)
         };
         PROCESS_INFORMATION process_information = { 0 };
@@ -88,26 +81,44 @@ int main(void)
 
         LocalFree(pArgv);
         free(pArgument);
-        if (success)
-        {
+        if (success) {
             WaitForSingleObject(process_information.hProcess, INFINITE);
             CloseHandle(process_information.hProcess);
             CloseHandle(process_information.hThread);
-            return 0;
+            return true;
         }
     }
 
+    return false;
+}
+
+int main(void)
+{
+#if _DEBUG
+    //메모리 누수 체크
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
+
+    if (force_old_console())
+        return 0;
+
+    initialize_console(true, true);
+
+    const main_menu_state_t main_menu_state = main_menu();
+    if (main_menu_state == MAIN_MENU_STATE_QUIT)
+        return 0;
+    else if (main_menu_state == MAIN_MENU_STATE_LOAD_GAME) {
+        //TODO: 로딩 추가
+    }
+
     call_database(false);
-    initialize_console(true, false);
     initialize_input_handler();
     create_map();
     player_init(map.size.x / 2);
     initialize_block_control();
     initialize_inventory();
 
-    clear();
-    while (!game_exit)
-    {
+    while (!game_exit) {
         update_delta_time();
 
         MSG msg = { 0 };

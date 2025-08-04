@@ -227,12 +227,17 @@ void print_color_tchar(const color_tchar_t character, const COORD position)
     write(position, character.character, attribute);
 }
 
-int fprint_string(const char * const pFormat, const COORD position, const BACKGROUND_color_t background, const FOREGROUND_color_t foreground, ...)
-{
+int fprint_string(const char * const pFormat, const COORD position, const BACKGROUND_color_t background, const FOREGROUND_color_t foreground, ...) {
     va_list args = { 0 };
     va_start(args, foreground);
-    char *pBuffer = format_string_v(pFormat, args);
+    int result = fprint_string_v(pFormat, position, background, foreground, args);
     va_end(args);
+
+    return result;
+}
+
+int fprint_string_v(const char * const pFormat, const COORD position, const BACKGROUND_color_t background, const FOREGROUND_color_t foreground, const va_list args) {
+    char *pBuffer = format_string_v(pFormat, args);
 
     const int wide_length = MultiByteToWideChar(CP_UTF8, 0, pBuffer, -1, NULL, 0);
     LPWSTR pWBuffer = malloc(sizeof(WCHAR) * wide_length);
