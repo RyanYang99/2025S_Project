@@ -235,6 +235,24 @@ void print_color_tchar(const color_tchar_t character, const COORD position)
     write(position, character.character, attribute);
 }
 
+void fill(const color_tchar_t character) {
+    const WORD attribute = (WORD)character.background | (WORD)character.foreground;
+    if (use_double_buffer)
+        for (int i = 0; i < character_buffer_count; ++i) {
+            character_buffer[i].Char.UnicodeChar = character.character;
+            character_buffer[i].Attributes = attribute;
+        }
+    else {
+        const DWORD total = console.size.X * console.size.Y;
+        const COORD coordinates = { 0 };
+        DWORD written_chars = 0;
+
+        FillConsoleOutputCharacter(handle, character.character, total, coordinates, &written_chars);
+        FillConsoleOutputAttribute(handle, attribute, total, coordinates, &written_chars);
+        SetConsoleCursorPosition(handle, coordinates);
+    }
+}
+
 int fprint_string(const char * const pFormat, const COORD position, const BACKGROUND_color_t background, const FOREGROUND_color_t foreground, ...) {
     va_list args = { 0 };
     va_start(args, foreground);

@@ -1,8 +1,10 @@
 ﻿#include "leak.h"
 #include "main_menu.h"
 
+#include <time.h>
 #include <conio.h>
 #include "map.h"
+#include "date_time.h"
 #include "formatter.h"
 
 #define PRINT_SELECTION(string, index, background, foreground) \
@@ -29,6 +31,13 @@ static void print_center(const char * const string,
     position.X -= (SHORT)strlen(pFormatted) / 2;
     fprint_string(pFormatted, position, background, foreground);
     free(pFormatted);
+}
+
+static void update_time(void) {
+    time_t now = time(NULL);
+    const struct tm *pTime_info = localtime(&now);
+
+    date_time_elapsed_since_start.hour = pTime_info->tm_hour;
 }
 
 const main_menu_state_t main_menu(void) {
@@ -83,7 +92,8 @@ const main_menu_state_t main_menu(void) {
         if (bottom + 2 >= console.size.Y)
             bottom = console.size.Y - 3;
 
-        //TODO: 하늘 추가
+        update_time();
+        fill(get_block_texture(BLOCK_AIR, 0, 0));
 
         for (int i = 0; i < lines; ++i)
             print_center(ppLogo[i], i + top - offset, BACKGROUND_T_BLACK, FOREGROUND_T_GREEN);
