@@ -55,6 +55,7 @@ void write(const COORD position, const TCHAR character, const WORD attribute);
 void clear(void);
 void print_color_tchar(const color_tchar_t character, const COORD position);
 const COORD convert_monitor_to_console(const POINT point);
+const bool is_cursor_inside_console(const POINT point);
 int fprint_string(const char * const pFormat, const COORD position, const BACKGROUND_color_t background, const FOREGROUND_color_t foreground, ...);
 int fprint_string_v(const char * const pFormat, const COORD position, const BACKGROUND_color_t background, const FOREGROUND_color_t foreground, const va_list args);
 void destroy_console(void);

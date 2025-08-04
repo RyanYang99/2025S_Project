@@ -278,6 +278,17 @@ const COORD convert_monitor_to_console(const POINT point)
     return consoleCoord;
 }
 
+const bool is_cursor_inside_console(const POINT point) {
+    RECT window_rect = { 0 };
+    GetWindowRect(window, &window_rect);
+
+    return point.x >= window_rect.left &&
+           point.x <= window_rect.right &&
+           point.y >= window_rect.top &&
+           point.y <= window_rect.bottom &&
+           GetForegroundWindow() == window;
+}
+
 void destroy_console(void)
 {
     if (use_double_buffer)

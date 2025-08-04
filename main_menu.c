@@ -6,7 +6,7 @@
 #include "formatter.h"
 
 #define PRINT_SELECTION(string, index, background, foreground) \
-print_center("%s%s%s", bottom + index, background, foreground, selection == index ? selected_left : "", string, selection == index ? selected_right : "")
+    print_center("%s%s%s", bottom + index, background, foreground, selection == index ? selected_left : "", string, selection == index ? selected_right : "")
 
 static void print_center(const char * const string,
                          const int y,

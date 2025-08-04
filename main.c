@@ -104,12 +104,14 @@ int main(void)
 
     initialize_console(true, true);
 
+    /*
     const main_menu_state_t main_menu_state = main_menu();
     if (main_menu_state == MAIN_MENU_STATE_QUIT)
         return 0;
     else if (main_menu_state == MAIN_MENU_STATE_LOAD_GAME) {
         //TODO: 로딩 추가
     }
+    */
 
     call_database(false);
     initialize_input_handler();

@@ -60,6 +60,9 @@
     <ClCompile Include="formatter.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="main_menu.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="console.h">
@@ -107,8 +110,13 @@
     <ClInclude Include="formatter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="main_menu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="items.csv" />
+    <None Include="items.csv">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
