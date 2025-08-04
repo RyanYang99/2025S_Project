@@ -13,9 +13,8 @@
 #define INVENTORY_FOREGROUND FOREGROUND_T_WHITE
 #define INVENTORY_FOREGROUND_DARK FOREGROUND_T_GRAY
 #define INVENTORY_FOREGROUND_BLINK FOREGROUND_T_WHITE
-#define FOREGROUND_EQUIPPED FOREGROUND_T_DARKBLUE
 
-#define HOTBAR_SIZE_IN_CHARACTERS_X (TEXTURE_SIZE * HOTBAR_COUNT + HOTBAR_COUNT + 1)
+#define HOTBAR_SIZE_IN_CHARACTERS_X (TEXTURE_SIZE * HOTBAR_COUNT)
 #define HOTBAR_SIZE_IN_CHARACTERS_Y (TEXTURE_SIZE + 2)
 
 inventory_t inventory = { 0 };
@@ -154,13 +153,9 @@ static void render_inventory_item(const int y,
             position.X += (SHORT)fprint_string(" (x%d) ]", position, INVENTORY_BACKGROUND, foreground, pItem->quantity);
 
         if (pItem_info->type == ITEM_TYPE_TOOL || pItem_info->type == ITEM_TYPE_ARMOR)
-            position.X += (SHORT)fprint_string(" (내구성: %d/%d) ]", position, INVENTORY_BACKGROUND, foreground, pItem->durability, pItem_info->base_durability);
-
-        if (pItem->passive_equipped)
-            position.X += (SHORT)fprint_string(" [E] ", position, INVENTORY_BACKGROUND, FOREGROUND_EQUIPPED);
-
+            position.X += (SHORT)fprint_string(" (Durability: %d/%d) ]", position, INVENTORY_BACKGROUND, foreground, pItem->durability, pItem_info->base_durability);
     } else
-        fprint_string("[ 비어있음 ]", position, INVENTORY_BACKGROUND, foreground);
+        fprint_string("[ Empty ]", position, INVENTORY_BACKGROUND, foreground);
 }
 
 void render_inventory(void) {
@@ -179,7 +174,7 @@ void render_inventory(void) {
     }
 
     COORD position = { 0 };
-    fprint_string("=== 인벤토리 (%d / %d) ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND, current_page_index + 1, MAX_PAGES);
+    fprint_string("=== Inventory (%d / %d) ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND, current_page_index + 1, MAX_PAGES);
 
     const int start_index = current_page_index * ITEMS_PER_PAGE;
     for (int i = 0; i < ITEMS_PER_PAGE; ++i)
@@ -188,7 +183,7 @@ void render_inventory(void) {
     }
 
     ++position.Y;
-    fprint_string("=== (W / S: 선택, A / D: 페이지, E: 사용 / 장착, I: 닫기) ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
+    fprint_string("=== (W / S: Select, A / D: Page, 0 ~ 9: Hotbar, I: Close) ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
 
     const player_item_t * const pItem = &inventory.item[start_index + current_selection_index];
     if (!pItem->item_db_index)
@@ -198,17 +193,14 @@ void render_inventory(void) {
     position.Y += 2;
     position.X += (SHORT)fprint_string("%s", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND, pItem_info->name);
 
-    if (pItem->passive_equipped)
-        position.X += (SHORT)fprint_string(" (장착중)", position, INVENTORY_BACKGROUND, FOREGROUND_EQUIPPED);
-
     char *pDescription = "";
     switch (pItem_info->type) {
         case ITEM_TYPE_MATERIAL:
-            pDescription = ": 제작에 사용되는 재료입니다.";
+            pDescription = ": Used in crafting.";
             break;
 
         case ITEM_TYPE_MISC:
-            pDescription = ": 특별한 용도가 있는 기타 아이템입니다.";
+            pDescription = ": Has a special ability.";
             break;
     }
 
@@ -311,17 +303,7 @@ void inventory_input(void) {
         --current_page_index;
     else if (character == 'd' && current_page_index < max_page_index)
         ++current_page_index;
-    else if (character == 'e') {
-        const player_item_t *pItem = &inventory.item[(current_page_index * ITEMS_PER_PAGE) + current_selection_index];
-        if (!pItem->item_db_index)
-            return;
-
-        const item_information_t *pItem_info = find_item_by_index(pItem->item_db_index);
-        if (!pItem_info)
-            return;
-
-        //사용 / 장착
-    } else if (is_number && number <= max_hotbar_index) {
+    else if (is_number && number <= max_hotbar_index) {
         const int index = current_page_index * ITEMS_PER_PAGE + current_selection_index;
 
         for (int i = 0; i < max_hotbar_index; ++i)

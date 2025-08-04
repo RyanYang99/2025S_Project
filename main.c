@@ -104,7 +104,7 @@ int main(void)
     if (force_old_console())
         return 0;
 
-    initialize_console(true, true);
+    initialize_console(true, false);
 
     /*
     const main_menu_state_t main_menu_state = main_menu();
