@@ -27,13 +27,13 @@ int Calculate_Heuristic(int x1, int y1, int x2, int y2) {
     return abs(x1 - x2) + abs(y1 - y2);
 }
 
-// 힙 관련 도우미 함수들
+
 void swap_nodes(PathNode** a, PathNode** b, int** open_list_index) {
     PathNode* temp = *a;
     *a = *b;
     *b = temp;
 
-    // 💡 힙 인덱스도 함께 교체
+    
     if (open_list_index) {
         int temp_index = open_list_index[(*a)->x][(*a)->y];
         open_list_index[(*a)->x][(*a)->y] = open_list_index[(*b)->x][(*b)->y];
@@ -73,7 +73,7 @@ void heap_push(PathNode** heap, int* heap_size, PathNode* node, int** open_list_
     if (*heap_size < MAX_HEAP_SIZE) {
         heap[*heap_size] = node;
         (*heap_size)++;
-        // 💡 힙 인덱스 배열 갱신
+      
         open_list_index[node->x][node->y] = *heap_size - 1;
         heapify_up(heap, *heap_size, *heap_size - 1, open_list_index);
     }
@@ -84,7 +84,7 @@ PathNode* heap_pop(PathNode** heap, int* heap_size, int** open_list_index) {
     (*heap_size)--;
     if (*heap_size > 0) {
         heap[0] = heap[*heap_size];
-        // 💡 힙 인덱스 배열 갱신
+     
         open_list_index[heap[0]->x][heap[0]->y] = 0;
         heapify_down(heap, *heap_size, 0, open_list_index);
     }
@@ -131,7 +131,7 @@ path_t find_path(int start_x, int start_y, int target_x, int target_y, IsMovable
     while (open_list_size > 0 && allocated_node_count < MAX_NODES_FOR_ASTAR_SEARCH) {
         PathNode* current_node = heap_pop(open_list_heap, &open_list_size, open_list_index);
 
-        // 💡 힙에서 꺼낸 노드는 이제 open_list에 없으므로 체크 해제
+       
         in_open_list_check[current_node->x][current_node->y] = false;
 
         if (current_node->x == target_x && current_node->y == target_y) {
