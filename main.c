@@ -70,7 +70,9 @@ int main(void)
         printf_s("Attempting to launch in conhost.exe.\n");
 
         int argc = 0;
-        LPWSTR* pArgv = CommandLineToArgvW(GetCommandLine(), &argc);
+
+        LPWSTR *pArgv = CommandLineToArgvW(GetCommandLine(), &argc);
+
 
         STARTUPINFO startup_info =
         {
@@ -84,15 +86,16 @@ int main(void)
         wcscat_s(pArgument, path_size, pArgv[0]);
 
         const BOOL success = CreateProcess(TEXT("C:\\Windows\\System32\\conhost.exe"),
-            pArgument,
-            NULL,
-            NULL,
-            false,
-            0,
-            NULL,
-            NULL,
-            &startup_info,
-            &process_information);
+
+                                           pArgument,
+                                           NULL,
+                                           NULL,
+                                           false,
+                                           0,
+                                           NULL,
+                                           NULL,
+                                           &startup_info,
+                                           &process_information);
 
         LocalFree(pArgv);
         free(pArgument);

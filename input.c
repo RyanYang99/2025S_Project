@@ -71,7 +71,11 @@ static LRESULT CALLBACK LowLevelMouseProc(const int nCode, const WPARAM wParam, 
 {
     if (nCode == HC_ACTION)
     {
+
         const MSLLHOOKSTRUCT* pMouse_struct = (MSLLHOOKSTRUCT*)lParam;
+
+        const MSLLHOOKSTRUCT *pMouse_struct = (MSLLHOOKSTRUCT *)lParam;
+
         const COORD position = convert_monitor_to_console(pMouse_struct->pt);
         mouse_position_callback(position);
 
@@ -108,6 +112,7 @@ void update_input(void)
 
 
 
+
 //새로운 콜백 함수 포인터 배열 ->승준 추가 ================
 mouse_click_with_pos_t* pMouseClickWithPos_callbacks = NULL;
 int mouse_click_with_pos_callback_count = 0;
@@ -119,6 +124,7 @@ static void mouse_click_with_pos_callback(const bool left, const COORD position)
         if (pMouseClickWithPos_callbacks[i])
             pMouseClickWithPos_callbacks[i](left, position);
 }
+
 
 // GetAsyncKeyState를 사용하여 키의 현재 상태를 반환
 // 0x8000 비트가 설정되어 있으면 키가 현재 눌려있다는 의미
