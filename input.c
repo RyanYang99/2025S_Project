@@ -1,4 +1,4 @@
-#include "leak.h"
+﻿#include "leak.h"
 #include "input.h"
 
 #include <conio.h>
@@ -39,6 +39,7 @@ static HHOOK hook = NULL;
 CALLBACK_VARIABLES(mouse_click_t);
 CALLBACK_VARIABLES(mouse_position_t);
 CALLBACK_VARIABLES(mouse_in_console_t);
+CALLBACK_VARIABLES(mouse_click_with_pos_t);
 
 static void mouse_click_callback(const bool left) {
     for (int i = 0; i < CALLBACK_COUNT_NAME(mouse_click_t); ++i)
@@ -156,12 +157,12 @@ void unsubscribe_mouse_in_console(const mouse_in_console_t callback) {
 //승준 추가
 void subscribe_mouse_click_with_pos(const mouse_click_with_pos_t callback)
 {
-    CALLBACK_SUBSCRIBE_IMPLEMENTATION(mouse_click_with_pos_t, pMouseClickWithPos_callbacks, mouse_click_with_pos_callback_count);
+    CALLBACK_SUBSCRIBE_IMPLEMENTATION(mouse_click_with_pos_t);
 }
 
 void unsubscribe_mouse_click_with_pos(const mouse_click_with_pos_t callback)
 {
-    CALLBACK_UNSUBSCRIBE_IMPLEMENTATION(pMouseClickWithPos_callbacks, mouse_click_with_pos_callback_count);
+    CALLBACK_UNSUBSCRIBE_IMPLEMENTATION(mouse_click_with_pos_t);
 }
 
 

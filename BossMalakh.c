@@ -1,4 +1,4 @@
-
+Ôªø
 #include "BossMalakh.h"
 #include "astar.h"
 #include <math.h>
@@ -12,11 +12,11 @@ extern map_t map;
 extern player_t player;
 extern console_t console;
 extern block_info_t get_block_info_at(int x, int y);
-extern void player_take_damage(int damage); // «√∑π¿ÃæÓ µ•πÃ¡ˆ «‘ºˆ º±æ √ﬂ∞°
+extern void player_take_damage(int damage); // ÌîåÎ†àÏù¥Ïñ¥ Îç∞ÎØ∏ÏßÄ Ìï®Ïàò ÏÑ†Ïñ∏ Ï∂îÍ∞Ä
 
 BossMalakh boss;
 
-// ∞°µ∂º∫¿ª ¿ß«ÿ ∏≈≈©∑Œ ¿Á¡§¿«
+// Í∞ÄÎèÖÏÑ±ÏùÑ ÏúÑÌï¥ Îß§ÌÅ¨Î°ú Ïû¨Ï†ïÏùò
 #define BG_BLACK BACKGROUND_T_BLACK
 #define FG_WHITE FOREGROUND_T_WHITE
 #define FG_YELLOW FOREGROUND_T_YELLOW
@@ -29,14 +29,14 @@ BossMalakh boss;
 #define BOSS_DRAW_SCALE 3
 
 static const color_tchar_t boss_malakh_sprite_data[BOSS_SPRITE_HEIGHT][BOSS_SPRITE_WIDTH] = {
-    // 0~4: ªÛ¥‹ ø©πÈ
+    // 0~4: ÏÉÅÎã® Ïó¨Î∞±
     {{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK}},
     {{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK}},
     {{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK}},
     {{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L'/',BG_BLACK,FG_WHITE},{L'-',BG_BLACK,FG_WHITE},{L'-',BG_BLACK,FG_WHITE},{L'-',BG_BLACK,FG_WHITE},{L'-',BG_BLACK,FG_WHITE},{L'-',BG_BLACK,FG_WHITE},{L'-',BG_BLACK,FG_WHITE},{L'\\',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK}},
     {{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L'/',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,FG_WHITE},{L'\\',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK}},
 
-    // 5~14: ¥´µø¿⁄ ∫Œ∫–
+    // 5~14: ÎààÎèôÏûê Î∂ÄÎ∂Ñ
     {{L' ',BG_BLACK,BG_BLACK},{L'/',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_WHITE},{L'\\',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK}},
     {{L' ',BG_BLACK,BG_BLACK},{L'|',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L'|',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK}},
     {{L'/',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_WHITE},{L'\\',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK}},
@@ -48,7 +48,7 @@ static const color_tchar_t boss_malakh_sprite_data[BOSS_SPRITE_HEIGHT][BOSS_SPRI
     {{L' ',BG_BLACK,BG_BLACK},{L'/',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_RED},{L' ',BG_BLACK,FG_WHITE},{L'\\',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK}},
     {{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L'\\',BG_BLACK,FG_WHITE},{L'_',BG_BLACK,FG_WHITE},{L'_',BG_BLACK,FG_WHITE},{L'_',BG_BLACK,FG_WHITE},{L'_',BG_BLACK,FG_WHITE},{L'_',BG_BLACK,FG_WHITE},{L'_',BG_BLACK,FG_WHITE},{L'_',BG_BLACK,FG_WHITE},{L'_',BG_BLACK,FG_WHITE},{L'_',BG_BLACK,FG_WHITE},{L'_',BG_BLACK,FG_WHITE},{L'/',BG_BLACK,FG_WHITE},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK}},
 
-    // 15~19: «œ¥‹ ø©πÈ
+    // 15~19: ÌïòÎã® Ïó¨Î∞±
     {{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK}},
     {{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK}},
     {{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK},{L' ',BG_BLACK,BG_BLACK}},
@@ -56,7 +56,7 @@ static const color_tchar_t boss_malakh_sprite_data[BOSS_SPRITE_HEIGHT][BOSS_SPRI
 };
 
 
-// πÆ¿⁄ø≠ √‚∑¬ µµøÚ «‘ºˆ
+// Î¨∏ÏûêÏó¥ Ï∂úÎ†• ÎèÑÏõÄ Ìï®Ïàò
 static void Boss_Print_String_Color_W(const wchar_t* wstr, const COORD position, unsigned short background_color, unsigned short foreground_color) {
     COORD current_pos = position;
     for (int i = 0; wstr[i] != L'\0'; ++i) {
@@ -65,7 +65,7 @@ static void Boss_Print_String_Color_W(const wchar_t* wstr, const COORD position,
     }
 }
 
-// ∫∏Ω∫ ¿¸øÎ √ﬂ¿˚ ø°¿ÃΩ∫≈∏
+// Î≥¥Ïä§ Ï†ÑÏö© Ï∂îÏ†Å ÏóêÏù¥Ïä§ÌÉÄ
 static bool is_boss_chasing(int x, int y)
 {
     if (x < 0 || x >= map.size.x || y < 0 || y >= map.size.y) {
@@ -75,7 +75,7 @@ static bool is_boss_chasing(int x, int y)
     return block.type == BLOCK_AIR || block.type == BLOCK_GRASS || block.type == BLOCK_DIRT || block.type == BLOCK_SNOW;
 }
 
-// ∫∏Ω∫ «œ¥√ø° ª˝º∫«œ±‚ ¿ß«ÿ ¿ßƒ° √£¥¬ «‘ºˆ
+// Î≥¥Ïä§ ÌïòÎäòÏóê ÏÉùÏÑ±ÌïòÍ∏∞ ÏúÑÌï¥ ÏúÑÏπò Ï∞æÎäî Ìï®Ïàò
 static int find_airpos_for_boss(int x)
 {
     if (map.size.y <= 0) return 0;
@@ -91,7 +91,7 @@ static int find_airpos_for_boss(int x)
     return default_y;
 }
 
-// ∫∏Ω∫ √ ±‚»≠
+// Î≥¥Ïä§ Ï¥àÍ∏∞Ìôî
 void Boss_Init(int start_x, int start_y, int init_hp, int attack_power)
 {
     boss.x = map.size.x / 2;
@@ -107,7 +107,7 @@ void Boss_Init(int start_x, int start_y, int init_hp, int attack_power)
     boss.special_attack_cooltime = 10000;
     boss.last_special_attack_time = clock();
 
-    // ∞Ê∑Œ ƒ≥ΩÃ ∫Øºˆ √ ±‚»≠
+    // Í≤ΩÎ°ú Ï∫êÏã± Î≥ÄÏàò Ï¥àÍ∏∞Ìôî
     boss.cached_path.count = 0;
     boss.cached_path.current_index = 0;
     boss.last_player_pos.X = -1;
@@ -122,7 +122,7 @@ void Boss_Init(int start_x, int start_y, int init_hp, int attack_power)
     }
 }
 
-// ∫∏Ω∫ ∑ª¥ı∏µ
+// Î≥¥Ïä§ Î†åÎçîÎßÅ
 void Boss_Render()
 {
     if (boss.state == E_BOOS_STATE_DEFEATED) return;
@@ -132,7 +132,7 @@ void Boss_Render()
     int boss_screen_base_x = center_m.X + (boss.x - player.x) * BOSS_DRAW_SCALE - (BOSS_SPRITE_WIDTH * BOSS_DRAW_SCALE / 2);
     int boss_screen_base_y = center_m.Y + (boss.y - player.y) * BOSS_DRAW_SCALE - (BOSS_SPRITE_HEIGHT * BOSS_DRAW_SCALE / 2) - 30;
 
-    // Ω∫«¡∂Û¿Ã∆Æ ∑ª¥ı∏µ
+    // Ïä§ÌîÑÎùºÏù¥Ìä∏ Î†åÎçîÎßÅ
     for (int y_offset = 0; y_offset < 20; ++y_offset) {
         for (int x_offset = 0; x_offset < 20; ++x_offset) {
             for (int py = 0; py < 3; ++py) {
@@ -150,7 +150,7 @@ void Boss_Render()
         }
     }
 
-    // ∫∏Ω∫ √º∑¬ πŸ ∑ª¥ı∏µ
+    // Î≥¥Ïä§ Ï≤¥Î†• Î∞î Î†åÎçîÎßÅ
     wchar_t hp_text[50];
     swprintf(hp_text, sizeof(hp_text) / sizeof(wchar_t), L"HP: %d/%d", boss.hp, boss.Max_hp);
     COORD hp_pos = { boss_screen_base_x + (20 * 3 / 2) - (int)(wcslen(hp_text) / 2.0), boss_screen_base_y - 1 };
@@ -159,7 +159,7 @@ void Boss_Render()
     Boss_Print_String_Color_W(hp_text, hp_pos, BACKGROUND_T_BLACK, FOREGROUND_T_WHITE);
 }
 
-// ∫∏Ω∫ AI
+// Î≥¥Ïä§ AI
 void Boss_Update_Ai()
 {
     if (boss.state == E_BOOS_STATE_DEFEATED) return;
@@ -169,7 +169,7 @@ void Boss_Update_Ai()
     int dist_y = abs(boss.y - player.y);
     int distance = dist_x + dist_y;
 
-    // ∆‰¿Ã¡Ó ¿¸»Ø ∑Œ¡˜
+    // ÌéòÏù¥Ï¶à Ï†ÑÌôò Î°úÏßÅ
     if (boss.hp <= boss.Max_hp * 0.3 && boss.state < E_BOOS_STATE_PHASE3)
     {
         boss.state = E_BOOS_STATE_PHASE3;
@@ -201,19 +201,19 @@ void Boss_Update_Ai()
         boss.last_action_time = current_time;
     }
 
-    // ∞¢ ∆‰¿Ã¡Ó∫∞ «‡µø ∑Œ¡˜
+    // Í∞Å ÌéòÏù¥Ï¶àÎ≥Ñ ÌñâÎèô Î°úÏßÅ
     switch (boss.state) {
     case E_BOOS_STATE_PHASE1:
     case E_BOOS_STATE_PHASE2:
     case E_BOOS_STATE_PHASE3:
     {
-        // ¿Ãµø ∑Œ¡˜ (∞Ê∑Œ ƒ≥ΩÃ ªÁøÎ)
+        // Ïù¥Îèô Î°úÏßÅ (Í≤ΩÎ°ú Ï∫êÏã± ÏÇ¨Ïö©)
         if ((current_time - boss.last_move_time) / (double)CLOCKS_PER_SEC >= 0.5) {
 
             if (boss.cached_path.count == 0 || boss.cached_path.current_index >= boss.cached_path.count ||
                 (boss.last_player_pos.X != player.x || boss.last_player_pos.Y != player.y)) {
 
-                // «√∑π¿ÃæÓ ¿ßƒ°∞° πŸ≤Óæ˙∞≈≥™ ∞Ê∑Œ∞° º“¡¯µ«∏È ªı ∞Ê∑Œ ∞ËªÍ
+                // ÌîåÎ†àÏù¥Ïñ¥ ÏúÑÏπòÍ∞Ä Î∞îÎÄåÏóàÍ±∞ÎÇò Í≤ΩÎ°úÍ∞Ä ÏÜåÏßÑÎêòÎ©¥ ÏÉà Í≤ΩÎ°ú Í≥ÑÏÇ∞
                 boss.cached_path = find_path(boss.x, boss.y, player.x, player.y, is_boss_chasing);
 
                 if (boss.cached_path.count > 0)
@@ -239,7 +239,7 @@ void Boss_Update_Ai()
             boss.last_move_time = current_time;
         }
 
-        // ∞¯∞› ∑Œ¡˜ (¿Ã¿¸ ƒ⁄µÂøÕ µø¿œ)
+        // Í≥µÍ≤© Î°úÏßÅ (Ïù¥Ï†Ñ ÏΩîÎìúÏôÄ ÎèôÏùº)
         if (distance <= 10) {
             if ((current_time - boss.last_action_time) / (double)CLOCKS_PER_SEC >= 1.0) {
                 player_take_damage(boss.atk);
@@ -250,7 +250,7 @@ void Boss_Update_Ai()
             }
         }
 
-        // ∆Øºˆ ∞¯∞› ∑Œ¡˜ (¿Ã¿¸ ƒ⁄µÂøÕ µø¿œ)
+        // ÌäπÏàò Í≥µÍ≤© Î°úÏßÅ (Ïù¥Ï†Ñ ÏΩîÎìúÏôÄ ÎèôÏùº)
         if ((current_time - boss.last_special_attack_time) / (double)CLOCKS_PER_SEC * 1000 >= boss.special_attack_cooltime) {
 #if _DEBUG
             printf("Boss Phase %d uses Special Attack!\n", boss.state);
@@ -277,7 +277,7 @@ void Boss_Update_Ai()
     }
 }
 
-// ∫∏Ω∫ µ•πÃ¡ˆ ¿‘»˜¥¬ «‘ºˆ
+// Î≥¥Ïä§ Îç∞ÎØ∏ÏßÄ ÏûÖÌûàÎäî Ìï®Ïàò
 void Boss_Take_Damage(int damage)
 {
     if (boss.state == E_BOOS_STATE_DEFEATED) return;
@@ -300,12 +300,12 @@ void Boss_Take_Damage(int damage)
     }
 }
 
-// ∫∏Ω∫ √Êµπ √≥∏Æ
+// Î≥¥Ïä§ Ï∂©Îèå Ï≤òÎ¶¨
 void Boss_Player_Collision()
 {
     if (boss.state == E_BOOS_STATE_DEFEATED) return;
     if (abs(boss.x - player.x) <= 1 && abs(boss.y - player.y) <= 1)
     {
-        // √Êµπ Ω√ ∑Œ¡˜ √ﬂ∞° (øπ: µ•πÃ¡ˆ)
+        // Ï∂©Îèå Ïãú Î°úÏßÅ Ï∂îÍ∞Ä (Ïòà: Îç∞ÎØ∏ÏßÄ)
     }
 }

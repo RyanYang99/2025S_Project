@@ -138,8 +138,8 @@ path_t find_path(int start_x, int start_y, int target_x, int target_y, IsMovable
             PathNode* temp = current_node;
             int path_len = 0;
             while (temp != NULL && path_len < MAX_PATH_LENGTH) {
-                result_path.path[path_len].X = temp->x;
-                result_path.path[path_len].Y = temp->y;
+                result_path.path[path_len].X = (SHORT)temp->x;
+                result_path.path[path_len].Y = (SHORT)temp->y;
                 path_len++;
                 temp = temp->parent;
             }
