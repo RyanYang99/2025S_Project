@@ -224,6 +224,7 @@ bool is_walkable(int x, int y) {
 
     // 블록 타입에 따른 이동 가능 여부 판단
     switch (block.type) {
+
         case BLOCK_AIR:
         case BLOCK_LOG:
         case BLOCK_LEAF:
@@ -301,3 +302,12 @@ int find_ground_pos(int x)
 
     return map.size.y / 2; //블록을 찾지 못하면 맵 높이의 절반 반환;
 }
+
+void player_take_damage(int damage)
+{
+    player.hp -= damage;
+    if (player.hp < 0) {
+        player.hp = 0;
+    }
+}
+

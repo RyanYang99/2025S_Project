@@ -110,7 +110,7 @@ static void flip_double_buffer(void)
     if (!use_double_buffer)
         return;
 
-    WriteConsoleOutput(buffer[current_buffer], character_buffer, console.size, (COORD){ 0, 0 }, &written);
+    WriteConsoleOutput(buffer[current_buffer], character_buffer, console.size, (COORD) { 0, 0 }, & written);
     SetConsoleActiveScreenBuffer(buffer[current_buffer]);
 
     if (!current_buffer)
@@ -149,7 +149,7 @@ static bool update_console_size(void)
 
         written.Right = console.size.X - 1;
         written.Bottom = console.size.Y - 1;
-            
+
         for (int i = 0; i < 2; ++i)
             resize(buffer[i]);
     }
@@ -227,11 +227,11 @@ void print_color_tchar(const color_tchar_t character, const COORD position)
     write(position, character.character, attribute);
 }
 
-int fprint_string(const char * const pFormat, const COORD position, const BACKGROUND_color_t background, const FOREGROUND_color_t foreground, ...)
+int fprint_string(const char* const pFormat, const COORD position, const BACKGROUND_color_t background, const FOREGROUND_color_t foreground, ...)
 {
     va_list args = { 0 };
     va_start(args, foreground);
-    char *pBuffer = format_string_v(pFormat, args);
+    char* pBuffer = format_string_v(pFormat, args);
     va_end(args);
 
     const int wide_length = MultiByteToWideChar(CP_UTF8, 0, pBuffer, -1, NULL, 0);
