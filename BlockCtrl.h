@@ -14,5 +14,6 @@ void initialize_block_control(void);
 
 void render_virtual_cursor(void);
 
+
 //모듈 정리: 프로그램 종료 전 호출
 void destroy_block_control(void);

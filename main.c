@@ -1,4 +1,4 @@
-﻿#include "leak.h"
+#include "leak.h"
 
 #include "save.h"
 #include "game.h"
@@ -11,6 +11,7 @@ static bool force_old_console(void) {
         printf_s("Attempting to launch in conhost.exe.\n");
 
         int argc = 0;
+
         LPWSTR *pArgv = CommandLineToArgvW(GetCommandLine(), &argc);
 
         STARTUPINFO startup_info = {
@@ -24,6 +25,7 @@ static bool force_old_console(void) {
         wcscat_s(pArgument, path_size, pArgv[0]);
 
         const BOOL success = CreateProcess(TEXT("C:\\Windows\\System32\\conhost.exe"),
+
                                            pArgument,
                                            NULL,
                                            NULL,
@@ -71,6 +73,8 @@ int main(void)
             free_save();
 
         initialize_input_handler();
+        register_mob_click_handler();
+        mob_init();
         initialize_game();
         run_game();
         destroy_game();

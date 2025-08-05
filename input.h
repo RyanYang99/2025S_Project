@@ -1,4 +1,5 @@
-﻿#pragma once
+#pragma once
+
 
 /*
     input.h 사용법:
@@ -50,3 +51,14 @@ void unsubscribe_mouse_in_console(const mouse_in_console_t callback);
 void pause_hook(void);
 void resume_hook(void);
 #endif
+
+
+
+//전투 시스템을 위한 마우스 콜백  -->mob.c 적용 위함 
+typedef void (*mouse_click_with_pos_t)(const bool left, const COORD position);
+
+static void mouse_click_with_pos_callback(const bool left, const COORD position);
+void subscribe_mouse_click_with_pos(const mouse_click_with_pos_t callback);
+void unsubscribe_mouse_click_with_pos(const mouse_click_with_pos_t callback);
+
+//=========================================================승준 추가 

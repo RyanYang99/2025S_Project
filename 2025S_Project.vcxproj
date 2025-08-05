@@ -98,6 +98,7 @@
   <ItemGroup>
     <ClInclude Include="astar.h" />
     <ClInclude Include="BlockCtrl.h" />
+    <ClInclude Include="BossMalakh.h" />
     <ClInclude Include="console.h" />
     <ClInclude Include="date_time.h" />
     <ClInclude Include="delta.h" />

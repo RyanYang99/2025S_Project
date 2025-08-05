@@ -1,4 +1,4 @@
-﻿#include "leak.h"
+#include "leak.h"
 #include "input.h"
 
 #include <conio.h>
@@ -29,7 +29,7 @@ static int CALLBACK_COUNT_NAME(type)
     CALLBACK_CALLBACKS_NAME(type) = NULL; \
     CALLBACK_COUNT_NAME(type) = 0
 
-bool keyboard_pressed = false;
+    bool keyboard_pressed = false;
 char input_character = 0;
 
 static HANDLE input_handle = NULL;
@@ -88,6 +88,22 @@ void update_input(void) {
         input_character = (char)_getch();
 }
 
+
+
+
+//새로운 콜백 함수 포인터 배열 ->승준 추가 ================
+mouse_click_with_pos_t* pMouseClickWithPos_callbacks = NULL;
+int mouse_click_with_pos_callback_count = 0;
+
+// 새로운 콜백 함수 추가
+static void mouse_click_with_pos_callback(const bool left, const COORD position)
+{
+    for (int i = 0; i < mouse_click_with_pos_callback_count; ++i)
+        if (pMouseClickWithPos_callbacks[i])
+            pMouseClickWithPos_callbacks[i](left, position);
+}
+
+
 // GetAsyncKeyState를 사용하여 키의 현재 상태를 반환
 // 0x8000 비트가 설정되어 있으면 키가 현재 눌려있다는 의미
 bool is_key_down(int virtual_key_code)
@@ -102,6 +118,12 @@ void destroy_input_handler(void)
     CALLBACK_DESTROY(mouse_click_t);
     CALLBACK_DESTROY(mouse_position_t);
     CALLBACK_DESTROY(mouse_in_console_t);
+
+    //승준 추가
+    free(pMouseClickWithPos_callbacks);
+    pMouseClickWithPos_callbacks = NULL;
+    mouse_click_with_pos_callback_count = 0;
+    //=========
 
     UnhookWindowsHookEx(hook);
 }
@@ -129,6 +151,20 @@ void subscribe_mouse_in_console(const mouse_in_console_t callback) {
 void unsubscribe_mouse_in_console(const mouse_in_console_t callback) {
     CALLBACK_UNSUBSCRIBE_IMPLEMENTATION(mouse_in_console_t);
 }
+
+
+//승준 추가
+void subscribe_mouse_click_with_pos(const mouse_click_with_pos_t callback)
+{
+    CALLBACK_SUBSCRIBE_IMPLEMENTATION(mouse_click_with_pos_t, pMouseClickWithPos_callbacks, mouse_click_with_pos_callback_count);
+}
+
+void unsubscribe_mouse_click_with_pos(const mouse_click_with_pos_t callback)
+{
+    CALLBACK_UNSUBSCRIBE_IMPLEMENTATION(pMouseClickWithPos_callbacks, mouse_click_with_pos_callback_count);
+}
+
+
 
 #if _DEBUG
 void pause_hook(void) {

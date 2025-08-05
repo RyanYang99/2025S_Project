@@ -67,6 +67,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="save.c">
+    <ClCompile Include="BossMalakh.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -123,6 +124,7 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="save.h">
+    <ClInclude Include="BossMalakh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

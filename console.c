@@ -110,7 +110,7 @@ static void flip_double_buffer(void)
     if (!use_double_buffer || !character_buffer)
         return;
 
-    WriteConsoleOutput(buffer[current_buffer], character_buffer, console.size, (COORD){ 0, 0 }, &written);
+    WriteConsoleOutput(buffer[current_buffer], character_buffer, console.size, (COORD) { 0, 0 }, & written);
     SetConsoleActiveScreenBuffer(buffer[current_buffer]);
 
     if (!current_buffer)
@@ -167,7 +167,7 @@ static bool update_console_size(void)
 
         written.Right = console.size.X - 1;
         written.Bottom = console.size.Y - 1;
-            
+
         for (int i = 0; i < 2; ++i)
             resize(buffer[i]);
     }
