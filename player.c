@@ -10,12 +10,19 @@
 #include <wchar.h>
 #include <time.h>
 #include <conio.h>
+#include <Windows.h> // VK_SPACE 사용을 위해 추가
 
-player_t player = { 0, 0, 1000, 0, 0.0f, 0 }; // 초기 위치 및 체력, is_walking 상태 추가 (0: 정지, 1: 걷기)
+player_t player = { 0 };
 
 #define PLAYER_SPRITE_WIDTH 5
 #define PLAYER_SPRITE_HEIGHT 5
-#define ANIMATION_SPEED 4.0f // 1초에 4번 프레임 변경 (속도 조절 가능)
+#define ANIMATION_SPEED 10.0f // 1초에 4번 프레임 변경
+
+#define GRAVITY 50.0f         // 중력 가속도
+#define JUMP_STRENGTH -12.0f  // 점프 시 부여되는 초기 수직 속도
+
+// 수평 이동 속도 조절 (값이 작을수록 빨라짐)
+#define HORIZONTAL_MOVE_COOLDOWN 0.08f  // 약 1초에 12.5칸 이동
 
 // 각 픽셀을 표현할 구조체
 typedef struct {
@@ -29,60 +36,85 @@ typedef struct {
 // 프레임 1: 기본 서 있는 자세
 static const PlayerSpritePixel player_sprite_stand[PLAYER_SPRITE_HEIGHT][PLAYER_SPRITE_WIDTH] = {
     // {문자, 배경색, 전경색}
-    { {L' ',0,0}, {L'▀', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▀', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▀', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L' ',0,0} }, // 머리 (위:머리카락, 아래:피부)
-    { {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_CYAN}, {L'█', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_WHITE}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_CYAN}, {L'█', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_WHITE}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_CYAN} }, // 몸통과 팔
-    { {L' ',0,0}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L' ',0,0} }, // 허리, 바지
-    { {L' ',0,0}, {L'▌', BACKGROUND_T_BLACK, FOREGROUND_T_GRAY}, {L' ',0,0}, {L'▐', BACKGROUND_T_BLACK, FOREGROUND_T_GRAY}, {L' ',0,0} }, // 다리
-    { {L' ',0,0}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_GRAY}, {L' ',0,0}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_GRAY}, {L' ',0,0} }  // 신발
+    { {L' ',0,0}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L' ',0,0} }, // 머리 (위:머리카락, 아래:피부)
+    { {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'█', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_WHITE}, {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'█', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_WHITE}, {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW} }, // 몸통과 팔
+    { {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW} }, // 허리, 바지
+    { {L' ',0,0}, {L'▓ ', BACKGROUND_T_BLACK, FOREGROUND_T_GRAY}, {L' ',0,0}, {L'▓ ', BACKGROUND_T_BLACK, FOREGROUND_T_GRAY}, {L' ',0,0} }, // 다리
+    { {L' ',0,0}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_BLACK}, {L' ',0,0}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_BLACK}, {L' ',0,0} }  // 신발
 };
 
 // 걷기 애니메이션 (2 프레임)
 static const PlayerSpritePixel player_sprite_walk[2][PLAYER_SPRITE_HEIGHT][PLAYER_SPRITE_WIDTH] = {
     // 프레임 0
     {
-        { {L' ',0,0}, {L'▀', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▀', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▀', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L' ',0,0} },
-        { {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_CYAN}, {L'█', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_WHITE}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_CYAN}, {L'█', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_WHITE}, {L' '}},
+        { {L' ',0,0}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L' ',0,0} },
+        { {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'█', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_WHITE}, {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'█', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_WHITE}, {L' '}},
         { {L' ',0,0}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L' ',0,0} },
-        { {L' ',0,0}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_GRAY}, {L' ',0,0}, {L' ',0,0}, {L' ',0,0} },
-        { {L' ',0,0}, {L' ',0,0}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_DARKGRAY}, {L' ',0,0}, {L' ',0,0} }
+        { {L' ',0,0}, {L'▓ ', BACKGROUND_T_BLACK, FOREGROUND_T_GRAY}, {L' ',0,0}, {L' ',0,0}, {L' ',0,0} },
+        { {L' ',0,0}, {L' ',0,0}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_BLACK}, {L' ',0,0}, {L' ',0,0} }
     },
     // 프레임 1
     {
-        { {L' ',0,0}, {L'▀', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▀', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▀', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L' ',0,0} },
-        { {L' '}, {L'█', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_WHITE}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_CYAN}, {L'█', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_WHITE}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_CYAN} },
+        { {L' ',0,0}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L' ',0,0} },
+        { {L' '}, {L'█', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_WHITE}, {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'█', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_WHITE}, {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW} },
         { {L' ',0,0}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L' ',0,0} },
-        { {L' ',0,0}, {L' ',0,0}, {L' ',0,0}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_GRAY}, {L' ',0,0} },
-        { {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_DARKGRAY}, {L' ',0,0}, {L' ',0,0}, {L' ',0,0}, {L' ',0,0} }
+        { {L' ',0,0}, {L' ',0,0}, {L' ',0,0}, {L'▓ ', BACKGROUND_T_BLACK, FOREGROUND_T_GRAY}, {L' ',0,0} },
+        { {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_BLACK}, {L' ',0,0}, {L' ',0,0}, {L' ',0,0}, {L' ',0,0} }
     }
 };
 
-
 static void movement(void) {
-    if (!_kbhit())
-        return;
-
-    const char character = (char)_getch();
-
-    if (character == 'q')
+    // 종료 키 확인
+    if (is_key_down('Q')) {
         game_exit = true;
+        return;
+    }
 
-    if (character == 'w' || character == 'a' || character == 's' || character == 'd') {
-        // 새로운 위치 계산
-        int new_x = player.x;
-        int new_y = player.y;
+    // 점프 키 확인
+    if (is_key_down(VK_SPACE) && player.is_on_ground) {
+        player.velocity_y = JUMP_STRENGTH;
+        player.is_on_ground = false;
+    }
 
-        if (character == 'w') new_y--;
-        else if (character == 'a') new_x--;
-        else if (character == 's') new_y++;
-        else if (character == 'd') new_x++;
+    // 쿨다운 타이머 업데이트
+    player.move_cooldown_timer += delta_time;
 
-        // 충돌 체크 - 공기 블록(BLOCK_AIR)인 경우에만 이동
-        if (is_walkable(new_x, new_y)) {
-            player.x = new_x;
-            player.y = new_y;
-            player.is_moving = 1; // 실제로 이동했을 때만 애니메이션 활성화
+    bool is_a_down = is_key_down('A');
+    bool is_d_down = is_key_down('D');
+
+    // 키가 눌렸는지 여부에 따라 애니메이션 상태 설정
+    if (is_a_down || is_d_down) {
+        player.is_moving = 1;
+    }
+    else {
+        player.is_moving = 0;
+    }
+
+    // 쿨타임이 다 되었는지 확인
+    if (player.move_cooldown_timer >= HORIZONTAL_MOVE_COOLDOWN) {
+        bool moved_horizontally = false;
+
+        // 왼쪽 이동 (D키와 동시에 눌리면 무시)
+        if (is_a_down && !is_d_down) {
+            int new_x = player.x - 1;
+            if (is_walkable(new_x, player.y)) {
+                player.x = new_x;
+                moved_horizontally = true;
+            }
         }
-        // 고체 블록에 충돌한 경우 이동하지 않음
+        // 오른쪽 이동 (A키와 동시에 눌리면 무시)
+        else if (is_d_down && !is_a_down) {
+            int new_x = player.x + 1;
+            if (is_walkable(new_x, player.y)) {
+                player.x = new_x;
+                moved_horizontally = true;
+            }
+        }
+
+        // 실제로 이동이 일어났다면 타이머를 리셋
+        if (moved_horizontally) {
+            player.move_cooldown_timer = 0.0f;
+        }
     }
 }
 
@@ -90,28 +122,68 @@ static void update_player_offset(void) {
     player.x += map.offset_x;
 }
 
-// *** 새로운 업데이트 함수 ***
+
 void player_update(void) {
+
+    // 입력 처리
     movement();
 
-    if (player.is_moving) {
-        // Delta Time을 타이머에 누적
-        player.animation_timer += delta_time;
-
-        // 프레임 변경 시간이 되었는지 확인
-        if (player.animation_timer >= 1.0f / ANIMATION_SPEED) {
-            player.animation_timer = 0.0f; // 타이머 초기화
-            player.current_frame = (player.current_frame + 1) % 2; // 다음 프레임으로 (0 -> 1 -> 0 ...)
+    // 물리 업데이트
+    // 땅에 있는지 확인
+    // 플레이어 바로 아래 블록이 걸을 수 없는 블록인지 확인
+    if (!is_walkable(player.x, player.y + 1)) {
+        player.is_on_ground = true;
+        // 땅에 있다면 수직 속도 초기화
+        if (player.velocity_y > 0) {
+            player.velocity_y = 0;
         }
     }
     else {
-        // 움직이지 않으면 정지 자세로 초기화
+        player.is_on_ground = false;
+    }
+
+    // 중력 적용 (공중에 있을 때만)
+    if (!player.is_on_ground) {
+        player.velocity_y += GRAVITY * delta_time;
+    }
+
+    // 속도에 따라 정밀 y좌표 업데이트
+    player.precise_y += player.velocity_y * delta_time;
+
+    // 정밀 y좌표를 정수 y좌표로 변환하여 충돌 처리
+    int new_y = (int)player.precise_y;
+
+    // 수직 이동에 대한 충돌 처리
+    if (new_y > player.y) { // 아래로 이동 시
+        while (!is_walkable(player.x, new_y)) {
+            new_y--;
+            player.velocity_y = 0;
+            player.precise_y = (float)new_y;
+            player.is_on_ground = true;
+        }
+    }
+    else if (new_y < player.y) { // 위로 이동 시
+        while (!is_walkable(player.x, new_y)) {
+            new_y++;
+            player.velocity_y = 0;
+            player.precise_y = (float)new_y;
+        }
+    }
+    player.y = new_y;
+
+
+    // 3. 애니메이션 업데이트
+    if (player.is_moving) {
+        player.animation_timer += delta_time;
+        if (player.animation_timer >= 1.0f / ANIMATION_SPEED) {
+            player.animation_timer = 0.0f;
+            player.current_frame = (player.current_frame + 1) % 2;
+        }
+    }
+    else {
         player.current_frame = 0;
         player.animation_timer = 0.0f;
     }
-
-    // 다음 프레임에서는 다시 정지 상태로 시작 (입력이 없으면 is_moving = 0 유지)
-     player.is_moving = 0;// 추후에 수정할것 true/false
 }
 
 
@@ -122,6 +194,19 @@ void player_init(int x) {
         --player.y; // 가능할 시 찾은 블록 위로 설정
 
     player.hp = 1000; // 초기 체력
+
+    // 물리 변수 초기화
+    player.precise_y = (float)player.y;
+    player.velocity_y = 0.0f;
+    player.is_on_ground = false; // 시작 시 공중에서 떨어지도록
+
+    // 애니메이션 변수 초기화
+    player.is_moving = 0;
+    player.current_frame = 0;
+    player.animation_timer = 0.0f;
+
+    // 이동 쿨다운 타이머 초기화
+    player.move_cooldown_timer = 0.0f;
 
     //subscribe_keyhit(movement);
     subscribe_offset_change(update_player_offset);
@@ -134,12 +219,13 @@ bool is_walkable(int x, int y) {
         return false;
     }
 
-    // 블록 정보 가져오기 (map.c의 함수 사용)
+    // 블록 정보 가져오기 
     block_info_t block = get_block_info_at(x, y);
 
     // 블록 타입에 따른 이동 가능 여부 판단
     switch (block.type) {
         case BLOCK_AIR:
+        case BLOCK_LOG:
         case BLOCK_LEAF:
         case BLOCK_WATER:
             return true;
@@ -148,24 +234,10 @@ bool is_walkable(int x, int y) {
     return false;
 }
 
-void player_move(int dx, int dy) {
-    int new_x = player.x + dx;
-    int new_y = player.y + dy;
-
-    // 충돌 체크 후 이동
-    if (is_walkable(new_x, new_y)) {
-        player.x = new_x;
-        player.y = new_y;
-        player.is_moving = 1;
-    }
-}
-
 void render_player(void) {
     // 플레이어의 중심이 될 콘솔 위치 (화면 중앙)
     COORD center_pos = { console.size.X / 2, console.size.Y / 2 };
 
-    // 플레이어의 'is_walking' 상태와 시간에 따라 어떤 프레임을 그릴지 결정
-    // (여기서는 간단히 is_walking 값으로만 구분)
     // 현재 상태에 맞는 스프라이트 포인터 선택
     const PlayerSpritePixel(*current_sprite_ptr)[PLAYER_SPRITE_WIDTH];
     if (player.is_moving) {

@@ -147,7 +147,7 @@ void render_crafting_ui(void) {
     clear();
     COORD pos = { .X = 2, .Y = 1 };
     fprint_string("[ 제작 가능한 아이템 목록 ]", pos, BACKGROUND_T_BLACK, FOREGROUND_T_YELLOW);
-    pos.Y += 2;
+    pos.Y += 1;
 
     for (int i = 0; i < crafting_ui.recipe_count; ++i) {
         const crafting_recipe_t* recipe = &crafting_ui.recipes[i];
@@ -184,7 +184,7 @@ void render_crafting_ui(void) {
         }
     }
 
-    pos.Y += 2;
+    
     fprint_string(" [W/S] 선택 이동 [E] 제작 [C] 닫기 ", pos, BACKGROUND_T_BLACK, FOREGROUND_T_GREEN);
     update_console();
 }

@@ -67,12 +67,7 @@ int main(void)
     initialize_inventory();
     initialize_crafting_ui();
     
-    add_item_to_inventory(207, 1);
-    add_item_to_inventory(208, 1);
-    add_item_to_inventory(209, 1);
-    add_item_to_inventory(210, 1);
-    add_item_to_inventory(211, 1);
-    add_item_to_inventory(212, 1);
+    add_item_to_inventory(109, 1);
 
     clear();
     while (!game_exit)
