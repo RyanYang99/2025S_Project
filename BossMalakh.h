@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "astar.h"
 #include <stdio.h>
@@ -13,26 +13,26 @@
 #include "astar.h"
 
 
-//º¸½º state
+//ë³´ìŠ¤ state
 typedef enum
 {
-	E_BOOS_STATE_IDLE,  //´ë±â
-	E_BOOS_STATE_CHASE, //Ãß°İ
-	E_BOOS_STATE_ATTACK, // °ø°İ 
-	E_BOOS_STATE_ULTIMATE, //Æ¯¼ö °ø°İ (±Ã±Ø±â)
-	E_BOOS_STATE_DAMAGED, //ÇÇ°İ ½Ã
+	E_BOOS_STATE_IDLE,  //ëŒ€ê¸°
+	E_BOOS_STATE_CHASE, //ì¶”ê²©
+	E_BOOS_STATE_ATTACK, // ê³µê²© 
+	E_BOOS_STATE_ULTIMATE, //íŠ¹ìˆ˜ ê³µê²© (ê¶ê·¹ê¸°)
+	E_BOOS_STATE_DAMAGED, //í”¼ê²© ì‹œ
 
-	//== ÆäÀÌÁî »óÅÂ ===
+	//== í˜ì´ì¦ˆ ìƒíƒœ ===
 	E_BOOS_STATE_PHASE1,
 	E_BOOS_STATE_PHASE2,
 	E_BOOS_STATE_PHASE3,
 
-	E_BOOS_STATE_DEFEATED // »ç¸Á (Ã³Ä¡µÊ)
+	E_BOOS_STATE_DEFEATED // ì‚¬ë§ (ì²˜ì¹˜ë¨)
 
 }BossState;
 
 
-//º¸½º ¸»¶óÅ© (È÷ºê¸®¾î·Î Ãµ»ç¶õ ÀÇ¹Ì )
+//ë³´ìŠ¤ ë§ë¼í¬ (íˆë¸Œë¦¬ì–´ë¡œ ì²œì‚¬ë€ ì˜ë¯¸ )
 typedef struct 
 {
 	int x;
@@ -41,33 +41,33 @@ typedef struct
 	int Max_hp;
 	int atk;
 	char display_char;
-	BossState state; //ÆäÀÌÁî »óÅÂ Æ÷ÇÔ ÇöÀç º¸½º »óÅÂ
-	long last_action_time; // ¸¶Áö¸· Çàµ¿ ½Ã°£
-	long last_move_time; //¸¶Áö¸· ÀÌµ¿ ½Ã°£
-	long special_attack_cooltime; //Æ¯¼ö °ø°İ ÄğÅ¸ÀÓ
-	long last_special_attack_time; //¸¶Áö¸· Æ¯¼ö °ø°İ ½Ã°£
+	BossState state; //í˜ì´ì¦ˆ ìƒíƒœ í¬í•¨ í˜„ì¬ ë³´ìŠ¤ ìƒíƒœ
+	long last_action_time; // ë§ˆì§€ë§‰ í–‰ë™ ì‹œê°„
+	long last_move_time; //ë§ˆì§€ë§‰ ì´ë™ ì‹œê°„
+	long special_attack_cooltime; //íŠ¹ìˆ˜ ê³µê²© ì¿¨íƒ€ì„
+	long last_special_attack_time; //ë§ˆì§€ë§‰ íŠ¹ìˆ˜ ê³µê²© ì‹œê°„
 
-	// A* °æ·Î Ä³½ÌÀ» À§ÇÑ º¯¼ö Ãß°¡
+	// A* ê²½ë¡œ ìºì‹±ì„ ìœ„í•œ ë³€ìˆ˜ ì¶”ê°€
 	path_t cached_path;
-	COORD last_player_pos; // ¸¶Áö¸·À¸·Î °æ·Î¸¦ °è»êÇÑ ½ÃÁ¡ÀÇ ÇÃ·¹ÀÌ¾î À§Ä¡
+	COORD last_player_pos; // ë§ˆì§€ë§‰ìœ¼ë¡œ ê²½ë¡œë¥¼ ê³„ì‚°í•œ ì‹œì ì˜ í”Œë ˆì´ì–´ ìœ„ì¹˜
 
 	color_tchar_t sprite_data[20][20];
 }BossMalakh;
 
-//Àü¿ª º¯¼ö
+//ì „ì—­ ë³€ìˆ˜
 extern BossMalakh boss;
 
-//ÇÔ¼ö 
-//º¸½º ÃÊ±âÈ­
+//í•¨ìˆ˜ 
+//ë³´ìŠ¤ ì´ˆê¸°í™”
 void Boss_Init(int start_x, int start_y, int init_hp, int attack_power);
-//º¸½º ·»´õ¸µ
+//ë³´ìŠ¤ ë Œë”ë§
 void Boss_Render();
-//º¸½º AI
+//ë³´ìŠ¤ AI
 void Boss_Update_Ai();
-//º¸½º µ¥¹ÌÁö ÀÔÈ÷´Â ÇÔ¼ö
+//ë³´ìŠ¤ ë°ë¯¸ì§€ ì…íˆëŠ” í•¨ìˆ˜
 void Boss_Take_Damage(int damage);
-//º¸½º Ãæµ¹ Ã³¸®
+//ë³´ìŠ¤ ì¶©ëŒ ì²˜ë¦¬
 void Boss_Player_Collision();
 
-//¹®ÀÚ¿­ »ö»ó Ãâ·Â
+//ë¬¸ìì—´ ìƒ‰ìƒ ì¶œë ¥
 static void Boss_Print_String_Color_W(const wchar_t* wstr, const COORD position, unsigned short background_color, unsigned short foreground_color);

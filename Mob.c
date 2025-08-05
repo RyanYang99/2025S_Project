@@ -13,6 +13,7 @@
 #include "console.h"
 #include "astar.h"
 #include "delta.h"
+#include "input.h"
 
 
 #define GRAVITY 25.0f
@@ -35,7 +36,7 @@
 char mob_debug_message[MAX_MOB_DEBUG_MESSAGE_LEN] = ""; // 변수 정의
 
 
-static const color_tchar_t zombie_sprite_data[MOB_SPRITE_HEIGHT][MOB_SPRITE_WIDTH] = {
+const color_tchar_t zombie_sprite_data[MOB_SPRITE_HEIGHT][MOB_SPRITE_WIDTH] = {
     { {L' ',0,0}, {L'▀', BG_BLACK, FG_RED}, {L'▀', BG_BLACK, FG_RED}, {L'▀', BG_BLACK, FG_RED}, {L' ',0,0} },
     { {L' ',0,0}, {L'o', BG_BLACK, FG_WHITE}, {L' ',0,0}, {L'o', BG_BLACK, FG_WHITE}, {L' ',0,0} },
     { {L'█', BG_BLACK, FG_DARKGREEN}, {L'█', BG_BLACK, FG_DARKGREEN}, {L'█', BG_BLACK, FG_DARKGREEN}, {L'█', BG_BLACK, FG_DARKGREEN}, {L'█', BG_BLACK, FG_DARKGREEN} },
@@ -159,14 +160,14 @@ void Mob_render()
         }
 
         COORD hp_pos;
-        hp_pos.X = screen_x;
-        hp_pos.Y = screen_y - 1;
+        hp_pos.X = (SHORT)screen_x;
+        hp_pos.Y = (SHORT)(screen_y - 1);
 
         wchar_t hp_str[16];
         swprintf(hp_str, 16, L"HP: %d", mobs[i].HP);
 
         for (int j = 0; hp_str[j] != L'\0'; ++j) {
-            COORD char_pos = { hp_pos.X + j, hp_pos.Y };
+            COORD char_pos = { hp_pos.X + (SHORT)j, hp_pos.Y };
 
             color_tchar_t hp_char = { hp_str[j], BACKGROUND_T_BLACK, FOREGROUND_T_RED };
             print_color_tchar(hp_char, char_pos);
