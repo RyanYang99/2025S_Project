@@ -1,4 +1,4 @@
-﻿#include "leak.h"
+﻿#include "leak.h"﻿
 #include "player.h"
 
 #include "map.h"
@@ -51,7 +51,7 @@ static const PlayerSpritePixel player_sprite_stand[PLAYER_SPRITE_HEIGHT][PLAYER_
     { {L' ',0,0}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_BLACK}, {L' ',0,0}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_BLACK}, {L' ',0,0} }  // 신발
 };
 
-// 걷기 애니메이션 (2 프레임)
+// 걷기 애니메이션
 static const PlayerSpritePixel player_sprite_walk[2][PLAYER_SPRITE_HEIGHT][PLAYER_SPRITE_WIDTH] = {
     // 프레임 1
     {
@@ -71,7 +71,7 @@ static const PlayerSpritePixel player_sprite_walk[2][PLAYER_SPRITE_HEIGHT][PLAYE
     }
 };
 
-// 무장하고 서 있는 자세 (오른팔을 옆으로 뻗음)
+// 무장하고 서 있는 자세
 static const PlayerSpritePixel player_sprite_stand_armed[PLAYER_SPRITE_HEIGHT][PLAYER_SPRITE_WIDTH] = {
     // 머리
     { {L' ',0,0}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L' ',0,0} },
@@ -85,7 +85,7 @@ static const PlayerSpritePixel player_sprite_stand_armed[PLAYER_SPRITE_HEIGHT][P
     { {L' ',0,0}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_BLACK}, {L' ',0,0}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_BLACK}, {L' ',0,0} }
 };
 
-// 무장하고 걷는 자세 (오른팔은 옆으로 뻗고 왼팔과 다리만 흔듦)
+// 무장하고 걷는 애니메이션
 static const PlayerSpritePixel player_sprite_walk_armed[2][PLAYER_SPRITE_HEIGHT][PLAYER_SPRITE_WIDTH] = {
     { // 프레임 1
         { {L' ',0,0}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L' ',0,0} },
@@ -215,7 +215,7 @@ void player_update(void) {
     player.y = new_y;
 
 
-    // 3. 애니메이션 업데이트
+    // 애니메이션 업데이트
     if (player.is_moving) {
         player.animation_timer += delta_time;
         if (player.animation_timer >= 1.0f / ANIMATION_SPEED) {
@@ -270,11 +270,11 @@ bool is_walkable(int x, int y) {
 
     // 블록 타입에 따른 이동 가능 여부 판단
     switch (block.type) {
-        case BLOCK_AIR:
-        case BLOCK_LOG:
-        case BLOCK_LEAF:
-        case BLOCK_WATER:
-            return true;
+    case BLOCK_AIR:
+    case BLOCK_LOG:
+    case BLOCK_LEAF:
+    case BLOCK_WATER:
+        return true;
     }
 
     return false;

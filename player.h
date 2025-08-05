@@ -8,7 +8,7 @@
 typedef struct {
     int x, y; // 맵 상의 위치
     int hp;   // 체력
-    
+
     // 애니메이션 상태 변수
     int is_moving;           // 현재 움직이는 중인지 (0 또는 1)
     float animation_timer;   // 현재 프레임을 얼마나 오래 보여줬는지 추적
