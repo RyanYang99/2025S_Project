@@ -449,9 +449,8 @@ void create_map(void)
     } else {
         fill_table((int)time(NULL));
 
+        map.size.x = 0;
         map.size.y = MAP_MAX_Y;
-        player.y = map.size.y / 2;
-
         resize_map(10);
     }
 }
@@ -598,53 +597,3 @@ void save_map(void) {
         for (int x = 0; x < map.size.x; ++x)
             pCurrent_save->pBlocks[y * map.size.x + x] = map.ppBlocks[y][x];
 }
-
-#if _DEBUG
-void debug_render_map(const bool pause)
-{
-    clear();
-
-    for (int y = 0; y < map.size.y; ++y)
-    {
-        for (int x = 0; x < map.size.x; ++x)
-        {
-            block_t block = map.ppBlocks[y][x].type;
-            char character = ' ';
-
-            switch (block)
-            {
-            case BLOCK_AIR:
-                character = 'A';
-                break;
-
-            case BLOCK_GRASS:
-                character = 'G';
-                break;
-
-            case BLOCK_DIRT:
-                character = 'D';
-                break;
-
-            case BLOCK_STONE:
-                character = 'S';
-                break;
-
-            case BLOCK_BEDROCK:
-                character = 'B';
-                break;
-
-            case BLOCK_IRON_ORE:
-                character = 'I';
-                break;
-            }
-
-            putchar(character);
-        }
-
-        putchar('\n');
-    }
-
-    if (pause)
-        system("pause");
-}
-#endif

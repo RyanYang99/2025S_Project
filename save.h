@@ -6,9 +6,10 @@
 #include "inventory.h"
 #include "date_time.h"
 
+#define MAX_SAVE_SPOTS 3
+
 #pragma pack(push, 1)
 typedef struct {
-    char *pSave_name;
     date_time_t game_time;
 
     int x, y, hp;
@@ -25,6 +26,14 @@ typedef struct {
 
 extern save_t *pCurrent_save;
 
+void initialize_save(void);
 void instantiate_save(void);
-void write_save(const char * const pPath);
-save_t *load_save(const char * const pPath);
+
+void save_input(void);
+void render_save_menu(void);
+
+void load_save_index(const int index);
+
+const LPCWSTR get_save_folder(void);
+
+bool *get_save_spots(void);

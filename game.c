@@ -10,7 +10,8 @@
 #include "BlockCtrl.h"
 #include "inventory.h"
 #include "date_time.h"
-#include "global_state.h"
+
+bool game_exit = false;
 
 #if _DEBUG
 static void render_debug_text(void) {
@@ -43,6 +44,7 @@ static void render(void) {
     render_inventory();
     render_hotbar();
     render_time();
+    render_save_menu();
 
 #if _DEBUG
     render_debug_text();
@@ -50,14 +52,13 @@ static void render(void) {
 }
 
 void initialize_game(void) {
-    pCurrent_save = load_save("test.bin");
-
+    game_exit = false;
     initialize_date_time();
-    initialize_input_handler();
     create_map();
     player_init();
     initialize_block_control();
     initialize_inventory();
+    initialize_save();
 }
 
 void run_game(void) {
@@ -75,6 +76,7 @@ void run_game(void) {
         update_date_time();
         player_update();
         inventory_input();
+        save_input();
         Mob_Spawn_Time();
         update_mob_ai();
 
@@ -83,14 +85,6 @@ void run_game(void) {
 }
 
 void destroy_game(void) {
-    save_date_time();
-    save_player();
-    save_inventory();
-    save_map();
-
     destroy_block_control();
-    destroy_input_handler();
     destroy_map();
-
-    write_save("test.bin");
 }

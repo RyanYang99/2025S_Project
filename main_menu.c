@@ -4,34 +4,12 @@
 #include <time.h>
 #include <conio.h>
 #include "map.h"
+#include "save.h"
 #include "date_time.h"
 #include "formatter.h"
 
 #define PRINT_SELECTION(string, index, background, foreground) \
     print_center("%s%s%s", bottom + index, background, foreground, selection == index ? selected_left : "", string, selection == index ? selected_right : "")
-
-static void print_center(const char * const string,
-                         const int y,
-                         const BACKGROUND_color_t background,
-                         const FOREGROUND_color_t foreground,
-                         ...) {
-    COORD position = {
-        .X = console.size.X / 2,
-        .Y = (SHORT)y
-    };
-    if (position.X < 0)
-        return;
-
-    va_list args = { 0 };
-    va_start(args, foreground);
-
-    char* const pFormatted = format_string_v(string, args);
-    va_end(args);
-
-    position.X -= (SHORT)strlen(pFormatted) / 2;
-    fprint_string(pFormatted, position, background, foreground);
-    free(pFormatted);
-}
 
 static void update_time(void) {
     time_t now = time(NULL);
@@ -131,4 +109,27 @@ const main_menu_state_t main_menu(void) {
     }
 
     return 0;
+}
+
+bool load_menu(void) {
+    const bool * const pUsed = get_save_spots();
+    clear();
+
+    int selection = 0;
+    while (true) {
+        for (int i = 0; i < MAX_SAVE_SPOTS; ++i)
+            print_center("%d", i, BACKGROUND_T_BLACK, FOREGROUND_T_WHITE, pUsed[i]);
+
+        if (_kbhit()) {
+            const int number = _getch() - '0';
+            if (number >= 1 && number <= 3) {
+                load_save_index(number - 1);
+                return true;
+            }
+        }
+
+        update_console();
+    }
+
+    return false;
 }

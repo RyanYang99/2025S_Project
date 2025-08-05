@@ -284,6 +284,29 @@ int fprint_string_v(const char * const pFormat, const COORD position, const BACK
     return wide_length - 1;
 }
 
+void print_center(const char * const string,
+                  const int y,
+                  const BACKGROUND_color_t background,
+                  const FOREGROUND_color_t foreground,
+                  ...) {
+    COORD position = {
+        .X = console.size.X / 2,
+        .Y = (SHORT)y
+    };
+    if (position.X < 0)
+        return;
+
+    va_list args = { 0 };
+    va_start(args, foreground);
+
+    char * const pFormatted = format_string_v(string, args);
+    va_end(args);
+
+    position.X -= (SHORT)strlen(pFormatted) / 2;
+    fprint_string(pFormatted, position, background, foreground);
+    free(pFormatted);
+}
+
 const COORD convert_monitor_to_console(const POINT point)
 {
     POINT client_point =

@@ -19,9 +19,7 @@
 #include <stdbool.h>
 #include <Windows.h>
 
-/*
-    left: true 일때 왼쪽 마우스 버튼, false 일때 오른쪽 마우스 버튼
-*/
+//left: true 일때 왼쪽 마우스 버튼, false 일때 오른쪽 마우스 버튼
 typedef void (* mouse_click_t)(const bool left);
 typedef void (* mouse_position_t)(const COORD position);
 typedef void (* mouse_in_console_t)(const bool in_console);

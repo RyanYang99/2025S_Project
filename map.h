@@ -59,7 +59,3 @@ void subscribe_offset_change(const offset_changed_t callback);
 void unsubscribe_offset_change(const offset_changed_t callback);
 
 void save_map(void);
-
-#if _DEBUG
-void debug_render_map(const bool pause);
-#endif

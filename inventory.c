@@ -29,6 +29,9 @@ static int current_selection_index = 0,
            current_page_index = 0;
 
 void initialize_inventory(void) {
+    is_inventory_open = false;
+    current_selection_index = current_page_index = 0;
+
     for (int i = 0; i < INVENTORY_SIZE; ++i) {
         if (pCurrent_save)
             inventory.item[i] = pCurrent_save->pInventory[i];
