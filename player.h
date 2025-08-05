@@ -13,6 +13,7 @@ typedef struct {
     int is_moving;           // 현재 움직이는 중인지 (0 또는 1)
     float animation_timer;   // 현재 프레임을 얼마나 오래 보여줬는지 추적
     int current_frame;       // 현재 보여줄 애니메이션 프레임 인덱스
+    int facing_direction;    // 플레이어가 바라보는 방향 (1: 오른쪽, -1: 왼쪽)
 
     // 물리 상태 변수
     float precise_y;     // 부동 소수점 정밀도의 Y 위치
