@@ -13,7 +13,7 @@ const color_tchar_t pHealth_potion[TEXTURE_SIZE][TEXTURE_SIZE] = {
 const bool use_item(const item_t item) {
     switch (item) {
         case ITEM_HEALTH_POTION:
-            add_health_to_player(100);
+            add_health_to_player(402);
 			return true;
     }
 

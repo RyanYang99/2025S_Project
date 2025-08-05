@@ -4,7 +4,7 @@
 
 typedef enum {
     ITEM_NONE = 0,
-    ITEM_HEALTH_POTION = 301
+    ITEM_HEALTH_POTION = 402
 } item_t;
 
 const bool use_item(const item_t item);

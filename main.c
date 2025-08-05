@@ -107,7 +107,7 @@ int main(void)
     initialize_inventory();
     initialize_crafting_ui();
     
-    add_item_to_inventory(109, 1);
+    add_item_to_inventory(206, 1);
 
     clear();
     while (!game_exit)

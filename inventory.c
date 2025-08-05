@@ -68,7 +68,7 @@ void initialize_inventory(void) {
 */
 bool add_item_to_inventory(const int item_db_index, int quantity) {
     item_information_t *pItem_info = find_item_by_index(item_db_index);
-    assert(pItem_info != NULL && "DB에 존재하지 않는 아이템을 추가하려고 시도했습니다!");
+    assert(pItem_info != NULL && "DB에  존 재 하 지  않 는  아 이 템 을  추 가 하 려 고  시 도 했 습 니 다 !");
 
     while (quantity) {
         if (pItem_info->max_stack > 1) {
@@ -100,7 +100,7 @@ bool add_item_to_inventory(const int item_db_index, int quantity) {
         }
 
         if (emptySlot == -1) {
-            printf("인벤토리가 가득 차서 아이템 [%s] %d개를 더는 얻을 수 없습니다.\n", pItem_info->name, quantity);
+            printf("인 벤 토 리 가  가 득  차 서  아 이 템  [%s] %d개 를  더 는  얻 을  수  없 습 니 다 .\n", pItem_info->name, quantity);
             return false;
         }
 
@@ -173,14 +173,14 @@ static void render_inventory_item(const int y,
             position.X += (SHORT)fprint_string(" (x%d) ", position, INVENTORY_BACKGROUND, foreground, pItem->quantity);
 
         if (pItem_info->type == ITEM_TYPE_TOOL || pItem_info->type == ITEM_TYPE_ARMOR)
-            position.X += (SHORT)fprint_string(" (내구성: %d/%d) ", position, INVENTORY_BACKGROUND, foreground, pItem->durability, pItem_info->base_durability);
+            position.X += (SHORT)fprint_string(" (내 구 성 : %d/%d) ", position, INVENTORY_BACKGROUND, foreground, pItem->durability, pItem_info->base_durability);
 
         position.X += (SHORT)fprint_string(" ]", position, INVENTORY_BACKGROUND, foreground);
 
         if (pItem->passive_equipped)
             position.X += (SHORT)fprint_string(" [E] ", position, INVENTORY_BACKGROUND, FOREGROUND_EQUIPPED);
     } else
-        fprint_string("[ 비어있음 ]", position, INVENTORY_BACKGROUND, foreground);
+        fprint_string("[ 비 어 있 음  ]", position, INVENTORY_BACKGROUND, foreground);
 }
 
 void render_inventory(void) {
@@ -199,7 +199,7 @@ void render_inventory(void) {
     }
 
     COORD position = { 0 };
-    fprint_string("=== 인벤토리 (%d / %d) ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND, current_page_index + 1, MAX_PAGES);
+    fprint_string("=== 인 벤 토 리  (%d / %d) ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND, current_page_index + 1, MAX_PAGES);
 
     const int start_index = current_page_index * ITEMS_PER_PAGE;
     for (int i = 0; i < ITEMS_PER_PAGE; ++i)
@@ -208,7 +208,7 @@ void render_inventory(void) {
     }
 
     ++position.Y;
-    fprint_string("=== (W / S: 선택, A / D: 페이지, E: 장착, I: 닫기) ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
+    fprint_string("=== (W / S: 선 택 , A / D: 페 이 지 , E: 장 착 , I: 닫 기 ) ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
 
     const player_item_t * const pItem = &inventory.item[start_index + current_selection_index];
     if (!pItem->item_db_index)
@@ -219,16 +219,16 @@ void render_inventory(void) {
     position.X += (SHORT)fprint_string("%s", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND, pItem_info->name);
 
     if (pItem->passive_equipped)
-        position.X += (SHORT)fprint_string(" (장착중)", position, INVENTORY_BACKGROUND, FOREGROUND_EQUIPPED);
+        position.X += (SHORT)fprint_string(" (장 착 중 )", position, INVENTORY_BACKGROUND, FOREGROUND_EQUIPPED);
 
     char *pDescription = "";
     switch (pItem_info->type) {
         case ITEM_TYPE_MATERIAL:
-            pDescription = ": 제작에 사용되는 재료입니다.";
+            pDescription = ": 제 작 에  사 용 되 는  재 료 입 니 다 .";
             break;
 
         case ITEM_TYPE_MISC:
-            pDescription = ": 특별한 용도가 있는 기타 아이템입니다.";
+            pDescription = ": 특 별 한  용 도 가  있 는  기 타  아 이 템 입 니 다 .";
             break;
     }
 
@@ -249,57 +249,72 @@ static bool should_skip(const int i, item_type_t * const poItem_type) {
     *poItem_type = pItem_info->type;
     return false;
 }
-
 void render_hotbar(void) {
+    const int slot_width = TEXTURE_SIZE + 2;  // 테두리 포함 가로 크기
+    const int slot_height = TEXTURE_SIZE + 2; // 테두리 포함 세로 크기
+
     COORD position = {
-        .X = console.size.X / 2 - HOTBAR_SIZE_IN_CHARACTERS_X / 2
+        .X = console.size.X / 2 - (HOTBAR_COUNT * slot_width) / 2,
+        .Y = console.size.Y - slot_height - 1 // 화면 하단 위치 (필요에 따라 조정)
     };
 
-    if (position.X < 0)
+    if (position.X < 0 || position.Y < 0)
         return;
 
     for (int i = 0; i < HOTBAR_COUNT; ++i) {
-        int item_index = 0;
-        if (inventory.pHotbar[i].pPlayer_Item != NULL) {
-            item_index = inventory.pHotbar[i].pPlayer_Item->item_db_index;
+        bool is_selected = (inventory.selected_hotbar_index == i);
+
+        // 테두리 색상 (선택 시 밝게, 아니면 어둡게)
+        WORD border_background = is_selected ? BACKGROUND_T_WHITE : BACKGROUND_T_DARKGRAY;
+
+        int slot_start_x = position.X + i * slot_width;
+        int slot_start_y = position.Y;
+
+        // 1. 테두리 영역 출력
+        // 위, 아래 가로줄 (빈칸 문자 + 테두리 배경색)
+        for (int tx = 0; tx < slot_width; ++tx) {
+            print_color_tchar((color_tchar_t) { ' ', border_background, 0 }, (COORD) { slot_start_x + tx, slot_start_y });
+            print_color_tchar((color_tchar_t) { ' ', border_background, 0 }, (COORD) { slot_start_x + tx, slot_start_y + slot_height - 1 });
         }
 
-        item_type_t item_type = ITEM_TYPE_NONE;
-        bool skip = should_skip(i, &item_type);
+        // 좌, 우 세로줄
+        for (int ty = 1; ty < slot_height - 1; ++ty) {
+            print_color_tchar((color_tchar_t) { ' ', border_background, 0 }, (COORD) { slot_start_x, slot_start_y + ty });
+            print_color_tchar((color_tchar_t) { ' ', border_background, 0 }, (COORD) { slot_start_x + slot_width - 1, slot_start_y + ty });
+        }
 
-        color_tchar_t character = {
-            .character = ' '
-        };
-        for (int ty = 0; ty < TEXTURE_SIZE; ++ty) {
-            for (int tx = 0; tx < TEXTURE_SIZE; ++tx) {
-                if (!skip) {
-                    color_tchar_t texture = { 0 };
+        // 2. 슬롯 내부 텍스처 출력 (기존 방식과 동일)
+        for (int ty = 1; ty < slot_height - 1; ++ty) {
+            for (int tx = 1; tx < slot_width - 1; ++tx) {
+                color_tchar_t texture_char = { ' ', 0, 0 };
+
+                if (inventory.pHotbar[i].pPlayer_Item != NULL) {
+                    int item_index = inventory.pHotbar[i].pPlayer_Item->item_db_index;
+                    item_type_t item_type = ITEM_TYPE_NONE;
+
+                    const item_information_t* pItem_info = find_item_by_index(item_index);
+                    if (pItem_info != NULL) {
+                        item_type = pItem_info->type;
+                    }
+
+                    int tex_x = tx - 1;
+                    int tex_y = ty - 1;
+
                     if (item_type == ITEM_TYPE_MATERIAL)
-                        texture = get_block_texture(item_index, tx, ty);
+                        texture_char = get_block_texture(item_index, tex_x, tex_y);
                     else if (item_type == ITEM_TYPE_TOOL)
-                        texture = get_tool_texture(item_index, tx, ty);
+                        texture_char = get_tool_texture(item_index, tex_x, tex_y);
                     else if (item_type == ITEM_TYPE_MISC)
-                        texture = get_item_texture(item_index, tx, ty);
-
-                    character.background = texture.background;
-                    character.foreground = texture.foreground;
-                    character.character = texture.character;
+                        texture_char = get_item_texture(item_index, tex_x, tex_y);
                 }
 
-                const COORD new_position = {
-                    .X = (WORD)(position.X + tx),
-                    .Y = (WORD)(position.Y + ty)
-                };
-                print_color_tchar(character, new_position);
+                print_color_tchar(texture_char, (COORD) { slot_start_x + tx, slot_start_y + ty });
             }
         }
-
-        if (inventory.selected_hotbar_index == i)
-            print_color_tchar((color_tchar_t) { 'S', 0, FOREGROUND_T_WHITE }, (COORD) { position.X, 0 });
-
-        position.X += TEXTURE_SIZE;
     }
 }
+
+
 
 int get_inventory_count(int item_db_index) {
     int count = 0;
