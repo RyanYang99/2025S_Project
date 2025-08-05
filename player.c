@@ -2,10 +2,10 @@
 #include "player.h"
 
 #include "map.h"
+#include "save.h"
 #include "input.h"
 #include "delta.h"
 #include "console.h"
-#include "global_state.h"
 #include <stdio.h> // swprintf 사용하기위해
 #include <wchar.h>
 #include <time.h>
@@ -39,7 +39,7 @@ static const PlayerSpritePixel player_sprite_stand[PLAYER_SPRITE_HEIGHT][PLAYER_
     { {L' ',0,0}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L' ',0,0} }, // 머리 (위:머리카락, 아래:피부)
     { {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'█', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_WHITE}, {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'█', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_WHITE}, {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW} }, // 몸통과 팔
     { {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW} }, // 허리, 바지
-    { {L' ',0,0}, {L'▓ ', BACKGROUND_T_BLACK, FOREGROUND_T_GRAY}, {L' ',0,0}, {L'▓ ', BACKGROUND_T_BLACK, FOREGROUND_T_GRAY}, {L' ',0,0} }, // 다리
+    { {L' ',0,0}, {L'▓', BACKGROUND_T_BLACK, FOREGROUND_T_GRAY}, {L' ',0,0}, {L'▓', BACKGROUND_T_BLACK, FOREGROUND_T_GRAY}, {L' ',0,0} }, // 다리
     { {L' ',0,0}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_BLACK}, {L' ',0,0}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_BLACK}, {L' ',0,0} }  // 신발
 };
 
@@ -50,7 +50,7 @@ static const PlayerSpritePixel player_sprite_walk[2][PLAYER_SPRITE_HEIGHT][PLAYE
         { {L' ',0,0}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L' ',0,0} },
         { {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'█', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_WHITE}, {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'█', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_WHITE}, {L' '}},
         { {L' ',0,0}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L' ',0,0} },
-        { {L' ',0,0}, {L'▓ ', BACKGROUND_T_BLACK, FOREGROUND_T_GRAY}, {L' ',0,0}, {L' ',0,0}, {L' ',0,0} },
+        { {L' ',0,0}, {L'▓', BACKGROUND_T_BLACK, FOREGROUND_T_GRAY}, {L' ',0,0}, {L' ',0,0}, {L' ',0,0} },
         { {L' ',0,0}, {L' ',0,0}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_BLACK}, {L' ',0,0}, {L' ',0,0} }
     },
     // 프레임 1
@@ -58,18 +58,12 @@ static const PlayerSpritePixel player_sprite_walk[2][PLAYER_SPRITE_HEIGHT][PLAYE
         { {L' ',0,0}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L' ',0,0} },
         { {L' '}, {L'█', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_WHITE}, {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'█', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_WHITE}, {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW} },
         { {L' ',0,0}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L' ',0,0} },
-        { {L' ',0,0}, {L' ',0,0}, {L' ',0,0}, {L'▓ ', BACKGROUND_T_BLACK, FOREGROUND_T_GRAY}, {L' ',0,0} },
+        { {L' ',0,0}, {L' ',0,0}, {L' ',0,0}, {L'▓', BACKGROUND_T_BLACK, FOREGROUND_T_GRAY}, {L' ',0,0} },
         { {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_BLACK}, {L' ',0,0}, {L' ',0,0}, {L' ',0,0}, {L' ',0,0} }
     }
 };
 
 static void movement(void) {
-    // 종료 키 확인
-    if (is_key_down('Q')) {
-        game_exit = true;
-        return;
-    }
-
     // 점프 키 확인
     if (is_key_down(VK_SPACE) && player.is_on_ground) {
         player.velocity_y = JUMP_STRENGTH;
@@ -187,13 +181,19 @@ void player_update(void) {
 }
 
 
-void player_init(int x) {
-    player.x = x;
-    player.y = find_ground_pos(x);
-    if (player.y - 1 >= 0)
-        --player.y; // 가능할 시 찾은 블록 위로 설정
+void player_init(void) {
+    if (pCurrent_save) {
+        player.x = pCurrent_save->x;
+        player.y = pCurrent_save->y;
+        player.hp = pCurrent_save->hp;
+    } else {
+        player.x = map.size.x / 2;
+        player.y = find_ground_pos(player.x);
+        if (player.y - 1 >= 0)
+            --player.y; // 가능할 시 찾은 블록 위로 설정
 
-    player.hp = 1000; // 초기 체력
+        player.hp = 1000; // 초기 체력
+    }
 
     // 물리 변수 초기화
     player.precise_y = (float)player.y;
@@ -229,6 +229,7 @@ bool is_walkable(int x, int y) {
         case BLOCK_LOG:
         case BLOCK_LEAF:
         case BLOCK_WATER:
+        case BLOCK_STAR:
             return true;
     }
 
@@ -303,6 +304,16 @@ int find_ground_pos(int x)
     return map.size.y / 2; //블록을 찾지 못하면 맵 높이의 절반 반환;
 }
 
+
+void save_player(void) {
+    if (!pCurrent_save)
+        instantiate_save();
+
+    pCurrent_save->x = player.x;
+    pCurrent_save->y = player.y;
+    pCurrent_save->hp = player.hp;
+}
+
 void player_take_damage(int damage)
 {
     player.hp -= damage;
@@ -310,4 +321,3 @@ void player_take_damage(int damage)
         player.hp = 0;
     }
 }
-

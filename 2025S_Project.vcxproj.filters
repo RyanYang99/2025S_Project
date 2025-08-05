@@ -42,9 +42,6 @@
     <ClCompile Include="Mob.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="global_state.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="delta.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -60,6 +57,16 @@
     <ClCompile Include="formatter.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="main_menu.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="date_time.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="save.c">
     <ClCompile Include="BossMalakh.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -92,9 +99,6 @@
     <ClInclude Include="Mob.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="global_state.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="delta.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -110,11 +114,23 @@
     <ClInclude Include="formatter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="main_menu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="date_time.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="save.h">
     <ClInclude Include="BossMalakh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="items.csv" />
+    <None Include="items.csv">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -107,7 +107,7 @@ void initialize_console(const bool use_double_buffering, const bool should_switc
 
 static void flip_double_buffer(void)
 {
-    if (!use_double_buffer)
+    if (!use_double_buffer || !character_buffer)
         return;
 
     WriteConsoleOutput(buffer[current_buffer], character_buffer, console.size, (COORD) { 0, 0 }, & written);
@@ -122,12 +122,20 @@ static void flip_double_buffer(void)
 static void resize(const HANDLE size_handle)
 {
     SMALL_RECT rect = { 0, 0, 1, 1 };
+
+    const bool maximized = IsZoomed(window);
+    if (maximized)
+        ShowWindow(window, SW_NORMAL);
+
     SetConsoleWindowInfo(size_handle, TRUE, &rect);
     SetConsoleScreenBufferSize(size_handle, console.size);
 
     rect.Right = console.size.X - 1;
     rect.Bottom = console.size.Y - 1;
     SetConsoleWindowInfo(size_handle, TRUE, &rect);
+
+    if (maximized)
+        ShowWindow(window, SW_MAXIMIZE);
 }
 
 static bool update_console_size(void)
@@ -145,7 +153,17 @@ static bool update_console_size(void)
     if (use_double_buffer)
     {
         character_buffer_count = console.size.X * console.size.Y;
-        character_buffer = realloc(character_buffer, sizeof(CHAR_INFO) * character_buffer_count);
+        if (!character_buffer_count) {
+            free(character_buffer);
+            character_buffer = NULL;
+        }
+        else {
+            const size_t size = sizeof(CHAR_INFO) * character_buffer_count;
+            if (!character_buffer)
+                character_buffer = malloc(size);
+            else
+                character_buffer = realloc(character_buffer, size);
+        }
 
         written.Right = console.size.X - 1;
         written.Bottom = console.size.Y - 1;
@@ -184,8 +202,11 @@ void write(const COORD position, const TCHAR character, const WORD attribute)
 
     if (use_double_buffer)
     {
+        if (!character_buffer)
+            return;
+
         const int i = index(position.X, position.Y);
-        if (i > character_buffer_count || i < 0)
+        if (i >= character_buffer_count || i < 0)
             return;
 
         character_buffer[i].Char.UnicodeChar = character;
@@ -206,7 +227,12 @@ void clear(void)
 {
     const DWORD total = console.size.X * console.size.Y;
     if (use_double_buffer)
+    {
+        if (!character_buffer)
+            return;
+
         memset(character_buffer, 0, sizeof(CHAR_INFO) * total);
+    }
     else
     {
         const COORD coordinates = { 0 };
@@ -227,12 +253,39 @@ void print_color_tchar(const color_tchar_t character, const COORD position)
     write(position, character.character, attribute);
 }
 
-int fprint_string(const char* const pFormat, const COORD position, const BACKGROUND_color_t background, const FOREGROUND_color_t foreground, ...)
-{
+void fill(const color_tchar_t character) {
+    const WORD attribute = (WORD)character.background | (WORD)character.foreground;
+    if (use_double_buffer) {
+        if (!character_buffer)
+            return;
+
+        for (int i = 0; i < character_buffer_count; ++i) {
+            character_buffer[i].Char.UnicodeChar = character.character;
+            character_buffer[i].Attributes = attribute;
+        }
+    }
+    else {
+        const DWORD total = console.size.X * console.size.Y;
+        const COORD coordinates = { 0 };
+        DWORD written_chars = 0;
+
+        FillConsoleOutputCharacter(handle, character.character, total, coordinates, &written_chars);
+        FillConsoleOutputAttribute(handle, attribute, total, coordinates, &written_chars);
+        SetConsoleCursorPosition(handle, coordinates);
+    }
+}
+
+int fprint_string(const char * const pFormat, const COORD position, const BACKGROUND_color_t background, const FOREGROUND_color_t foreground, ...) {
     va_list args = { 0 };
     va_start(args, foreground);
-    char* pBuffer = format_string_v(pFormat, args);
+    int result = fprint_string_v(pFormat, position, background, foreground, args);
     va_end(args);
+
+    return result;
+}
+
+int fprint_string_v(const char * const pFormat, const COORD position, const BACKGROUND_color_t background, const FOREGROUND_color_t foreground, const va_list args) {
+    char *pBuffer = format_string_v(pFormat, args);
 
     const int wide_length = MultiByteToWideChar(CP_UTF8, 0, pBuffer, -1, NULL, 0);
     LPWSTR pWBuffer = malloc(sizeof(WCHAR) * wide_length);
@@ -253,6 +306,29 @@ int fprint_string(const char* const pFormat, const COORD position, const BACKGRO
     return wide_length - 1;
 }
 
+void print_center(const char * const string,
+                  const int y,
+                  const BACKGROUND_color_t background,
+                  const FOREGROUND_color_t foreground,
+                  ...) {
+    COORD position = {
+        .X = console.size.X / 2,
+        .Y = (SHORT)y
+    };
+    if (position.X < 0)
+        return;
+
+    va_list args = { 0 };
+    va_start(args, foreground);
+
+    char * const pFormatted = format_string_v(string, args);
+    va_end(args);
+
+    position.X -= (SHORT)strlen(pFormatted) / 2;
+    fprint_string(pFormatted, position, background, foreground);
+    free(pFormatted);
+}
+
 const COORD convert_monitor_to_console(const POINT point)
 {
     POINT client_point =
@@ -271,6 +347,17 @@ const COORD convert_monitor_to_console(const POINT point)
         .Y = (SHORT)(client_point.y / (font.dwFontSize.Y * dpi_scale))
     };
     return consoleCoord;
+}
+
+const bool is_cursor_inside_console(const POINT point) {
+    RECT window_rect = { 0 };
+    GetWindowRect(window, &window_rect);
+
+    return point.x >= window_rect.left &&
+           point.x <= window_rect.right &&
+           point.y >= window_rect.top &&
+           point.y <= window_rect.bottom &&
+           GetForegroundWindow() == window;
 }
 
 void destroy_console(void)

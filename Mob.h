@@ -6,12 +6,11 @@
 
 
 #define Max_Mob 5
-
 #define MAX_MOB_DEBUG_MESSAGE_LEN 100
+
 extern char mob_debug_message[MAX_MOB_DEBUG_MESSAGE_LEN];
 
-
-
+#pragma pack(push, 1)
 typedef struct {
 	int x;
 	int y;
@@ -31,6 +30,7 @@ typedef struct {
 	float ai_timer;
 	float despawn_timer;
 } Mob;
+#pragma pack(pop)
 
 extern Mob mobs[Max_Mob];
 extern int mob_count;
@@ -40,7 +40,8 @@ extern int mob_level;
 extern const color_tchar_t zombie_sprite_data[5][5];
 
 // 함수 선언
-
+void load_mob(void);
+void save_mob(void);
 void Mob_physics();
 void update_mob_ai(void);
 void mob_init();
