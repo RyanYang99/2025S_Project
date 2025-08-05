@@ -4,6 +4,7 @@
 
 typedef enum {
     ITEM_NONE = 0,
+    ITEM_APPLE = 401,
     ITEM_HEALTH_POTION = 402
 } item_t;
 

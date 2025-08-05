@@ -34,6 +34,8 @@ player_t player = { 0 };
 // 수평 이동 속도 조절 (값이 작을수록 빨라짐)
 #define HORIZONTAL_MOVE_COOLDOWN 0.08f  // 약 1초에 12.5칸 이동
 
+#define HP_BAR_WIDTH 20
+
 // 각 픽셀을 표현할 구조체
 typedef struct {
     wchar_t character; // 표시할 유니코드 문자
@@ -236,7 +238,8 @@ void player_init(int x) {
     if (player.y - 1 >= 0)
         --player.y; // 가능할 시 찾은 블록 위로 설정
 
-    player.hp = 1000; // 초기 체력
+    player.max_hp = 1000;
+    player.hp = 110; // 초기 체력
 
     // 물리 변수 초기화
     player.precise_y = (float)player.y;
@@ -351,25 +354,35 @@ void render_player(void) {
         }
     }
 
+    const int bar_width = HP_BAR_WIDTH;
 
-    //// 5. 체력(HP) 바 렌더링
-    //wchar_t hp_str[16];
-    //swprintf(hp_str, 16, L"HP: %d", player.hp);
+    int current_hp = player.hp < 0 ? 0 : player.hp;
+    int max_hp = player.max_hp > 0 ? player.max_hp : 1;
 
-    //// 체력 문자열을 플레이어 스프라이트 머리 위에 출력
-    //COORD hp_pos;
-    //// 새로운 스프라이트의 최상단 좌표를 기준으로 Y 위치 조정
-    //hp_pos.Y = center_pos.Y - (PLAYER_SPRITE_HEIGHT / 2) - 1;
-    //if (hp_pos.Y < 0) hp_pos.Y = 0; // 화면 위로 벗어나지 않도록 처리
+    int filled = (current_hp * bar_width) / max_hp;
+    int empty = bar_width - filled;
 
-    //// HP 문자열을 중앙에 정렬하여 출력
-    //for (int i = 0; hp_str[i] != L'\0'; ++i) {
-    //    COORD char_pos = hp_pos;
-    //    char_pos.X = center_pos.X + (SHORT)i - (SHORT)(wcslen(hp_str) / 2);
-    //    if (char_pos.X >= 0 && char_pos.X < console.size.X) {
-    //        print_color_tchar((color_tchar_t) { hp_str[i], BACKGROUND_T_BLACK, FOREGROUND_T_RED }, char_pos);
-    //    }
-    //}
+    COORD pos = {
+        .X = console.size.X - (bar_width + 22),  // 오른쪽 끝에서 약간 여유
+        .Y = 1
+    };
+
+    fprint_string("[", pos, FOREGROUND_T_WHITE, BACKGROUND_T_TRANSPARENT);
+    pos.X += 1;
+
+    for (int i = 0; i < filled; ++i) {
+        fprint_string(" ", pos, BACKGROUND_T_RED, 0);  // 빨간 체력 바
+        pos.X += 1;
+    }
+    for (int i = 0; i < empty; ++i) {
+        fprint_string(" ", pos, BACKGROUND_T_DARKGRAY, 0);  // 회색 빈 바
+        pos.X += 1;
+    }
+
+    fprint_string("]", pos, FOREGROUND_T_WHITE, BACKGROUND_T_TRANSPARENT);
+    pos.X += 2;
+
+    fprint_string("HP: %d / %d", pos, BACKGROUND_T_BLACK, FOREGROUND_T_YELLOW, current_hp, max_hp);
 }
 
 //특정 x좌표에서 가장 높은 지상 의 Y좌표를 찾아 반환
@@ -383,5 +396,9 @@ int find_ground_pos(int x)
 }
 
 void add_health_to_player(const int additional_health) {
+
     player.hp += additional_health;
+
+    if (player.hp > player.max_hp)
+        player.hp = player.max_hp;
 }

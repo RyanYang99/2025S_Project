@@ -7,6 +7,7 @@
 // 플레이어 상태 구조체
 typedef struct {
     int x, y; // 맵 상의 위치
+    int max_hp;
     int hp;   // 체력
 
     // 애니메이션 상태 변수
