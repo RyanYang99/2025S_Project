@@ -7,7 +7,7 @@
 #include <stdbool.h>
 #include <math.h>
 
-
+#include "save.h"
 #include "Mob.h"
 #include "player.h"
 #include "map.h"
@@ -30,6 +30,16 @@ COORD console_c() // 콘솔 중앙 찾기
     center_m.X = console.size.X / 2;
     center_m.Y = console.size.Y / 2;
     return center_m;
+}
+
+void load_mob(void) {
+    if (!pCurrent_save)
+        return;
+
+    mob_count = pCurrent_save->mob_count;
+    mob_level = pCurrent_save->mob_level;
+    for (int i = 0; i < mob_count; ++i)
+        mobs[i] = pCurrent_save->pMobs[i];
 }
 
 void Mob_Spawn_Time()
@@ -108,6 +118,23 @@ void Mob_render() // 몹 렌더링
         print_color_tchar(mob_c, Mobpos);
     }
 
+}
+
+void save_mob(void) {
+    if (!pCurrent_save)
+        instantiate_save();
+
+    pCurrent_save->mob_count = mob_count;
+    pCurrent_save->mob_level = mob_level;
+
+    const size_t size = sizeof(Mob) * mob_count;
+    if (!pCurrent_save->pMobs)
+        pCurrent_save->pMobs = malloc(size);
+    else
+        pCurrent_save->pMobs = realloc(pCurrent_save->pMobs, size);
+
+    for (int i = 0; i < mob_count; ++i)
+        pCurrent_save->pMobs[i] = mobs[i];
 }
 
 void update_mob_ai() {

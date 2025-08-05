@@ -34,6 +34,9 @@ static void write_save(LPCWSTR const pPath) {
     fwrite(&pCurrent_save->map_x, sizeof(pCurrent_save->map_x), 1, pFile);
     fwrite(&pCurrent_save->map_y, sizeof(pCurrent_save->map_y), 1, pFile);
     fwrite(pCurrent_save->pBlocks, sizeof(block_info_t), pCurrent_save->map_x * pCurrent_save->map_y, pFile);
+    fwrite(&pCurrent_save->mob_count, sizeof(pCurrent_save->mob_count), 1, pFile);
+    fwrite(&pCurrent_save->mob_level, sizeof(pCurrent_save->mob_level), 1, pFile);
+    fwrite(pCurrent_save->pMobs, sizeof(Mob), pCurrent_save->mob_count, pFile);
 
     fclose(pFile);
 }
@@ -74,6 +77,7 @@ void save_input(void) {
                 save_player();
                 save_inventory();
                 save_map();
+                save_mob();
 
                 LPCWSTR pFolder = get_save_folder();
                 if (!directory_exists(pFolder))
@@ -81,6 +85,7 @@ void save_input(void) {
 
                 LPCWSTR pFile = get_file_path(number - 1);
                 write_save(pFile);
+                free_save();
             }
         }
     }
@@ -116,6 +121,12 @@ save_t *load_save(LPCWSTR const pPath) {
     pSave->pBlocks = malloc(sizeof(block_info_t) * size);
     fread(pSave->pBlocks, sizeof(block_info_t), size, pFile);
 
+    fread(&pSave->mob_count, sizeof(pSave->mob_count), 1, pFile);
+    fread(&pSave->mob_level, sizeof(pSave->mob_level), 1, pFile);
+
+    pSave->pMobs = malloc(sizeof(Mob) * pSave->mob_count);
+    fread(pSave->pMobs, sizeof(Mob), pSave->mob_count, pFile);
+
     fclose(pFile);
     return pSave;
 }
@@ -148,4 +159,15 @@ bool *get_save_spots(void) {
         pUsed[i] = file_exists(get_file_path(i));
 
     return pUsed;
+}
+
+void free_save(void) {
+    if (!pCurrent_save)
+        return;
+
+    free(pCurrent_save->pBlocks);
+    free(pCurrent_save->pMobs);
+    free(pCurrent_save);
+    
+    pCurrent_save = NULL;
 }

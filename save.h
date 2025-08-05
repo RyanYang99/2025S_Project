@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Mob.h"
 #include "map.h"
 #include "player.h"
 #include "perlin.h"
@@ -17,10 +18,11 @@ typedef struct {
     player_item_t pInventory[INVENTORY_SIZE];
     int pHotbar_linked_index[HOTBAR_COUNT];
 
-    int pPermuation_table[PERLIN_SIZE];
-
-    int map_x, map_y;
+    int pPermuation_table[PERLIN_SIZE], map_x, map_y;
     block_info_t *pBlocks;
+
+    int mob_count, mob_level;
+    Mob *pMobs;
 } save_t;
 #pragma pack(pop)
 
@@ -37,3 +39,5 @@ void load_save_index(const int index);
 const LPCWSTR get_save_folder(void);
 
 bool *get_save_spots(void);
+
+void free_save(void);

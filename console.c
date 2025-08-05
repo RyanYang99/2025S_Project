@@ -107,7 +107,7 @@ void initialize_console(const bool use_double_buffering, const bool should_switc
 
 static void flip_double_buffer(void)
 {
-    if (!use_double_buffer)
+    if (!use_double_buffer || !character_buffer)
         return;
 
     WriteConsoleOutput(buffer[current_buffer], character_buffer, console.size, (COORD){ 0, 0 }, &written);
@@ -153,7 +153,17 @@ static bool update_console_size(void)
     if (use_double_buffer)
     {
         character_buffer_count = console.size.X * console.size.Y;
-        character_buffer = realloc(character_buffer, sizeof(CHAR_INFO) * character_buffer_count);
+        if (!character_buffer_count) {
+            free(character_buffer);
+            character_buffer = NULL;
+        }
+        else {
+            const size_t size = sizeof(CHAR_INFO) * character_buffer_count;
+            if (!character_buffer)
+                character_buffer = malloc(size);
+            else
+                character_buffer = realloc(character_buffer, size);
+        }
 
         written.Right = console.size.X - 1;
         written.Bottom = console.size.Y - 1;
@@ -192,8 +202,11 @@ void write(const COORD position, const TCHAR character, const WORD attribute)
 
     if (use_double_buffer)
     {
+        if (!character_buffer)
+            return;
+
         const int i = index(position.X, position.Y);
-        if (i > character_buffer_count || i < 0)
+        if (i >= character_buffer_count || i < 0)
             return;
 
         character_buffer[i].Char.UnicodeChar = character;
@@ -214,7 +227,12 @@ void clear(void)
 {
     const DWORD total = console.size.X * console.size.Y;
     if (use_double_buffer)
+    {
+        if (!character_buffer)
+            return;
+
         memset(character_buffer, 0, sizeof(CHAR_INFO) * total);
+    }
     else
     {
         const COORD coordinates = { 0 };
@@ -237,11 +255,15 @@ void print_color_tchar(const color_tchar_t character, const COORD position)
 
 void fill(const color_tchar_t character) {
     const WORD attribute = (WORD)character.background | (WORD)character.foreground;
-    if (use_double_buffer)
+    if (use_double_buffer) {
+        if (!character_buffer)
+            return;
+
         for (int i = 0; i < character_buffer_count; ++i) {
             character_buffer[i].Char.UnicodeChar = character.character;
             character_buffer[i].Attributes = attribute;
         }
+    }
     else {
         const DWORD total = console.size.X * console.size.Y;
         const COORD coordinates = { 0 };

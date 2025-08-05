@@ -59,6 +59,8 @@ void initialize_game(void) {
     initialize_block_control();
     initialize_inventory();
     initialize_save();
+    load_mob();
+    free_save();
 }
 
 void run_game(void) {
