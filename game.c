@@ -63,7 +63,6 @@ void initialize_game(void) {
     initialize_save();
     load_mob();
     free_save();
-    add_item_to_inventory(401, 10);
 }
 
 void run_game(void) {

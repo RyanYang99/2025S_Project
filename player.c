@@ -239,7 +239,7 @@ void player_init(void) {
             --player.y; // 가능할 시 찾은 블록 위로 설정
 
         player.max_hp = 1000;
-        player.hp = 900; // 초기 체력
+        player.hp = 1000; // 초기 체력
 
         // 물리 변수 초기화
         player.precise_y = (float)player.y;

@@ -15,6 +15,7 @@
 #define INVENTORY_FOREGROUND FOREGROUND_T_WHITE
 #define INVENTORY_FOREGROUND_DARK FOREGROUND_T_GRAY
 #define INVENTORY_FOREGROUND_BLINK FOREGROUND_T_WHITE
+#define INVENTORY_FOREGROUND_IN_HOTBAR FOREGROUND_T_GREEN
 
 #define HOTBAR_SIZE_IN_CHARACTERS_X (TEXTURE_SIZE * HOTBAR_COUNT + HOTBAR_COUNT + 1)
 #define HOTBAR_SIZE_IN_CHARACTERS_Y (TEXTURE_SIZE + 2)
@@ -163,7 +164,7 @@ static void render_inventory_item(const int y,
     COORD position = {
         .Y = (SHORT)y
     };
-
+        
     FOREGROUND_color_t foreground = INVENTORY_FOREGROUND_DARK;
     if (selected && blink)
         foreground = INVENTORY_FOREGROUND_BLINK;
@@ -185,6 +186,11 @@ static void render_inventory_item(const int y,
             position.X += (SHORT)fprint_string(" (Durability: %d/%d) ", position, INVENTORY_BACKGROUND, foreground, pItem->durability, pItem_info->base_durability);
 
         position.X += (SHORT)fprint_string("]", position, INVENTORY_BACKGROUND, foreground);
+
+        for (int i = 0; i < max_hotbar_index; ++i)
+            if (inventory.pHotbar[i].index_in_inventory == inventory_index)
+                fprint_string(" [%d] ", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND_IN_HOTBAR, i + 1);
+
 
     } else
         fprint_string("[ Empty ]", position, INVENTORY_BACKGROUND, foreground);
