@@ -78,6 +78,7 @@
   <ItemGroup>
     <ClCompile Include="astar.c" />
     <ClCompile Include="BlockCtrl.c" />
+    <ClCompile Include="BossMalakh.c" />
     <ClCompile Include="console.c" />
     <ClCompile Include="Crafting_UI.c" />
     <ClCompile Include="delta.c" />

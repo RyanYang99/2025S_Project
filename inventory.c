@@ -180,12 +180,12 @@ static void render_inventory_item(const int y,
         position.X += (SHORT)fprint_string("[ %s", position, INVENTORY_BACKGROUND, foreground, pItem_info->name);
 
         if (pItem_info->max_stack > 1)
-            position.X += (SHORT)fprint_string(" (x%d) ", position, INVENTORY_BACKGROUND, foreground, pItem->quantity);
+            position.X += (SHORT)fprint_string(" (x%d)", position, INVENTORY_BACKGROUND, foreground, pItem->quantity);
 
         if (pItem_info->type == ITEM_TYPE_TOOL || pItem_info->type == ITEM_TYPE_ARMOR)
-            position.X += (SHORT)fprint_string(" (Durability: %d/%d) ", position, INVENTORY_BACKGROUND, foreground, pItem->durability, pItem_info->base_durability);
+            position.X += (SHORT)fprint_string(" (Durability: %d/%d)", position, INVENTORY_BACKGROUND, foreground, pItem->durability, pItem_info->base_durability);
 
-        position.X += (SHORT)fprint_string("]", position, INVENTORY_BACKGROUND, foreground);
+        position.X += (SHORT)fprint_string(" ]", position, INVENTORY_BACKGROUND, foreground);
 
         for (int i = 0; i < max_hotbar_index; ++i)
             if (inventory.pHotbar[i].index_in_inventory == inventory_index)

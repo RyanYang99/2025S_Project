@@ -119,8 +119,8 @@ color_tchar_t get_block_texture(const block_t block, const int x, const int y)
         { { ' ' , BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_T_BLACK, 0 } }
     }, pWorkbench[TEXTURE_SIZE][TEXTURE_SIZE] = {
         { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 } },
-        { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 } },
-        { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_TRANSPARENT, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 } }
+        { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_TRANSPARENT, 0 } },
+        { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 } }
     };
 
     if (is_air_or_star(block)) {
@@ -175,7 +175,7 @@ color_tchar_t get_block_texture(const block_t block, const int x, const int y)
             return pWater[y][x];
             
         case BLOCK_WORKBENCH:
-            return pWorkbench[y][x];
+            return pWorkbench[x][y];
     }
 
     return (color_tchar_t){ 0 };
