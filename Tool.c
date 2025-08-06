@@ -122,7 +122,7 @@ const int get_drop_from_block(const block_t block) {
             return -1;
         
         case BLOCK_LEAF:
-            if (rand() % 100 >= 10)
+            if (rand() % 100 >= 80)
             {
                 add_item_to_inventory(401, 1);
                 return -1;
