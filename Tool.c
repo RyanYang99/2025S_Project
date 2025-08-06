@@ -8,11 +8,56 @@
 #include "blockctrl.h"
 #include "inventory.h"
 
-const color_tchar_t pWooden_pickaxe[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { ' ', BACKGROUND_T_DARKYELLOW, 0 }, { ' ', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_BLACK }, { ' ', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_BLACK } },
-    { { ' ', BACKGROUND_T_TRANSPARENT, 0 }, { ' ', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_BLACK }, { ' ', BACKGROUND_T_TRANSPARENT, 0 } },
-    { { ' ', BACKGROUND_T_TRANSPARENT, 0 }, { ' ', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_BLACK }, { ' ', BACKGROUND_T_TRANSPARENT, 0 } }
+const color_tchar_t pWooden_sword[TEXTURE_SIZE][TEXTURE_SIZE] = {
+    { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
+    { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
+    { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } }
+}, pStone_sword[TEXTURE_SIZE][TEXTURE_SIZE] = {
+    { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
+    { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
+    { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } }
+}, pIron_sword[TEXTURE_SIZE][TEXTURE_SIZE] = {
+    { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ',FOREGROUND_T_BLACK, BACKGROUND_T_DARKGRAY }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
+    { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKGRAY }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
+    { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } }
+}, pWooden_pickaxe[TEXTURE_SIZE][TEXTURE_SIZE] = {
+    { { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW } },
+    { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
+    { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } }
+}, pStone_pickaxe[TEXTURE_SIZE][TEXTURE_SIZE] = {
+    { { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GRAY } },
+    { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
+    { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } }
+}, pIron_pickaxe[TEXTURE_SIZE][TEXTURE_SIZE] = {
+    { { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKGRAY }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKGRAY }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKGRAY } },
+    { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
+    { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } }
+}, pWooden_axe[TEXTURE_SIZE][TEXTURE_SIZE] = {
+    { { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
+    { { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
+    { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } }
+}, pStone_axe[TEXTURE_SIZE][TEXTURE_SIZE] = {
+    { { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
+    { { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
+    { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } }
+}, pIron_axe[TEXTURE_SIZE][TEXTURE_SIZE] = {
+    { { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKGRAY }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKGRAY }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
+    { { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKGRAY }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
+    { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } }
+}, pWooden_shovel[TEXTURE_SIZE][TEXTURE_SIZE] = {
+    { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
+    { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
+    { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } }
+}, pStone_shovel[TEXTURE_SIZE][TEXTURE_SIZE] = {
+    { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
+    { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
+    { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } }
+}, pIron_shovel[TEXTURE_SIZE][TEXTURE_SIZE] = {
+    { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKGRAY }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
+    { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
+    { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } }
 };
+
 
 const bool can_tool_break_block(const item_information_t * const pTool, const block_t block) {
     int tool = TOOL_KIND_NONE, material = MATERIAL_TIER_NONE;
@@ -27,6 +72,9 @@ const bool can_tool_break_block(const item_information_t * const pTool, const bl
         case BLOCK_GRASS:
         case BLOCK_LEAF:
             return true; //맨손, 모든 도구
+
+        case BLOCK_WORKBENCH:
+            return (tool == TOOL_KIND_PICKAXE || tool == TOOL_KIND_AXE); // 곡괭이,도끼로만 가능
 
         case BLOCK_DIRT:
             return (tool == TOOL_KIND_NONE || tool == TOOL_KIND_SHOVEL || tool == TOOL_KIND_PICKAXE); //맨손, 삽, 곡괭이로만 가능
@@ -75,6 +123,16 @@ const int get_drop_from_block(const block_t block) {
         case BLOCK_WATER:
         case BLOCK_STAR:
             return -1;
+        
+        case BLOCK_LEAF:
+            if (rand() % 100 >= 80)
+            {
+                add_item_to_inventory(401, 1);
+                return -1;
+            }
+            else
+                return block;
+
     }
 
     return block;
@@ -102,8 +160,42 @@ const bool can_place_block(const int x, const int y) {
 
 const color_tchar_t get_tool_texture(const tool_t tool, const int x, const int y) {
     switch (tool) {
+        case TOOL_WOODEN_SWORD:
+            return pWooden_sword[y][x];
+
+        case TOOL_STONE_SWORD:
+            return pStone_sword[y][x]; //
+
+        case TOOL_IRON_SWORD:
+            return pIron_sword[y][x];//
+
         case TOOL_WOODEN_PICKAXE:
             return pWooden_pickaxe[y][x];
+
+        case TOOL_STONE_PICKAXE:
+            return pStone_pickaxe[y][x]; //
+
+        case TOOL_IRON_PICKAXE:
+            return pIron_pickaxe[y][x];
+
+        case TOOL_WOODEN_AXE:
+            return pWooden_axe[y][x];
+
+        case TOOL_STONE_AXE:
+            return pStone_axe[y][x];
+
+        case TOOL_IRON_AXE:
+            return pIron_axe[y][x];
+
+        case TOOL_WOODEN_SHOVEL:
+            return pWooden_shovel[y][x];
+
+        case TOOL_STONE_SHOVEL:
+            return pStone_shovel[y][x];
+
+        case TOOL_IRON_SHOVEL:
+            return pIron_shovel[y][x];
+
     }
 
     return (color_tchar_t){ 0 };

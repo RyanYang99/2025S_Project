@@ -10,7 +10,6 @@
 #include "player.h"
 #include "console.h"
 #include "map.h"
-#include "astar.h"
 
 
 //보스 state

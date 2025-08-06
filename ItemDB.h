@@ -17,8 +17,19 @@ typedef enum {
 } item_type_t;
 
 typedef enum {
-	TOOL_NONE,
-	TOOL_WOODEN_PICKAXE = 201
+    TOOL_NONE,
+    TOOL_WOODEN_SWORD = 201,
+    TOOL_STONE_SWORD = 202,
+    TOOL_IRON_SWORD = 203,
+    TOOL_WOODEN_PICKAXE = 204,
+    TOOL_STONE_PICKAXE = 205,
+    TOOL_IRON_PICKAXE = 206,
+    TOOL_WOODEN_AXE = 207,
+    TOOL_STONE_AXE = 208,
+    TOOL_IRON_AXE = 209,
+    TOOL_WOODEN_SHOVEL = 210,
+    TOOL_STONE_SHOVEL = 211,
+    TOOL_IRON_SHOVEL = 212
 } tool_t;
 
 // 도구 종류 상수 (tool_kind 값에 대응)

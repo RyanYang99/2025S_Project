@@ -62,6 +62,7 @@ int main(void)
     call_database(false);
     initialize_console(true, false);
     
+
     while (true) {
         const main_menu_state_t main_menu_state = main_menu();
         if (main_menu_state == MAIN_MENU_STATE_QUIT)

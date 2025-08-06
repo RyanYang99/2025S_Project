@@ -1,6 +1,7 @@
-﻿#include "leak.h"
+﻿#include "leak.h"﻿
 #include "player.h"
 
+#include "Tool.h"
 #include "map.h"
 #include "save.h"
 #include "input.h"
@@ -11,6 +12,13 @@
 #include <time.h>
 #include <conio.h>
 #include <Windows.h> // VK_SPACE 사용을 위해 추가
+
+// 전역 인벤토리 객체 extern 선언
+extern inventory_t inventory;
+
+// ItemDB에서 아이템 정보를 가져오는 함수 extern 선언 (가정)
+// item_db_index를 받아 해당 아이템의 정보를 담은 구조체 포인터를 반환합니다.
+extern item_information_t* find_item_by_index(const int index);
 
 player_t player = { 0 };
 
@@ -23,6 +31,8 @@ player_t player = { 0 };
 
 // 수평 이동 속도 조절 (값이 작을수록 빨라짐)
 #define HORIZONTAL_MOVE_COOLDOWN 0.08f  // 약 1초에 12.5칸 이동
+
+#define HP_BAR_WIDTH 20
 
 // 각 픽셀을 표현할 구조체
 typedef struct {
@@ -63,6 +73,39 @@ static const PlayerSpritePixel player_sprite_walk[2][PLAYER_SPRITE_HEIGHT][PLAYE
     }
 };
 
+// 무장하고 서 있는 자세
+static const PlayerSpritePixel player_sprite_stand_armed[PLAYER_SPRITE_HEIGHT][PLAYER_SPRITE_WIDTH] = {
+    // 머리
+    { {L' ',0,0}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L' ',0,0} },
+    // 몸통과 옆으로 뻗은 오른팔
+    { {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'█', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_WHITE}, {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_WHITE}, {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW} },
+    // 허리, 바지
+    { {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L' ',0,0} },
+    // 다리 
+    { {L' ',0,0}, {L'▓', BACKGROUND_T_BLACK, FOREGROUND_T_GRAY}, {L' ',0,0}, {L'▓', BACKGROUND_T_BLACK, FOREGROUND_T_GRAY}, {L' ',0,0} },
+    // 신발
+    { {L' ',0,0}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_BLACK}, {L' ',0,0}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_BLACK}, {L' ',0,0} }
+};
+
+// 무장하고 걷는 애니메이션
+static const PlayerSpritePixel player_sprite_walk_armed[2][PLAYER_SPRITE_HEIGHT][PLAYER_SPRITE_WIDTH] = {
+    { // 프레임 1
+        { {L' ',0,0}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L' ',0,0} },
+        { {L' ',0,0}, {L'█', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_WHITE}, {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_WHITE}, {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}}, // 왼팔 뒤로, 오른팔은 고정
+        { {L' ',0,0}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L' ',0,0} },
+        { {L' ',0,0}, {L'▓', BACKGROUND_T_BLACK, FOREGROUND_T_GRAY}, {L' ',0,0}, {L' ',0,0}, {L' ',0,0} },
+        { {L' ',0,0}, {L' ',0,0}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_BLACK}, {L' ',0,0}, {L' ',0,0} }
+    },
+    { // 프레임 2
+        { {L' ',0,0}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'▄', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L' ',0,0} },
+        { {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'█', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_WHITE}, {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}, {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_WHITE}, {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW}}, // 왼팔 앞으로, 오른팔은 고정
+        { {L' ',0,0}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE}, {L' ',0,0} },
+        { {L' ',0,0}, {L' ',0,0}, {L' ',0,0}, {L'▓', BACKGROUND_T_BLACK, FOREGROUND_T_GRAY}, {L' ',0,0} },
+        { {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_BLACK}, {L' ',0,0}, {L' ',0,0}, {L' ',0,0}, {L' ',0,0} }
+    }
+};
+
+
 static void movement(void) {
     // 점프 키 확인
     if (is_key_down(VK_SPACE) && player.is_on_ground) {
@@ -94,6 +137,7 @@ static void movement(void) {
             if (is_walkable(new_x, player.y)) {
                 player.x = new_x;
                 moved_horizontally = true;
+                player.facing_direction = -1; // 왼쪽 보기
             }
         }
         // 오른쪽 이동 (A키와 동시에 눌리면 무시)
@@ -102,6 +146,7 @@ static void movement(void) {
             if (is_walkable(new_x, player.y)) {
                 player.x = new_x;
                 moved_horizontally = true;
+                player.facing_direction = 1; // 오른쪽 보기
             }
         }
 
@@ -186,30 +231,35 @@ void player_init(void) {
         player.x = pCurrent_save->x;
         player.y = pCurrent_save->y;
         player.hp = pCurrent_save->hp;
-    } else {
+    }
+    else {
         player.x = map.size.x / 2;
         player.y = find_ground_pos(player.x);
         if (player.y - 1 >= 0)
             --player.y; // 가능할 시 찾은 블록 위로 설정
 
+        player.max_hp = 1000;
         player.hp = 1000; // 초기 체력
+
+        // 물리 변수 초기화
+        player.precise_y = (float)player.y;
+        player.velocity_y = 0.0f;
+        player.is_on_ground = false; // 시작 시 공중에서 떨어지도록
+
+        // 애니메이션 변수 초기화
+        player.is_moving = 0;
+        player.current_frame = 0;
+        player.animation_timer = 0.0f;
+
+        // 이동 쿨다운 타이머 초기화
+        player.move_cooldown_timer = 0.0f;
+
+        // 초기 방향: 오른쪽
+        player.facing_direction = 1;
+
+        //subscribe_keyhit(movement);
+        subscribe_offset_change(update_player_offset);
     }
-
-    // 물리 변수 초기화
-    player.precise_y = (float)player.y;
-    player.velocity_y = 0.0f;
-    player.is_on_ground = false; // 시작 시 공중에서 떨어지도록
-
-    // 애니메이션 변수 초기화
-    player.is_moving = 0;
-    player.current_frame = 0;
-    player.animation_timer = 0.0f;
-
-    // 이동 쿨다운 타이머 초기화
-    player.move_cooldown_timer = 0.0f;
-
-    //subscribe_keyhit(movement);
-    subscribe_offset_change(update_player_offset);
 }
 
 // 충돌 감지 함수 구현
@@ -240,58 +290,102 @@ void render_player(void) {
     // 플레이어의 중심이 될 콘솔 위치 (화면 중앙)
     COORD center_pos = { console.size.X / 2, console.size.Y / 2 };
 
-    // 현재 상태에 맞는 스프라이트 포인터 선택
+    // 1. 장착한 아이템 확인
+    player_item_t* equipped_item = inventory.pHotbar[inventory.selected_hotbar_index].pPlayer_Item;
+    item_information_t* pToolInfo = NULL;
+    bool is_tool_equipped = false;
+
+    if (equipped_item && equipped_item->quantity > 0) {
+        pToolInfo = find_item_by_index(equipped_item->item_db_index);
+        if (pToolInfo && pToolInfo->type == ITEM_TYPE_TOOL) {
+            is_tool_equipped = true;
+        }
+    }
+
+    // 2. 상태에 맞는 스프라이트 선택
     const PlayerSpritePixel(*current_sprite_ptr)[PLAYER_SPRITE_WIDTH];
-    if (player.is_moving) {
-        current_sprite_ptr = player_sprite_walk[player.current_frame];
+    if (is_tool_equipped) {
+        current_sprite_ptr = player.is_moving ? player_sprite_walk_armed[player.current_frame] : player_sprite_stand_armed;
     }
     else {
-        current_sprite_ptr = player_sprite_stand;
+        current_sprite_ptr = player.is_moving ? player_sprite_walk[player.current_frame] : player_sprite_stand;
     }
 
+    // 3. 플레이어 스프라이트 렌더링 (좌우 반전 적용)
     for (int y = 0; y < PLAYER_SPRITE_HEIGHT; ++y) {
         for (int x = 0; x < PLAYER_SPRITE_WIDTH; ++x) {
-            PlayerSpritePixel pixel = current_sprite_ptr[y][x];
+            int source_x = (player.facing_direction == 1) ? x : (PLAYER_SPRITE_WIDTH - 1 - x);
+            PlayerSpritePixel pixel = current_sprite_ptr[y][source_x];
 
-            if (pixel.character == L' ') continue;
+            if (pixel.character == L' ' && pixel.background_color == 0) continue;
 
-            COORD draw_pos;
-            draw_pos.X = (SHORT)(center_pos.X + x - (PLAYER_SPRITE_WIDTH / 2));
-            draw_pos.Y = (SHORT)(center_pos.Y + y - (PLAYER_SPRITE_HEIGHT / 2));
+            COORD draw_pos = {
+                (SHORT)(center_pos.X + x - (PLAYER_SPRITE_WIDTH / 2)),
+                (SHORT)(center_pos.Y + y - (PLAYER_SPRITE_HEIGHT / 2))
+            };
 
             if (draw_pos.X >= 0 && draw_pos.X < console.size.X &&
                 draw_pos.Y >= 0 && draw_pos.Y < console.size.Y) {
-
-                // 캐릭터 '픽셀'의 전경색과 배경색을 동시에 사용
-                color_tchar_t tchar;
-                tchar.character = pixel.character;
-
-                tchar.background = (pixel.character == L'▀') ? pixel.foreground_color : BACKGROUND_T_BLACK;
-                tchar.foreground = (pixel.character == L'▀') ? pixel.background_color : pixel.foreground_color;
-
-                print_color_tchar(tchar, draw_pos);
+                print_color_tchar((color_tchar_t) { pixel.character, pixel.background_color, pixel.foreground_color }, draw_pos);
             }
         }
     }
 
-    // 체력(HP) 바 렌더링
-    wchar_t hp_str[16];
-    swprintf(hp_str, 16, L"HP: %d", player.hp);
+    // 4. 장착한 도구 렌더링 (좌우 반전 적용)
+    if (is_tool_equipped) {
+        // 도구를 들 손의 위치 계산
+        int tool_hand_offset_x = (player.facing_direction == 1) ? 5 : -TEXTURE_SIZE;
+        int tool_hand_offset_y = -1;
 
-    // 체력 문자열을 플레이어 스프라이트 머리 위에 출력
-    COORD hp_pos;
-    // 새로운 스프라이트의 최상단 좌표를 기준으로 Y 위치 조정
-    hp_pos.Y = center_pos.Y - (PLAYER_SPRITE_HEIGHT / 2) - 1;
-    if (hp_pos.Y < 0) hp_pos.Y = 0; // 화면 위로 벗어나지 않도록 처리
+        for (int y = 0; y < TEXTURE_SIZE; ++y) {
+            for (int x = 0; x < TEXTURE_SIZE; ++x) {
+                int source_x = (player.facing_direction == 1) ? x : (TEXTURE_SIZE - 1 - x);
+                color_tchar_t tool_pixel = get_tool_texture((tool_t)pToolInfo->index, source_x, y);
 
-    // HP 문자열을 중앙에 정렬하여 출력
-    for (int i = 0; hp_str[i] != L'\0'; ++i) {
-        COORD char_pos = hp_pos;
-        char_pos.X = center_pos.X + (SHORT)i - (SHORT)(wcslen(hp_str) / 2);
-        if (char_pos.X >= 0 && char_pos.X < console.size.X) {
-            print_color_tchar((color_tchar_t) { hp_str[i], BACKGROUND_T_BLACK, FOREGROUND_T_RED }, char_pos);
+                if (tool_pixel.foreground == FOREGROUND_T_TRANSPARENT) continue;
+
+                COORD draw_pos = {
+                    (SHORT)(center_pos.X + (tool_hand_offset_x - PLAYER_SPRITE_WIDTH / 2) + x),
+                    (SHORT)(center_pos.Y + (tool_hand_offset_y - PLAYER_SPRITE_HEIGHT / 2) + y)
+                };
+
+                if (draw_pos.X >= 0 && draw_pos.X < console.size.X &&
+                    draw_pos.Y >= 0 && draw_pos.Y < console.size.Y) {
+                    print_color_tchar(tool_pixel, draw_pos);
+                }
+            }
         }
     }
+
+    const int bar_width = HP_BAR_WIDTH;
+
+    int current_hp = player.hp < 0 ? 0 : player.hp;
+    int max_hp = player.max_hp > 0 ? player.max_hp : 1;
+
+    int filled = (current_hp * bar_width) / max_hp;
+    int empty = bar_width - filled;
+
+    COORD pos = {
+        .X = console.size.X - (bar_width + 22),  // 오른쪽 끝에서 약간 여유
+        .Y = 2
+    };
+
+    fprint_string("[", pos, FOREGROUND_T_WHITE, BACKGROUND_T_TRANSPARENT);
+    pos.X += 1;
+
+    for (int i = 0; i < filled; ++i) {
+        fprint_string(" ", pos, BACKGROUND_T_RED, 0);  // 빨간 체력 바
+        pos.X += 1;
+    }
+    for (int i = 0; i < empty; ++i) {
+        fprint_string(" ", pos, BACKGROUND_T_DARKGRAY, 0);  // 회색 빈 바
+        pos.X += 1;
+    }
+
+    fprint_string("]", pos, FOREGROUND_T_WHITE, BACKGROUND_T_TRANSPARENT);
+    pos.X += 2;
+
+    fprint_string("HP: %d / %d", pos, BACKGROUND_T_BLACK, FOREGROUND_T_YELLOW, current_hp, max_hp);
 }
 
 //특정 x좌표에서 가장 높은 지상 의 Y좌표를 찾아 반환
@@ -320,4 +414,12 @@ void player_take_damage(int damage)
     if (player.hp < 0) {
         player.hp = 0;
     }
+}
+
+void add_health_to_player(const int additional_health) {
+
+    player.hp += additional_health;
+
+    if (player.hp > player.max_hp)
+        player.hp = player.max_hp;
 }

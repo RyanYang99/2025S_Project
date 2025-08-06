@@ -10,6 +10,7 @@
 #include "BlockCtrl.h"
 #include "inventory.h"
 #include "date_time.h"
+#include "Crafting_UI.h"
 
 bool game_exit = false;
 
@@ -58,6 +59,7 @@ void initialize_game(void) {
     player_init();
     initialize_block_control();
     initialize_inventory();
+    initialize_crafting_ui();
     initialize_save();
     load_mob();
     free_save();
@@ -78,6 +80,7 @@ void run_game(void) {
         update_date_time();
         player_update();
         inventory_input();
+        Crafting_UI_input();
         save_input();
         Mob_Spawn_Time();
         update_mob_ai();

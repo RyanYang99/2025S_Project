@@ -79,11 +79,13 @@
     <ClCompile Include="astar.c" />
     <ClCompile Include="BlockCtrl.c" />
     <ClCompile Include="console.c" />
+    <ClCompile Include="Crafting_UI.c" />
     <ClCompile Include="delta.c" />
     <ClCompile Include="formatter.c" />
     <ClCompile Include="game.c" />
     <ClCompile Include="input.c" />
     <ClCompile Include="inventory.c" />
+    <ClCompile Include="item.c" />
     <ClCompile Include="ItemDB.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="main_menu.c" />
@@ -100,12 +102,14 @@
     <ClInclude Include="BlockCtrl.h" />
     <ClInclude Include="BossMalakh.h" />
     <ClInclude Include="console.h" />
+    <ClInclude Include="Crafting_UI.h" />
     <ClInclude Include="date_time.h" />
     <ClInclude Include="delta.h" />
     <ClInclude Include="formatter.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="inventory.h" />
+    <ClInclude Include="item.h" />
     <ClInclude Include="ItemDB.h" />
     <ClInclude Include="leak.h" />
     <ClInclude Include="main_menu.h" />
@@ -117,7 +121,9 @@
     <ClInclude Include="Tool.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="base_recipes.csv" />
     <None Include="items.csv" />
+    <None Include="workbench_recipes.csv" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

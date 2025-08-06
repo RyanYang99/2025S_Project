@@ -2,7 +2,7 @@
 
 #include "console.h"
 
-#define BLOCKS 11
+#define BLOCKS 12
 #define TEXTURE_SIZE 3
 #define MAP_MAX_Y 200
 
@@ -21,10 +21,11 @@ typedef enum
     BLOCK_SNOW = 107,
     BLOCK_SAND = 108,
     BLOCK_WATER = 2,
-    BLOCK_STAR = 3
+    BLOCK_STAR = 3,
+    BLOCK_WORKBENCH = 109
 } block_t;
 
-// ✅ 블록 정보 구조체: 종류 + 체력 포함
+// 블록 정보 구조체: 종류 + 체력 포함
 #pragma pack(push, 1)
 typedef struct
 {
@@ -52,7 +53,9 @@ void initialize_block(block_info_t* block, block_t type);
 bool damage_block_at(map_t* map, int x, int y, int damage);
 block_info_t get_block_info_at(int x, int y);
 bool set_block_at(int x, int y, block_t type);
+
 color_tchar_t get_block_texture(const block_t block, const int x, const int y);
+
 const bool is_air_or_star(const block_t block);
 
 void subscribe_offset_change(const offset_changed_t callback);
