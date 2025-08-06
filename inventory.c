@@ -3,6 +3,8 @@
 
 #include <conio.h>
 #include "map.h"
+#include "save.h"
+#include "item.h"
 #include "Tool.h"
 #include "input.h"
 #include "delta.h"
@@ -13,7 +15,7 @@
 #define INVENTORY_FOREGROUND FOREGROUND_T_WHITE
 #define INVENTORY_FOREGROUND_DARK FOREGROUND_T_GRAY
 #define INVENTORY_FOREGROUND_BLINK FOREGROUND_T_WHITE
-#define FOREGROUND_EQUIPPED FOREGROUND_T_DARKBLUE
+#define INVENTORY_FOREGROUND_IN_HOTBAR FOREGROUND_T_GREEN
 
 #define HOTBAR_SIZE_IN_CHARACTERS_X (TEXTURE_SIZE * HOTBAR_COUNT + HOTBAR_COUNT + 1)
 #define HOTBAR_SIZE_IN_CHARACTERS_Y (TEXTURE_SIZE + 2)
@@ -28,19 +30,47 @@ static bool is_inventory_open = false;
 static int current_selection_index = 0,
            current_page_index = 0;
 
+static void inventory_mouse_click(const bool left) {
+    if (left || !inventory.pHotbar[inventory.selected_hotbar_index].pPlayer_Item)
+        return;
+
+    player_item_t* const pItem = &inventory.item[inventory.pHotbar[inventory.selected_hotbar_index].index_in_inventory];
+    if (!pItem->item_db_index)
+        return;
+
+    const item_information_t* const pItem_info = find_item_by_index(pItem->item_db_index);
+    if (!pItem_info)
+        return;
+
+    if (use_item(pItem->item_db_index))
+        decrement_item_from_inventory(pItem);
+}
+
+
 void initialize_inventory(void) {
+    is_inventory_open = false;
+    current_selection_index = current_page_index = 0;
+
     for (int i = 0; i < INVENTORY_SIZE; ++i) {
-        inventory.item[i].item_db_index = 0; // 0은 빈 칸을 의미
-        inventory.item[i].quantity = 0;
-        inventory.item[i].durability = 0;
-        inventory.item[i].passive_equipped = false;
+        if (pCurrent_save)
+            inventory.item[i] = pCurrent_save->pInventory[i];
+        else
+            inventory.item[i].item_db_index = inventory.item[i].quantity = inventory.item[i].durability = 0; // 0은 빈 칸을 의미
     }
 
-    inventory.selected_hotbar_index = 0;
     for (int i = 0; i < HOTBAR_COUNT; ++i) {
-        inventory.pHotbar[i].index_in_inventory = -1;
-        inventory.pHotbar[i].pPlayer_Item = NULL;
+        if (pCurrent_save) {
+            inventory.pHotbar[i].index_in_inventory = pCurrent_save->pHotbar_linked_index[i];
+
+            if (inventory.pHotbar[i].index_in_inventory != -1)
+                inventory.pHotbar[i].pPlayer_Item = &inventory.item[inventory.pHotbar[i].index_in_inventory];
+        } else {
+            inventory.pHotbar[i].index_in_inventory = -1;
+            inventory.pHotbar[i].pPlayer_Item = NULL;
+        }
     }
+
+    subscribe_mouse_click(inventory_mouse_click);
 }
 
 /*
@@ -87,7 +117,6 @@ bool add_item_to_inventory(const int item_db_index, int quantity) {
 
         inventory.item[emptySlot].item_db_index = item_db_index; // items -> item
         inventory.item[emptySlot].durability = pItem_info->base_durability; // items -> item
-        inventory.item[emptySlot].passive_equipped = false; // items -> item
 
         if (quantity <= pItem_info->max_stack) {
             inventory.item[emptySlot].quantity = quantity; // items -> item
@@ -107,7 +136,6 @@ static void remove_item_from_inventory(player_item_t * const pItem) {
     pItem->item_db_index = 0;
     pItem->durability = 0;
     pItem->quantity = 0;
-    pItem->passive_equipped = false;
 
     if (pHotbar->pPlayer_Item->item_db_index == pItem->item_db_index) {
         pHotbar->index_in_inventory = -1;
@@ -125,6 +153,7 @@ void decrement_item_from_inventory(player_item_t * const pItem) {
 
     if (!(--pItem->quantity))
         remove_item_from_inventory(pItem);
+
 }
 
 static void render_inventory_item(const int y,
@@ -135,7 +164,7 @@ static void render_inventory_item(const int y,
     COORD position = {
         .Y = (SHORT)y
     };
-
+        
     FOREGROUND_color_t foreground = INVENTORY_FOREGROUND_DARK;
     if (selected && blink)
         foreground = INVENTORY_FOREGROUND_BLINK;
@@ -151,13 +180,17 @@ static void render_inventory_item(const int y,
         position.X += (SHORT)fprint_string("[ %s", position, INVENTORY_BACKGROUND, foreground, pItem_info->name);
 
         if (pItem_info->max_stack > 1)
-            position.X += (SHORT)fprint_string(" (x%d) ]", position, INVENTORY_BACKGROUND, foreground, pItem->quantity);
+            position.X += (SHORT)fprint_string(" (x%d) ", position, INVENTORY_BACKGROUND, foreground, pItem->quantity);
 
         if (pItem_info->type == ITEM_TYPE_TOOL || pItem_info->type == ITEM_TYPE_ARMOR)
-            position.X += (SHORT)fprint_string(" (내구성: %d/%d) ]", position, INVENTORY_BACKGROUND, foreground, pItem->durability, pItem_info->base_durability);
+            position.X += (SHORT)fprint_string(" (Durability: %d/%d) ", position, INVENTORY_BACKGROUND, foreground, pItem->durability, pItem_info->base_durability);
 
-        if (pItem->passive_equipped)
-            position.X += (SHORT)fprint_string(" [E] ", position, INVENTORY_BACKGROUND, FOREGROUND_EQUIPPED);
+        position.X += (SHORT)fprint_string("]", position, INVENTORY_BACKGROUND, foreground);
+
+        for (int i = 0; i < max_hotbar_index; ++i)
+            if (inventory.pHotbar[i].index_in_inventory == inventory_index)
+                fprint_string(" [%d] ", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND_IN_HOTBAR, i + 1);
+
 
     } else
         fprint_string("[ Empty ]", position, INVENTORY_BACKGROUND, foreground);
@@ -188,7 +221,7 @@ void render_inventory(void) {
     }
 
     ++position.Y;
-    fprint_string("=== (W / S: Up/Down, A / D: Page, E: Use / Equip, I: Close) ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
+    fprint_string("=== (W / S: Select, A / D: Page, 0 ~ 9: Hotbar, I: Close) ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
 
     const player_item_t * const pItem = &inventory.item[start_index + current_selection_index];
     if (!pItem->item_db_index)
@@ -198,17 +231,14 @@ void render_inventory(void) {
     position.Y += 2;
     position.X += (SHORT)fprint_string("%s", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND, pItem_info->name);
 
-    if (pItem->passive_equipped)
-        position.X += (SHORT)fprint_string(" (Equipped)", position, INVENTORY_BACKGROUND, FOREGROUND_EQUIPPED);
-
     char *pDescription = "";
     switch (pItem_info->type) {
         case ITEM_TYPE_MATERIAL:
-            pDescription = ": 제작에 사용되는 재료입니다.";
+            pDescription = ": Used in crafting.";
             break;
 
         case ITEM_TYPE_MISC:
-            pDescription = ": 특별한 용도가 있는 기타 아이템입니다.";
+            pDescription = ": Has a special ability.";
             break;
     }
 
@@ -229,53 +259,81 @@ static bool should_skip(const int i, item_type_t * const poItem_type) {
     *poItem_type = pItem_info->type;
     return false;
 }
-
 void render_hotbar(void) {
+    const int slot_width = TEXTURE_SIZE + 2;  // 테두리 포함 가로 크기
+    const int slot_height = TEXTURE_SIZE + 2; // 테두리 포함 세로 크기
+
     COORD position = {
-        .X = console.size.X / 2 - HOTBAR_SIZE_IN_CHARACTERS_X / 2
+        .X = console.size.X / 2 - (HOTBAR_COUNT * slot_width) / 2,
+        .Y = console.size.Y - slot_height - 1 // 화면 하단 위치 (필요에 따라 조정)
     };
 
-    if (position.X < 0)
+    if (position.X < 0 || position.Y < 0)
         return;
 
     for (int i = 0; i < HOTBAR_COUNT; ++i) {
-        int item_index = 0;
-        if (inventory.pHotbar[i].pPlayer_Item != NULL) {
-            item_index = inventory.pHotbar[i].pPlayer_Item->item_db_index;
+        bool is_selected = (inventory.selected_hotbar_index == i);
+
+        // 테두리 색상 (선택 시 밝게, 아니면 어둡게)
+        WORD border_background = is_selected ? BACKGROUND_T_WHITE : BACKGROUND_T_DARKGRAY;
+
+        int slot_start_x = position.X + i * slot_width;
+        int slot_start_y = position.Y;
+
+        // 1. 테두리 영역 출력
+        // 위, 아래 가로줄 (빈칸 문자 + 테두리 배경색)
+        for (int tx = 0; tx < slot_width; ++tx) {
+            print_color_tchar((color_tchar_t) { ' ', border_background, 0 }, (COORD) { slot_start_x + tx, slot_start_y });
+            print_color_tchar((color_tchar_t) { ' ', border_background, 0 }, (COORD) { slot_start_x + tx, slot_start_y + slot_height - 1 });
         }
 
-        const block_t selected_block = item_index;
-        const tool_t selected_tool = item_index;
-        item_type_t item_type = ITEM_TYPE_NONE;
-        bool skip = should_skip(i, &item_type);
+        // 좌, 우 세로줄
+        for (int ty = 1; ty < slot_height - 1; ++ty) {
+            print_color_tchar((color_tchar_t) { ' ', border_background, 0 }, (COORD) { slot_start_x, slot_start_y + ty });
+            print_color_tchar((color_tchar_t) { ' ', border_background, 0 }, (COORD) { slot_start_x + slot_width - 1, slot_start_y + ty });
+        }
 
-        color_tchar_t character = {
-            .character = ' '
-        };
-        for (int ty = 0; ty < TEXTURE_SIZE; ++ty) {
-            for (int tx = 0; tx < TEXTURE_SIZE; ++tx) {
-                if (!skip) {
-                    const color_tchar_t texture = item_type == ITEM_TYPE_MATERIAL ?
-                                                  get_block_texture(selected_block, tx, ty) :
-                                                  get_tool_texture(selected_tool, tx, ty);
-                    character.background = texture.background;
-                    character.foreground = texture.foreground;
-                    character.character = texture.character;
+        // 2. 슬롯 내부 텍스처 출력 (기존 방식과 동일)
+        for (int ty = 1; ty < slot_height - 1; ++ty) {
+            for (int tx = 1; tx < slot_width - 1; ++tx) {
+                color_tchar_t texture_char = { ' ', 0, 0 };
+
+                if (inventory.pHotbar[i].pPlayer_Item != NULL) {
+                    int item_index = inventory.pHotbar[i].pPlayer_Item->item_db_index;
+                    item_type_t item_type = ITEM_TYPE_NONE;
+
+                    const item_information_t* pItem_info = find_item_by_index(item_index);
+                    if (pItem_info != NULL) {
+                        item_type = pItem_info->type;
+                    }
+
+                    int tex_x = tx - 1;
+                    int tex_y = ty - 1;
+
+                    if (item_type == ITEM_TYPE_MATERIAL)
+                        texture_char = get_block_texture(item_index, tex_x, tex_y);
+                    else if (item_type == ITEM_TYPE_TOOL)
+                        texture_char = get_tool_texture(item_index, tex_x, tex_y);
+                    else if (item_type == ITEM_TYPE_MISC)
+                        texture_char = get_item_texture(item_index, tex_x, tex_y);
                 }
 
-                const COORD new_position = {
-                    .X = (WORD)(position.X + tx),
-                    .Y = (WORD)(position.Y + ty)
-                };
-                print_color_tchar(character, new_position);
+                print_color_tchar(texture_char, (COORD) { slot_start_x + tx, slot_start_y + ty });
             }
         }
-
-        if (inventory.selected_hotbar_index == i)
-            print_color_tchar((color_tchar_t) { 'S', 0, FOREGROUND_T_WHITE }, (COORD) { position.X, 0 });
-
-        position.X += TEXTURE_SIZE;
     }
+}
+
+
+
+int get_inventory_count(int item_db_index) {
+    int count = 0;
+    for (int i = 0; i < INVENTORY_SIZE; ++i) {
+        if (inventory.item[i].item_db_index == item_db_index) {
+            count += inventory.item[i].quantity;
+        }
+    }
+    return count;
 }
 
 //I키 입력시 인벤토리 호출
@@ -311,18 +369,10 @@ void inventory_input(void) {
         --current_page_index;
     else if (character == 'd' && current_page_index < max_page_index)
         ++current_page_index;
-    else if (character == 'e') {
-        const player_item_t *pItem = &inventory.item[(current_page_index * ITEMS_PER_PAGE) + current_selection_index];
-        if (!pItem->item_db_index)
-            return;
-
-        const item_information_t *pItem_info = find_item_by_index(pItem->item_db_index);
-        if (!pItem_info)
-            return;
-
-        //사용 / 장착
-    } else if (is_number && number <= max_hotbar_index) {
+    else if (is_number && number <= max_hotbar_index) {
         const int index = current_page_index * ITEMS_PER_PAGE + current_selection_index;
+        if (!inventory.item[index].item_db_index)
+            return;
 
         for (int i = 0; i < max_hotbar_index; ++i)
             if (inventory.pHotbar[i].index_in_inventory == index)
@@ -331,4 +381,15 @@ void inventory_input(void) {
         inventory.pHotbar[number].index_in_inventory = index;
         inventory.pHotbar[number].pPlayer_Item = &inventory.item[index];
     }
+}
+
+void save_inventory(void) {
+    if (!pCurrent_save)
+        instantiate_save();
+
+    for (int i = 0; i < INVENTORY_SIZE; ++i)
+        pCurrent_save->pInventory[i] = inventory.item[i];
+    
+    for (int i = 0; i < HOTBAR_COUNT; ++i)
+        pCurrent_save->pHotbar_linked_index[i] = inventory.pHotbar[i].index_in_inventory;
 }
