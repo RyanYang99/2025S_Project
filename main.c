@@ -14,6 +14,7 @@
 #include "global_state.h"
 #include "ItemDB.h"
 #include "inventory.h"
+#include "sound.h"
 
 #if _DEBUG
 static void render_debug_text(void)
@@ -56,6 +57,9 @@ int main(void)
     //메모리 누수 체크
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
+    
+    PlayBGM();
+
 
     if (is_new_console())
     {
@@ -118,6 +122,7 @@ int main(void)
         }
         update_console();
         update_input();
+        
 
         player_update();
         inventory_input();
@@ -126,6 +131,7 @@ int main(void)
 
         render();
     }
+    
 
     destroy_block_control();
     destroy_database();

@@ -90,6 +90,7 @@
     <ClCompile Include="Mob.c" />
     <ClCompile Include="perlin.c" />
     <ClCompile Include="player.c" />
+    <ClCompile Include="sound.c" />
     <ClCompile Include="Tool.c" />
   </ItemGroup>
   <ItemGroup>
@@ -107,10 +108,21 @@
     <ClInclude Include="Mob.h" />
     <ClInclude Include="perlin.h" />
     <ClInclude Include="player.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="resource1.h" />
+    <ClInclude Include="resource2.h" />
+    <ClInclude Include="resource3.h" />
+    <ClInclude Include="resource4.h" />
+    <ClInclude Include="resource5.h" />
+    <ClInclude Include="sound.h" />
     <ClInclude Include="Tool.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="items.csv" />
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="Caketown-1_1.wav" />
+    <Media Include="fixed_roop1.wav" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
