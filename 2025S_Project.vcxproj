@@ -121,8 +121,8 @@
     <None Include="items.csv" />
   </ItemGroup>
   <ItemGroup>
-    <Media Include="Caketown-1_1.wav" />
-    <Media Include="fixed_roop1.wav" />
+    <Media Include="SoundFile\BGM\Caketown-1_1.wav" />
+    <Media Include="SoundFile\BGM\fixed_roop1.wav" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
