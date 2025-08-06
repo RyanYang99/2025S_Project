@@ -1,13 +1,13 @@
-﻿#include "leak.h"
+﻿#include "astar.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <string.h>
+#include "map.h"
 
-// astar.c
-#include "astar.h" // 새로 만든 astar.h를 포함합니다.
 
-#include <stdio.h>   // fprintf, NULL 등을 위해
-#include <stdlib.h>  // malloc, free, qsort, exit 등을 위해
-#include <math.h>    // abs() 함수를 위해
+extern map_t map;
 
-// PathNode 메모리 할당 및 초기화
 PathNode* Create_node(int x, int y, int g, int h, PathNode* parent) {
     PathNode* newNode = (PathNode*)malloc(sizeof(PathNode));
     if (newNode == NULL) {
@@ -23,183 +23,195 @@ PathNode* Create_node(int x, int y, int g, int h, PathNode* parent) {
     return newNode;
 }
 
-// 휴리스틱 함수 (맨해튼 거리)
 int Calculate_Heuristic(int x1, int y1, int x2, int y2) {
     return abs(x1 - x2) + abs(y1 - y2);
 }
 
-// 해당 좌표가 맵 범위 내에 있고 이동 가능한 블록인지 확인
-bool is_valid_block(int x, int y, int map_size_x, int map_size_y) {
-    if (x < 0 || x >= map_size_x || y < 0 || y >= map_size_y - 1) {
-        return false;
-    }
-    block_t block_under_mob = map.ppBlocks[y + 1][x].type;
-    return (block_under_mob == BLOCK_GRASS || block_under_mob == BLOCK_DIRT);
-}
 
-// 노드 비교 함수 (qsort 사용을 위해)
-int Compare_nodes(const void* a, const void* b) {
-    PathNode* nodeA = *(PathNode**)a;
-    PathNode* nodeB = *(PathNode**)b;
-    return nodeA->f - nodeB->f; // F값이 작은 노드가 우선순위 높음
-}
+void swap_nodes(PathNode** a, PathNode** b, int** open_list_index) {
+    PathNode* temp = *a;
+    *a = *b;
+    *b = temp;
 
-// A* 경로 찾기 함수 (다음 한 칸 이동)
-COORD find_path_next_step(int start_x, int start_y, int target_x, int target_y, int map_size_x, int map_size_y) {
-    // 동적으로 closed_list_grid 할당 및 초기화
-    bool** closed_list_grid = (bool**)malloc(map_size_y * sizeof(bool*));
-    if (closed_list_grid == NULL) {
-        fprintf(stderr, "closed_list_grid 메모리 할당 실패\n");
-        return (COORD) { -1, -1 };
+    
+    if (open_list_index) {
+        int temp_index = open_list_index[(*a)->x][(*a)->y];
+        open_list_index[(*a)->x][(*a)->y] = open_list_index[(*b)->x][(*b)->y];
+        open_list_index[(*b)->x][(*b)->y] = temp_index;
     }
-    for (int i = 0; i < map_size_y; ++i) {
-        closed_list_grid[i] = (bool*)calloc(map_size_x, sizeof(bool)); // calloc으로 false로 초기화
-        if (closed_list_grid[i] == NULL) {
-            fprintf(stderr, "closed_list_grid[%d] 메모리 할당 실패\n", i);
-            for (int j = 0; j < i; ++j) free(closed_list_grid[j]);
-            free(closed_list_grid);
-            return (COORD) { -1, -1 };
+}
+void heapify_up(PathNode** heap, int heap_size, int index, int** open_list_index) {
+    while (index > 0) {
+        int parent_index = (index - 1) / 2;
+        if (heap[index]->f < heap[parent_index]->f) {
+            swap_nodes(&heap[index], &heap[parent_index], open_list_index);
+            index = parent_index;
+        }
+        else {
+            break;
         }
     }
+}
+void heapify_down(PathNode** heap, int heap_size, int index, int** open_list_index) {
+    int min_index = index;
+    int left_child = 2 * index + 1;
+    int right_child = 2 * index + 2;
 
-    // A* 노드들을 저장할 동적 배열
-#define MAX_NODES_FOR_ASTAR_SEARCH 200 * 200 // 예시: MAP_MAX_Y * 최대 X 사이즈
-    PathNode** open_list = (PathNode**)malloc(MAX_NODES_FOR_ASTAR_SEARCH * sizeof(PathNode*));
-    if (open_list == NULL) {
-        fprintf(stderr, "open_list 메모리 할당 실패\n");
-        for (int i = 0; i < map_size_y; ++i) free(closed_list_grid[i]);
-        free(closed_list_grid);
-        return (COORD) { -1, -1 };
+    if (left_child < heap_size && heap[left_child]->f < heap[min_index]->f) {
+        min_index = left_child;
     }
-    int open_list_count = 0;
+    if (right_child < heap_size && heap[right_child]->f < heap[min_index]->f) {
+        min_index = right_child;
+    }
 
-    // 할당된 모든 PathNode를 추적하여 함수 종료 시 해제
-    PathNode** all_allocated_nodes = (PathNode**)malloc(MAX_NODES_FOR_ASTAR_SEARCH * sizeof(PathNode*));
-    if (all_allocated_nodes == NULL) {
-        fprintf(stderr, "all_allocated_nodes 메모리 할당 실패\n");
-        free(open_list);
-        for (int i = 0; i < map_size_y; ++i) free(closed_list_grid[i]);
-        free(closed_list_grid);
-        return (COORD) { -1, -1 };
+    if (min_index != index) {
+        swap_nodes(&heap[index], &heap[min_index], open_list_index);
+        heapify_down(heap, heap_size, min_index, open_list_index);
     }
+}
+void heap_push(PathNode** heap, int* heap_size, PathNode* node, int** open_list_index) {
+    if (*heap_size < MAX_HEAP_SIZE) {
+        heap[*heap_size] = node;
+        (*heap_size)++;
+      
+        open_list_index[node->x][node->y] = *heap_size - 1;
+        heapify_up(heap, *heap_size, *heap_size - 1, open_list_index);
+    }
+}
+PathNode* heap_pop(PathNode** heap, int* heap_size, int** open_list_index) {
+    if (*heap_size <= 0) return NULL;
+    PathNode* min_node = heap[0];
+    (*heap_size)--;
+    if (*heap_size > 0) {
+        heap[0] = heap[*heap_size];
+     
+        open_list_index[heap[0]->x][heap[0]->y] = 0;
+        heapify_down(heap, *heap_size, 0, open_list_index);
+    }
+    return min_node;
+}
+
+
+path_t find_path(int start_x, int start_y, int target_x, int target_y, IsMovableFunc is_movable) {
+    PathNode** all_allocated_nodes = (PathNode**)malloc(sizeof(PathNode*) * MAX_NODES_FOR_ASTAR_SEARCH);
+    PathNode** open_list_heap = (PathNode**)malloc(sizeof(PathNode*) * MAX_HEAP_SIZE);
+
     int allocated_node_count = 0;
+    int open_list_size = 0;
 
-    // 시작 노드 생성 및 오픈 리스트에 추가
+    bool** close_list_visited = (bool**)malloc(map.size.x * sizeof(bool*));
+    bool** in_open_list_check = (bool**)malloc(map.size.x * sizeof(bool*));
+    int** open_list_index = (int**)malloc(map.size.x * sizeof(int*));
+
+    path_t result_path = { .count = 0, .current_index = 0 };
+    bool path_found = false;
+
+    if (!close_list_visited || !in_open_list_check || !open_list_index || !all_allocated_nodes || !open_list_heap) {
+        fprintf(stderr, "A* 배열 메모리 할당 실패!\n");
+        return result_path;
+    }
+
+    for (int i = 0; i < map.size.x; i++) {
+        close_list_visited[i] = (bool*)malloc(map.size.y * sizeof(bool));
+        in_open_list_check[i] = (bool*)malloc(map.size.y * sizeof(bool));
+        open_list_index[i] = (int*)malloc(map.size.y * sizeof(int));
+    }
+
+    for (int i = 0; i < map.size.x; i++) {
+        memset(close_list_visited[i], 0, map.size.y * sizeof(bool));
+        memset(in_open_list_check[i], 0, map.size.y * sizeof(bool));
+        memset(open_list_index[i], 0, map.size.y * sizeof(int));
+    }
+
     PathNode* start_node = Create_node(start_x, start_y, 0, Calculate_Heuristic(start_x, start_y, target_x, target_y), NULL);
-    open_list[open_list_count++] = start_node;
+    heap_push(open_list_heap, &open_list_size, start_node, open_list_index);
+    in_open_list_check[start_x][start_y] = true;
     all_allocated_nodes[allocated_node_count++] = start_node;
 
-    PathNode* current_node = NULL;
-    COORD next_step = { -1, -1 }; // 찾지 못했을 경우 반환할 값
+    while (open_list_size > 0 && allocated_node_count < MAX_NODES_FOR_ASTAR_SEARCH) {
+        PathNode* current_node = heap_pop(open_list_heap, &open_list_size, open_list_index);
 
-    int dx[] = { 0, 0, 1, -1 }; // 상, 하, 우, 좌
-    int dy[] = { -1, 1, 0, 0 };
+       
+        in_open_list_check[current_node->x][current_node->y] = false;
 
-    while (open_list_count > 0) {
-        // 오픈 리스트 정렬 
-        qsort(open_list, open_list_count, sizeof(PathNode*), Compare_nodes);
-
-        // 가장 작은 F값 노드 추출
-        current_node = open_list[0];
-        // 추출한 노드를 오픈 리스트에서 제거 (배열 재정렬)
-        for (int i = 0; i < open_list_count - 1; ++i) {
-            open_list[i] = open_list[i + 1];
-        }
-        open_list_count--;
-
-        // 현재 노드를 클로즈 리스트에 추가
-        if (current_node->x >= 0 && current_node->x < map_size_x &&
-            current_node->y >= 0 && current_node->y < map_size_y) {
-            closed_list_grid[current_node->y][current_node->x] = true;
-        }
-
-        // 목표에 도달했는지 확인
         if (current_node->x == target_x && current_node->y == target_y) {
-            // 경로 재구성: 시작 노드 바로 다음 노드를 찾음
-            PathNode* path_ptr = current_node;
-            if (path_ptr->parent == NULL) { // 이미 시작 노드에 도착했다면 (시작점 == 목표점)
-                next_step.X = (SHORT)target_x; // 현재 위치가 곧 목표 위치
-                next_step.Y = (SHORT)target_y;
+            PathNode* temp = current_node;
+            int path_len = 0;
+            while (temp != NULL && path_len < MAX_PATH_LENGTH) {
+                result_path.path[path_len].X = (SHORT)temp->x;
+                result_path.path[path_len].Y = (SHORT)temp->y;
+                path_len++;
+                temp = temp->parent;
             }
-            else {
-                while (path_ptr->parent != NULL && path_ptr->parent->parent != NULL) {
-                    path_ptr = path_ptr->parent;
-                }
-                next_step.X = (SHORT)path_ptr->x;
-                next_step.Y = (SHORT)path_ptr->y;
+            result_path.count = path_len;
+
+            for (int i = 0; i < result_path.count / 2; ++i) {
+                COORD temp_coord = result_path.path[i];
+                result_path.path[i] = result_path.path[result_path.count - 1 - i];
+                result_path.path[result_path.count - 1 - i] = temp_coord;
             }
-            // 찾았으므로 루프 종료
+            path_found = true;
             break;
         }
 
-        // 이웃 노드 탐색
-        for (int i = 0; i < 4; ++i) {
-            int neighbor_x = current_node->x + dx[i];
-            int neighbor_y = current_node->y + dy[i];
+        close_list_visited[current_node->x][current_node->y] = true;
 
-            // 맵 범위 내에 있고 이동 가능한 블록인지 확인
-            if (!is_valid_block(neighbor_x, neighbor_y, map_size_x, map_size_y)) {
-                continue;
-            }
+        for (int dx = -1; dx <= 1; ++dx) {
+            for (int dy = -1; dy <= 1; ++dy) {
+                if (dx == 0 && dy == 0) continue;
 
-            // 클로즈 리스트에 있는지 확인
-            if (neighbor_x >= 0 && neighbor_x < map_size_x &&
-                neighbor_y >= 0 && neighbor_y < map_size_y &&
-                closed_list_grid[neighbor_y][neighbor_x]) {
-                continue;
-            }
+                int neighbor_x = current_node->x + dx;
+                int neighbor_y = current_node->y + dy;
 
-            int new_g = current_node->g + 1; // 인접 노드이므로 비용은 1
+                if (neighbor_x < 0 || neighbor_x >= map.size.x || neighbor_y < 0 || neighbor_y >= map.size.y) continue;
+                if (close_list_visited[neighbor_x][neighbor_y]) continue;
+                if (!is_movable(neighbor_x, neighbor_y)) continue;
 
-            // 오픈 리스트에 이미 있는지 확인
-            bool in_open_list = false;
-            PathNode* existing_node = NULL;
-            for (int j = 0; j < open_list_count; ++j) {
-                if (open_list[j]->x == neighbor_x && open_list[j]->y == neighbor_y) {
-                    in_open_list = true;
-                    existing_node = open_list[j];
-                    break;
-                }
-            }
+                int new_g = current_node->g + 1;
 
-            if (in_open_list) {
-                if (new_g < existing_node->g) {
-                    existing_node->g = new_g;
-                    existing_node->f = existing_node->g + existing_node->h;
-                    existing_node->parent = current_node;
-                }
-            }
-            else {
-                // 오픈 리스트에 없으면 새 노드 생성 및 추가
-                PathNode* neighbor_node = Create_node(
-                    neighbor_x, neighbor_y, new_g,
-                    Calculate_Heuristic(neighbor_x, neighbor_y, target_x, target_y),
-                    current_node
-                );
-                if (open_list_count < MAX_NODES_FOR_ASTAR_SEARCH) { // 오픈 리스트 용량 확인
-                    open_list[open_list_count++] = neighbor_node;
-                    all_allocated_nodes[allocated_node_count++] = neighbor_node;
+                if (in_open_list_check[neighbor_x][neighbor_y]) {
+                    int existing_index = open_list_index[neighbor_x][neighbor_y];
+                    PathNode* existing_node = open_list_heap[existing_index];
+                    if (new_g < existing_node->g) {
+                        existing_node->g = new_g;
+                        existing_node->f = existing_node->g + existing_node->h;
+                        existing_node->parent = current_node;
+                        heapify_up(open_list_heap, open_list_size, existing_index, open_list_index);
+                    }
                 }
                 else {
-                    fprintf(stderr, "오픈 리스트 용량 초과!\n");
-                    free(neighbor_node); // 할당된 노드 해제
+                    PathNode* neighbor_node = Create_node(
+                        neighbor_x, neighbor_y, new_g,
+                        Calculate_Heuristic(neighbor_x, neighbor_y, target_x, target_y),
+                        current_node
+                    );
+
+                    if (open_list_size < MAX_HEAP_SIZE && allocated_node_count < MAX_NODES_FOR_ASTAR_SEARCH) {
+                        heap_push(open_list_heap, &open_list_size, neighbor_node, open_list_index);
+                        in_open_list_check[neighbor_x][neighbor_y] = true;
+                        all_allocated_nodes[allocated_node_count++] = neighbor_node;
+                    }
+                    else {
+                        free(neighbor_node);
+                    }
                 }
             }
         }
     }
 
-    // 할당된 모든 PathNode 메모리 해제
     for (int i = 0; i < allocated_node_count; ++i) {
         free(all_allocated_nodes[i]);
     }
-    free(all_allocated_nodes);
-    free(open_list); // 오픈 리스트 배열 자체 해제
-
-    // 클로즈 리스트 그리드 메모리 해제
-    for (int i = 0; i < map_size_y; ++i) {
-        free(closed_list_grid[i]);
+    for (int i = 0; i < map.size.x; i++) {
+        free(close_list_visited[i]);
+        free(in_open_list_check[i]);
+        free(open_list_index[i]);
     }
-    free(closed_list_grid);
+    free(all_allocated_nodes);
+    free(open_list_heap);
+    free(close_list_visited);
+    free(in_open_list_check);
+    free(open_list_index);
 
-    return next_step;
+    return result_path;
 }

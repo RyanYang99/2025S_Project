@@ -28,7 +28,7 @@ typedef struct {
 extern player_t player;
 
 // 플레이어 초기화
-void player_init(int x);
+void player_init(void);
 
 int find_ground_pos(int x);
 
@@ -41,5 +41,11 @@ bool is_walkable(int x, int y);
 
 // 플레이어 렌더링
 void render_player(void);
+
+
+void save_player(void);
+
+//플레이어 추가 - 승준 ( 전투 시스템 )
+extern void player_take_damage(int damage);
 
 void add_health_to_player(const int additional_health);

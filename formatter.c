@@ -2,7 +2,7 @@
 #include "formatter.h"
 
 #include <stdio.h>
-#include <stdarg.h>
+#include <stdlib.h>
 
 char *format_string(const char * const pFormat, ...) {
     va_list args = { 0 };

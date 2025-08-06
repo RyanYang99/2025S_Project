@@ -2,6 +2,7 @@
 #include "Tool.h"
 
 #include <stdbool.h>
+#include "map.h"
 #include "ItemDB.h"
 #include "player.h"
 #include "blockctrl.h"
@@ -94,6 +95,7 @@ const bool can_tool_break_block(const item_information_t * const pTool, const bl
         case BLOCK_BEDROCK:
         case BLOCK_AIR:
         case BLOCK_WATER:
+        case BLOCK_STAR:
             return false; //어떤 도구로도 파괴불가
     }
 
@@ -119,6 +121,7 @@ const int get_drop_from_block(const block_t block) {
         case BLOCK_AIR:
         case BLOCK_BEDROCK:
         case BLOCK_WATER:
+        case BLOCK_STAR:
             return -1;
         
         case BLOCK_LEAF:
@@ -144,7 +147,7 @@ const bool can_place_block(const int x, const int y) {
     const block_info_t target = get_block_info_at(x, y);
 
     //3. 이미 블록이 존재하면 설치 불가
-    if (target.type != BLOCK_AIR)
+    if (!is_air_or_star(target.type))
         return false;
 
     /*

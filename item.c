@@ -16,18 +16,23 @@ const color_tchar_t pHealth_potion[TEXTURE_SIZE][TEXTURE_SIZE] = {
 
 const bool use_item(const item_t item) {
     switch (item) {
-        if (player.hp >= player.max_hp)
-            return false;
+        
 
         case ITEM_HEALTH_POTION:
 
-            add_health_to_player(100);
-			return true;
+            if (player.hp >= player.max_hp)
+                return false;
+            else
+                add_health_to_player(100);
+                return true;
 
         case ITEM_APPLE:
 
-            add_health_to_player(30);
-            return true;
+            if (player.hp >= player.max_hp)
+                return false;
+            else
+                add_health_to_player(30);
+                return true;
     }
 
 	return false;

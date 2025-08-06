@@ -8,7 +8,8 @@
 #include "ItemDB.h"
 #include "inventory.h"
 
-static COORD latestMousePos;
+static bool show = false;
+static COORD latestMousePos = { 0 };
 static float screen_cx = 0, screen_cy = 0, relative_mouse_x = 0, relative_mouse_y = 0;
 static int block_x = 0, block_y = 0, draw_x = 0, draw_y = 0;
 
@@ -75,20 +76,32 @@ static void handle_mouse_move(const COORD pos) {
     draw_x = (int)(screen_cx + (block_x - player.x) * TEXTURE_SIZE);
     draw_y = (int)(screen_cy + (block_y - player.y) * TEXTURE_SIZE);
 
+
+
+
+
 #if _DEBUG
     selected_block_x = block_x;
     selected_block_y = block_y;
 #endif
 }
 
+static void handle_in_console(const bool in_console) {
+    show = in_console;
+}
+
 //초기화 및 해제
 void initialize_block_control(void) {
     subscribe_mouse_click(handle_mouse_click);
     subscribe_mouse_position(handle_mouse_move);
+    subscribe_mouse_in_console(handle_in_console);
 }
 
 //가상 커서 렌더링 (모서리 스타일)
 void render_virtual_cursor(void) {
+    if (!show)
+        return;
+
     color_tchar_t character = {
         .character = L'┌',
         .background = BACKGROUND_T_TRANSPARENT,
@@ -111,4 +124,5 @@ void render_virtual_cursor(void) {
 void destroy_block_control(void) {
     unsubscribe_mouse_click(handle_mouse_click);
     unsubscribe_mouse_position(handle_mouse_move);
+    unsubscribe_mouse_in_console(handle_in_console);
 }
