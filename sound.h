@@ -1,18 +1,12 @@
 #pragma once
-#include "Windows.h" // 사운드파일 재생 목적
-#pragma comment (lib, "winmm.lib")
-#include "mmsystem.h";
-#include "stdio.h"
-#include "time.h"
+
+// 한 번에 로드할 발소리 파일의 최대 개수
+#define MAX_FOOTSTEP_SOUNDS 10
 
 
-
-
-
-
-
-
-
+void Sound_init();
+void Sound_playBGM(const char* filename);
+void Sound_shutdown();
 
 
 

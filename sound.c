@@ -1,34 +1,83 @@
 #define _CRT_SECURE_NO_WARNINGS
 
-#include "Windows.h" // 사운드파일 재생 목적
-#pragma comment (lib, "winmm.lib")
 #include "sound.h"
 #include "stdio.h"
+#include "stdlib.h"
+#include "time.h"
 
+#include "SFML/Audio.h"
 
-// 게임화면 BGM
-PlayBGM()
-{
-    PlaySound(TEXT("SoundFile\\BGM\\fixed_roop1.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+typedef struct {
+    sfMusic* bgm;
+} SoundManager;
 
+static SoundManager* s_manager = NULL;
+
+void Sound_init() {
+    if (s_manager != NULL) return;
+
+    s_manager = (SoundManager*)malloc(sizeof(SoundManager));
+    if (!s_manager) return;
+
+    s_manager->bgm = NULL;
+    srand((unsigned int)time(NULL));
 }
 
-//시작화면 루프에 같이 넣어두면 됨
-PlayStartMenuBGM()
-{
-    PlaySound(TEXT("SoundFile\\BGM\\Caketown-1_1.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+void Sound_playBGM(const char* filename) {
+    if (!s_manager || !filename) return;
+
+    // 기존 BGM 정리
+    if (s_manager->bgm) {
+        sfMusic_stop(s_manager->bgm);
+        sfMusic_destroy(s_manager->bgm);
+        s_manager->bgm = NULL;
+    }
+
+    char path[256];
+    snprintf(path, sizeof(path), "SoundFile/%s", filename);
+
+    // CSFML에서는 반드시 createFromFile 사용
+    s_manager->bgm = sfMusic_createFromFile(path);
+    if (!s_manager->bgm) {
+        fprintf(stderr, "Failed to load BGM file: %s\n", path);
+        return;
+    }
+
+    sfMusic_setLoop(s_manager->bgm, sfTrue);
+    sfMusic_play(s_manager->bgm);
+}
+
+void Sound_shutdown() {
+    if (!s_manager) return;
+
+    if (s_manager->bgm) {
+        sfMusic_stop(s_manager->bgm);
+        sfMusic_destroy(s_manager->bgm);
+        s_manager->bgm = NULL;
+    }
+
+    free(s_manager);
+    s_manager = NULL;
 }
 
 
-FootstepSound()
-{
-
-}
 
 
 
 
 
+//// 게임화면 BGM
+//PlayBGM()
+//{
+//    PlaySound(TEXT("SoundFile\\BGM\\fixed_roop1.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+//
+//}
+//
+////시작화면 루프에 같이 넣어두면 됨
+//PlayStartMenuBGM()
+//{
+//    PlaySound(TEXT("SoundFile\\BGM\\Caketown-1_1.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+//}
 
 
 //static const char* bgmFiles[] = { "fixed_roop1.wav", "fixed_roop2.wav" };

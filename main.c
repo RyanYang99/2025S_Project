@@ -58,7 +58,6 @@ int main(void)
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
     
-    //PlayBGM();
 
     if (is_new_console())
     {
@@ -108,6 +107,9 @@ int main(void)
     initialize_block_control();
     initialize_inventory();
 
+    Sound_init();
+    Sound_playBGM("BGM/fixed_roop1.wav");
+
     clear();
     while (!game_exit)
     {
@@ -136,6 +138,8 @@ int main(void)
     destroy_database();
     destroy_map();
     destroy_input_handler();
+    Sound_shutdown();
     destroy_console();
+
     return EXIT_SUCCESS;
 }
