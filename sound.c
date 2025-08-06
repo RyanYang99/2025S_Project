@@ -6,17 +6,20 @@
 #include "stdio.h"
 
 
-
+// 게임화면 BGM
 PlayBGM()
 {
     PlaySound(TEXT("fixed_roop1.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
 
 }
 
+//시작화면 루프에 같이 넣어두면 됨
 PlayStartMenuBGM()
 {
     PlaySound(TEXT("Caketown-1_1.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
 }
+
+
 
 
 

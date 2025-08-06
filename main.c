@@ -60,7 +60,6 @@ int main(void)
     
     PlayBGM();
 
-
     if (is_new_console())
     {
         printf_s("Attempting to launch in conhost.exe.\n");
