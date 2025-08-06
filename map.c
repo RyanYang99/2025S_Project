@@ -175,7 +175,7 @@ color_tchar_t get_block_texture(const block_t block, const int x, const int y)
             return pWater[y][x];
             
         case BLOCK_WORKBENCH:
-            return pWorkbench[x][y];
+            return pWorkbench[y][x];
     }
 
     return (color_tchar_t){ 0 };
@@ -501,8 +501,8 @@ static COORD render_block(const POINT map_position, const COORD console_position
             size.Y = (SHORT)ty + 1;
 
             print_color_tchar(get_block_texture(map.ppBlocks[map_position.y][map_position.x].type,
-                                                utd ? ty : (TEXTURE_SIZE - ty - 1),
-                                                ltr ? tx : (TEXTURE_SIZE - tx - 1)),
+                                                ltr ? tx : (TEXTURE_SIZE - tx - 1),
+                                                utd ? ty : (TEXTURE_SIZE - ty - 1)),
                               position);
         }
 
