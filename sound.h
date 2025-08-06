@@ -5,10 +5,24 @@
 #include "stdio.h"
 #include "time.h"
 
-#ifndef SOUND_H
-#define SOUND_H
 
-PlayBGM();
-PlayStartMenuBGM();
 
-#endif
+
+
+
+
+
+
+
+
+
+
+
+
+//#ifndef SOUND_H
+//#define SOUND_H
+//
+//PlayBGM();
+//PlayStartMenuBGM();
+//
+//#endif
