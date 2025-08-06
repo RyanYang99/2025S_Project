@@ -34,6 +34,10 @@ static void render_debug_text(void) {
     ++position.Y;
 
     fprint_string("Mouse: (%d, %d)", position, background, foreground, selected_block_x, selected_block_y);
+    ++position.Y;
+
+    //몬스터 알고리즘
+    fprint_string(mob_debug_message, position, background, FOREGROUND_T_RED);
 }
 #endif
 
@@ -41,7 +45,7 @@ static void render(void) {
     render_map();
     render_player();
     render_virtual_cursor();
-    Mob_render();
+    mob_update();
     render_inventory();
     render_hotbar();
     render_time();
@@ -63,6 +67,7 @@ void initialize_game(void) {
     initialize_save();
     load_mob();
     free_save();
+    register_mob_click_handler();
 }
 
 void run_game(void) {
@@ -76,14 +81,12 @@ void run_game(void) {
         }
         update_console();
         update_input();
-
         update_date_time();
         player_update();
         inventory_input();
         Crafting_UI_input();
         save_input();
-        Mob_Spawn_Time();
-        update_mob_ai();
+       
 
         render();
     }
