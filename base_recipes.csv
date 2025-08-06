@@ -1,4 +1,4 @@
-resultItemIndex,resultItemName,resultQuantity,materialCount,materials
+﻿resultItemIndex,resultItemName,resultQuantity,materialCount,materials
 109,Workbench,1,2,105:3@103:2
 201,Wooden_Sword,1,1,105:5
 204,Wooden_Pickaxe,1,1,105:6

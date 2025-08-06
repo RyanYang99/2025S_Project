@@ -264,8 +264,8 @@ void render_hotbar(void) {
     const int slot_height = TEXTURE_SIZE + 2; // 테두리 포함 세로 크기
 
     COORD position = {
-        .X = console.size.X / 2 - (HOTBAR_COUNT * slot_width) / 2,
-        .Y = console.size.Y - slot_height - 1 // 화면 하단 위치 (필요에 따라 조정)
+        .X = (SHORT)(console.size.X / 2 - (HOTBAR_COUNT * slot_width) / 2),
+        .Y = (SHORT)(console.size.Y - slot_height - 1) // 화면 하단 위치 (필요에 따라 조정)
     };
 
     if (position.X < 0 || position.Y < 0)
@@ -283,14 +283,14 @@ void render_hotbar(void) {
         // 1. 테두리 영역 출력
         // 위, 아래 가로줄 (빈칸 문자 + 테두리 배경색)
         for (int tx = 0; tx < slot_width; ++tx) {
-            print_color_tchar((color_tchar_t) { ' ', border_background, 0 }, (COORD) { slot_start_x + tx, slot_start_y });
-            print_color_tchar((color_tchar_t) { ' ', border_background, 0 }, (COORD) { slot_start_x + tx, slot_start_y + slot_height - 1 });
+            print_color_tchar((color_tchar_t) { ' ', border_background, 0 }, (COORD) { (SHORT)(slot_start_x + tx), (SHORT)slot_start_y });
+            print_color_tchar((color_tchar_t) { ' ', border_background, 0 }, (COORD) { (SHORT)(slot_start_x + tx), (SHORT)(slot_start_y + slot_height - 1) });
         }
 
         // 좌, 우 세로줄
         for (int ty = 1; ty < slot_height - 1; ++ty) {
-            print_color_tchar((color_tchar_t) { ' ', border_background, 0 }, (COORD) { slot_start_x, slot_start_y + ty });
-            print_color_tchar((color_tchar_t) { ' ', border_background, 0 }, (COORD) { slot_start_x + slot_width - 1, slot_start_y + ty });
+            print_color_tchar((color_tchar_t) { ' ', border_background, 0 }, (COORD) { (SHORT)(slot_start_x), (SHORT)(slot_start_y + ty) });
+            print_color_tchar((color_tchar_t) { ' ', border_background, 0 }, (COORD) { (SHORT)(slot_start_x + slot_width - 1), (SHORT)(slot_start_y + ty) });
         }
 
         // 2. 슬롯 내부 텍스처 출력 (기존 방식과 동일)
@@ -318,7 +318,7 @@ void render_hotbar(void) {
                         texture_char = get_item_texture(item_index, tex_x, tex_y);
                 }
 
-                print_color_tchar(texture_char, (COORD) { slot_start_x + tx, slot_start_y + ty });
+                print_color_tchar(texture_char, (COORD) { (SHORT)(slot_start_x + tx), (SHORT)(slot_start_y + ty) });
             }
         }
     }
