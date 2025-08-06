@@ -71,7 +71,11 @@ static LRESULT CALLBACK LowLevelMouseProc(const int nCode, const WPARAM wParam, 
 {
     if (nCode == HC_ACTION)
     {
+
         const MSLLHOOKSTRUCT* pMouse_struct = (MSLLHOOKSTRUCT*)lParam;
+
+   
+
         const COORD position = convert_monitor_to_console(pMouse_struct->pt);
         mouse_position_callback(position);
 
@@ -105,6 +109,7 @@ void update_input(void)
     if (keyboard_pressed)
         input_character = (char)_getch();
 }
+
 
 
 

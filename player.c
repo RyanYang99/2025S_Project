@@ -286,11 +286,12 @@ bool is_walkable(int x, int y) {
 
     // 블록 타입에 따른 이동 가능 여부 판단
     switch (block.type) {
-    case BLOCK_AIR:
-    case BLOCK_LOG:
-    case BLOCK_LEAF:
-    case BLOCK_WATER:
-        return true;
+
+        case BLOCK_AIR:
+        case BLOCK_LOG:
+        case BLOCK_LEAF:
+        case BLOCK_WATER:
+            return true;
     }
 
     return false;
