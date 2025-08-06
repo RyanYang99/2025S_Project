@@ -34,6 +34,7 @@ static void render_debug_text(void)
 
     fprint_string("Mouse: (%d, %d)", position, background, foreground, selected_block_x, selected_block_y);
     ++position.Y;
+
     fprint_string(mob_debug_message, position, background, FOREGROUND_T_RED);
 }
 #endif
@@ -134,6 +135,8 @@ int main(void)
         player_update();
         inventory_input();
         render();
+
+        
     }
 
     destroy_block_control();

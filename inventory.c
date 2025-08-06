@@ -160,7 +160,7 @@ static void render_inventory_item(const int y,
             position.X += (SHORT)fprint_string(" [E] ", position, INVENTORY_BACKGROUND, FOREGROUND_EQUIPPED);
 
     } else
-        fprint_string("[ 비어있음 ]", position, INVENTORY_BACKGROUND, foreground);
+        fprint_string("[ Empty ]", position, INVENTORY_BACKGROUND, foreground);
 }
 
 void render_inventory(void) {
@@ -179,7 +179,7 @@ void render_inventory(void) {
     }
 
     COORD position = { 0 };
-    fprint_string("=== 인벤토리 (%d / %d) ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND, current_page_index + 1, MAX_PAGES);
+    fprint_string("=== Inventory (%d / %d) ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND, current_page_index + 1, MAX_PAGES);
 
     const int start_index = current_page_index * ITEMS_PER_PAGE;
     for (int i = 0; i < ITEMS_PER_PAGE; ++i)
@@ -188,7 +188,7 @@ void render_inventory(void) {
     }
 
     ++position.Y;
-    fprint_string("=== (W / S: 선택, A / D: 페이지, E: 사용 / 장착, I: 닫기) ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
+    fprint_string("=== (W / S: Up/Down, A / D: Page, E: Use / Equip, I: Close) ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
 
     const player_item_t * const pItem = &inventory.item[start_index + current_selection_index];
     if (!pItem->item_db_index)
@@ -199,7 +199,7 @@ void render_inventory(void) {
     position.X += (SHORT)fprint_string("%s", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND, pItem_info->name);
 
     if (pItem->passive_equipped)
-        position.X += (SHORT)fprint_string(" (장착중)", position, INVENTORY_BACKGROUND, FOREGROUND_EQUIPPED);
+        position.X += (SHORT)fprint_string(" (Equipped)", position, INVENTORY_BACKGROUND, FOREGROUND_EQUIPPED);
 
     char *pDescription = "";
     switch (pItem_info->type) {

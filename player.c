@@ -24,6 +24,9 @@ player_t player = { 0 };
 // 수평 이동 속도 조절 (값이 작을수록 빨라짐)
 #define HORIZONTAL_MOVE_COOLDOWN 0.08f  // 약 1초에 12.5칸 이동
 
+DamageText damage_texts[MAX_DAMAGE_TEXTS];
+
+
 // 각 픽셀을 표현할 구조체
 typedef struct {
     wchar_t character; // 표시할 유니코드 문자
@@ -62,6 +65,61 @@ static const PlayerSpritePixel player_sprite_walk[2][PLAYER_SPRITE_HEIGHT][PLAYE
         { {L'█', BACKGROUND_T_BLACK, FOREGROUND_T_BLACK}, {L' ',0,0}, {L' ',0,0}, {L' ',0,0}, {L' ',0,0} }
     }
 };
+
+// 대미지 텍스트 생성 함수
+void create_damage_text(int damage_value) {
+    for (int i = 0; i < MAX_DAMAGE_TEXTS; ++i) {
+        if (!damage_texts[i].active) {
+            damage_texts[i].active = true;
+            damage_texts[i].damage_value = damage_value;
+            damage_texts[i].precise_y = (float)player.y;
+            damage_texts[i].timer = 1.5f; // 1.5초 동안 화면에 표시
+            break;
+        }
+    }
+}
+
+static void update_damage_texts() {
+    for (int i = 0; i < MAX_DAMAGE_TEXTS; ++i) {
+        if (damage_texts[i].active) {
+            // 위로 움직이는 효과
+            damage_texts[i].precise_y -= delta_time * 5.0f; //움직이는 속도
+
+            // 타이머 감소
+            damage_texts[i].timer -= delta_time;
+            if (damage_texts[i].timer <= 0.0f) {
+                damage_texts[i].active = false; // 시간이 지나면 비활성화
+            }
+        }
+    }
+}
+
+static void render_damage_texts() {
+    COORD center_pos = { console.size.X / 2, console.size.Y / 2 };
+
+    for (int i = 0; i < MAX_DAMAGE_TEXTS; ++i) {
+        if (damage_texts[i].active) {
+            COORD draw_pos;
+
+            draw_pos.X = center_pos.X;
+            draw_pos.Y = (SHORT)(center_pos.Y - (PLAYER_SPRITE_HEIGHT / 2) - 1 - (player.precise_y - damage_texts[i].precise_y));
+
+            wchar_t damage_str[20];
+            swprintf(damage_str, 20, L" Heat! - %d ! ", damage_texts[i].damage_value);
+
+            for (int j = 0; damage_str[j] != L'\0'; ++j) {
+                COORD char_pos = draw_pos;
+                char_pos.X = draw_pos.X + (SHORT)j - (SHORT)(wcslen(damage_str) / 2);
+
+                if (char_pos.X >= 0 && char_pos.X < console.size.X &&
+                    char_pos.Y >= 0 && char_pos.Y < console.size.Y) {
+                    print_color_tchar((color_tchar_t) { damage_str[j], BACKGROUND_T_BLACK, FOREGROUND_T_RED }, char_pos);
+                }
+            }
+        }
+    }
+}
+
 
 static void movement(void) {
     // 종료 키 확인
@@ -127,6 +185,9 @@ void player_update(void) {
 
     // 입력 처리
     movement();
+
+    //데미지 출력 업데이트
+    update_damage_texts();
 
     // 물리 업데이트
     // 땅에 있는지 확인
@@ -194,6 +255,7 @@ void player_init(int x) {
         --player.y; // 가능할 시 찾은 블록 위로 설정
 
     player.hp = 1000; // 초기 체력
+    player.atk_power = 10;
 
     // 물리 변수 초기화
     player.precise_y = (float)player.y;
@@ -272,6 +334,10 @@ void render_player(void) {
         }
     }
 
+    //데미지 텍스트 렌더링 함수 호출
+    render_damage_texts();
+
+
     // 체력(HP) 바 렌더링
     wchar_t hp_str[16];
     swprintf(hp_str, 16, L"HP: %d", player.hp);
@@ -308,5 +374,7 @@ void player_take_damage(int damage)
     if (player.hp < 0) {
         player.hp = 0;
     }
+    create_damage_text(damage);
+
 }
 
