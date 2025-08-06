@@ -236,7 +236,7 @@ static int find_top(const int x)
         return -1;
 
     for (int y = 0; y < map.size.y; ++y)
-        if (is_air_or_star(map.ppBlocks[y][x].type))
+        if (!is_air_or_star(map.ppBlocks[y][x].type))
             return y;
 
     return -1;
