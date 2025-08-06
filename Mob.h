@@ -7,6 +7,7 @@
 
 #define Max_Mob 5
 #define MAX_MOB_DEBUG_MESSAGE_LEN 100
+#define MAX_MOB_DAMAGE_TEXTS 20
 
 extern char mob_debug_message[MAX_MOB_DEBUG_MESSAGE_LEN];
 
@@ -29,15 +30,32 @@ typedef struct {
 
 	float ai_timer;
 	float despawn_timer;
+
+	float last_attack_time;
+	float atk_cooltime_timer;
 } Mob;
 #pragma pack(pop)
 
+typedef struct {
+	int damage_value;
+	int mob_x;        
+	int mob_y;        
+	float precise_y;
+	float timer;
+	bool active;
+} MobDamageText;
+
+
+//전역 변수
 extern Mob mobs[Max_Mob];
 extern int mob_count;
 extern int mob_level;
 
 //좀비 그래픽 스프라이트 
 extern const color_tchar_t zombie_sprite_data[5][5];
+
+extern char mob_debug_message[MAX_MOB_DEBUG_MESSAGE_LEN];
+extern MobDamageText mob_damage_texts[MAX_MOB_DAMAGE_TEXTS];
 
 // 함수 선언
 void load_mob(void);
@@ -51,5 +69,7 @@ void MobSpawn(int x, int y);
 void Mob_render();
 void DespawnMob();
 void Mob_deadcheck();
-void handle_mob_click(const bool left_click, const COORD mouse_pos);
+void handle_mob_click(const bool left_click);
 void register_mob_click_handler();
+
+static void Mob_player_collision();

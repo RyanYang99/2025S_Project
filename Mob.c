@@ -9,11 +9,13 @@
 #include "save.h"
 #include "Mob.h"
 #include "player.h"
+#include "Mob.h" 
 #include "map.h"
 #include "console.h"
 #include "astar.h"
 #include "delta.h"
 #include "input.h"
+#include "BlockCtrl.h"
 
 
 #define GRAVITY 25.0f
@@ -29,12 +31,18 @@
 
 #define MOB_SPRITE_WIDTH 5
 #define MOB_SPRITE_HEIGHT 5
+#define MOB_ATK_COOLTIME 2.0f
+
+
+#define PLAYER_SPRITE_WIDTH 5
+#define PLAYER_SPRITE_HEIGHT 5
 
 #define MOB_SPD 0.2f
 #define JUMP_SPD -12.0f
 
-char mob_debug_message[MAX_MOB_DEBUG_MESSAGE_LEN] = ""; // 변수 정의
+char mob_debug_message[MAX_MOB_DEBUG_MESSAGE_LEN] = ""; 
 
+MobDamageText mob_damage_texts[MAX_MOB_DAMAGE_TEXTS];
 
 const color_tchar_t zombie_sprite_data[MOB_SPRITE_HEIGHT][MOB_SPRITE_WIDTH] = {
     { {L' ',0,0}, {L'▀', BG_BLACK, FG_RED}, {L'▀', BG_BLACK, FG_RED}, {L'▀', BG_BLACK, FG_RED}, {L' ',0,0} },
@@ -142,6 +150,67 @@ void MobSpawn(int player_x, int player_y)
     }
 }
 
+// 몬스터 피격 시 대미지 텍스트 생성 함수
+void create_mob_damage_text(int mob_index, int damage_value) {
+    for (int i = 0; i < MAX_MOB_DAMAGE_TEXTS; ++i) {
+        if (!mob_damage_texts[i].active) {
+            mob_damage_texts[i].active = true;
+            mob_damage_texts[i].damage_value = damage_value;
+            mob_damage_texts[i].mob_x = mobs[mob_index].x;
+            mob_damage_texts[i].mob_y = mobs[mob_index].y;
+            mob_damage_texts[i].precise_y = (float)mobs[mob_index].y;
+            mob_damage_texts[i].timer = 1.0f; // 1.0초 동안 화면에 표시
+            break;
+        }
+    }
+}
+
+// 몬스터 대미지 텍스트 업데이트 함수 (매 프레임 호출)
+static void update_mob_damage_texts() {
+    for (int i = 0; i < MAX_MOB_DAMAGE_TEXTS; ++i) {
+        if (mob_damage_texts[i].active) {
+            // 위로 움직이는 효과
+            mob_damage_texts[i].precise_y -= delta_time * 5.0f;
+            // 타이머 감소
+            mob_damage_texts[i].timer -= delta_time;
+            if (mob_damage_texts[i].timer <= 0.0f) {
+                mob_damage_texts[i].active = false;
+            }
+        }
+    }
+}
+
+// 몬스터 대미지 텍스트 렌더링 함수 
+static void render_mob_damage_texts() {
+    COORD center_pos = { console.size.X / 2, console.size.Y / 2 };
+
+    for (int i = 0; i < MAX_MOB_DAMAGE_TEXTS; ++i) {
+        if (mob_damage_texts[i].active) {
+            COORD draw_pos;
+
+          
+            draw_pos.X = center_pos.X + 8; 
+            draw_pos.Y = (SHORT)(center_pos.Y - (PLAYER_SPRITE_HEIGHT / 2) - 1 - (player.precise_y - mob_damage_texts[i].precise_y));
+
+            wchar_t damage_str[16];
+            swprintf(damage_str, 16, L"atk! %d", mob_damage_texts[i].damage_value);
+
+           
+            for (int j = 0; damage_str[j] != L'\0'; ++j) {
+                COORD char_pos = draw_pos;
+                char_pos.X += (SHORT)j;
+                if (char_pos.X >= 0 && char_pos.X < console.size.X &&
+                    char_pos.Y >= 0 && char_pos.Y < console.size.Y) {
+                    print_color_tchar((color_tchar_t) { damage_str[j], BACKGROUND_T_BLACK, FOREGROUND_T_YELLOW }, char_pos);
+                }
+            }
+        }
+    }
+}
+
+
+
+
 void Mob_render()
 {
     COORD center_m = console_c();
@@ -188,6 +257,8 @@ void Mob_render()
             }
         }
     }
+
+    render_mob_damage_texts();
 }
 
 void DespawnMob()
@@ -318,24 +389,7 @@ static bool is_mob_movable(int x, int y) {
         return false;
     }
 
-    
-    //for (int x_offset = 0; x_offset < MOB_SPRITE_WIDTH; ++x_offset) {
-    //    block_info_t block_under_foot = get_block_info_at(x + x_offset, y - 1);
-    //    if (block_under_foot.type == BLOCK_AIR || block_under_foot.type == BLOCK_WATER || block_under_foot.type == BLOCK_LEAF) {
-    //        return false; // 발 아래가 단단한 블록이 아니면 이동 불가능
-    //    }
-    //}
-    // 
-    //    for (int x_offset = 0; x_offset < MOB_SPRITE_WIDTH; ++x_offset) {
-    //        block_info_t block_in_body = get_block_info_at(x + x_offset, y + y_offset);
-
-    //        // 몸체가 단단한 블록과 겹치면 이동 불가능
-    //        if (block_in_body.type != BLOCK_AIR && block_in_body.type != BLOCK_WATER && block_in_body.type != BLOCK_LEAF) {
-    //            return false;
-    //        }
-    //    }
-    //}
-
+   
     return true;
 }
 
@@ -381,34 +435,58 @@ void update_mob_ai() {
     }
 }
 
-
-void handle_mob_click(const bool left_click, const COORD mouse_pos)
+//몬스터 피격 함수
+void handle_mob_click(const bool left_click)
 {
+    // 왼쪽 클릭이 아니면 리턴
     if (!left_click) return;
-
-    COORD center_m = console_c();
 
     for (int i = 0; i < mob_count; i++)
     {
-        int mob_screen_x_start = center_m.X + (mobs[i].x - player.x);
-        int mob_screen_y_start = center_m.Y + (mobs[i].y - player.y);
-
-        if (mouse_pos.X >= mob_screen_x_start && mouse_pos.X < mob_screen_x_start + MOB_SPRITE_WIDTH &&
-            mouse_pos.Y >= mob_screen_y_start && mouse_pos.Y < mob_screen_y_start + MOB_SPRITE_HEIGHT)
+        // 몬스터의 스프라이트 범위 안에 있는지 확인
+        if (selected_block_x >= mobs[i].x && selected_block_x < mobs[i].x + MOB_SPRITE_WIDTH &&
+            selected_block_y >= mobs[i].y && selected_block_y < mobs[i].y + MOB_SPRITE_HEIGHT)
         {
-            double distance = sqrt(pow(mobs[i].x - player.x, 2) + pow(mobs[i].y - player.y, 2));
+            //데미지 입히는 부분
+            int atk_damage = player.atk_power;
 
-            if (distance <= 5.0)
+            mobs[i].HP -= atk_damage;
+
+            create_mob_damage_text(i, player.atk_power);
+
+            return; 
+
+          
+        }
+    }
+}
+
+static void check_mob_player_collision()
+{
+    for (int i = 0; i < mob_count; ++i)
+    {
+        bool collision_x = (mobs[i].x < player.x + PLAYER_SPRITE_WIDTH) && (mobs[i].x + MOB_SPRITE_WIDTH > player.x);
+        bool collision_y = (mobs[i].y < player.y + PLAYER_SPRITE_HEIGHT) && (mobs[i].y + MOB_SPRITE_HEIGHT > player.y);
+
+        if (collision_x && collision_y)
+        {
+            // 충돌했을 때만 쿨타임 
+            mobs[i].atk_cooltime_timer += delta_time;
+
+            // 쿨타임이 지났는지 확인
+            if (mobs[i].atk_cooltime_timer  >= MOB_ATK_COOLTIME)
             {
-                mobs[i].HP -= 5;
-                return;
+                player_take_damage(mobs[i].atk);
+                mobs[i].atk_cooltime_timer = 0.0f; // 공격 후 타이머 리셋
             }
         }
     }
 }
 
+
+
 void register_mob_click_handler() {
-    subscribe_mouse_click_with_pos(handle_mob_click);
+    subscribe_mouse_click(handle_mob_click);
 }
 
 void mob_init() {
@@ -418,10 +496,10 @@ void mob_init() {
 //몬스터 업데이트 
 void mob_update()
 {
+    update_mob_damage_texts();
     update_mob_ai();
-
     Mob_physics();
- 
+    check_mob_player_collision();
     Mob_Spawn_Time();
     Mob_deadcheck();
     DespawnMob();
