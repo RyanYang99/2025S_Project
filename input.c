@@ -39,7 +39,7 @@ static HHOOK hook = NULL;
 CALLBACK_VARIABLES(mouse_click_t);
 CALLBACK_VARIABLES(mouse_position_t);
 CALLBACK_VARIABLES(mouse_in_console_t);
-CALLBACK_VARIABLES(mouse_click_with_pos_t);
+//CALLBACK_VARIABLES(mouse_click_with_pos_t);
 
 static void mouse_click_callback(const bool left) {
     for (int i = 0; i < CALLBACK_COUNT_NAME(mouse_click_t); ++i)
@@ -92,19 +92,6 @@ void update_input(void) {
 
 
 
-//새로운 콜백 함수 포인터 배열 ->승준 추가 ================
-mouse_click_with_pos_t* pMouseClickWithPos_callbacks = NULL;
-int mouse_click_with_pos_callback_count = 0;
-
-// 새로운 콜백 함수 추가
-static void mouse_click_with_pos_callback(const bool left, const COORD position)
-{
-    for (int i = 0; i < mouse_click_with_pos_callback_count; ++i)
-        if (pMouseClickWithPos_callbacks[i])
-            pMouseClickWithPos_callbacks[i](left, position);
-}
-
-
 // GetAsyncKeyState를 사용하여 키의 현재 상태를 반환
 // 0x8000 비트가 설정되어 있으면 키가 현재 눌려있다는 의미
 bool is_key_down(int virtual_key_code)
@@ -120,11 +107,6 @@ void destroy_input_handler(void)
     CALLBACK_DESTROY(mouse_position_t);
     CALLBACK_DESTROY(mouse_in_console_t);
 
-    //승준 추가
-    free(pMouseClickWithPos_callbacks);
-    pMouseClickWithPos_callbacks = NULL;
-    mouse_click_with_pos_callback_count = 0;
-    //=========
 
     UnhookWindowsHookEx(hook);
 }
@@ -152,19 +134,6 @@ void subscribe_mouse_in_console(const mouse_in_console_t callback) {
 void unsubscribe_mouse_in_console(const mouse_in_console_t callback) {
     CALLBACK_UNSUBSCRIBE_IMPLEMENTATION(mouse_in_console_t);
 }
-
-
-//승준 추가
-void subscribe_mouse_click_with_pos(const mouse_click_with_pos_t callback)
-{
-    CALLBACK_SUBSCRIBE_IMPLEMENTATION(mouse_click_with_pos_t);
-}
-
-void unsubscribe_mouse_click_with_pos(const mouse_click_with_pos_t callback)
-{
-    CALLBACK_UNSUBSCRIBE_IMPLEMENTATION(mouse_click_with_pos_t);
-}
-
 
 
 #if _DEBUG

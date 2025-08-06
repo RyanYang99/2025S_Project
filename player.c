@@ -32,6 +32,9 @@ player_t player = { 0 };
 // 수평 이동 속도 조절 (값이 작을수록 빨라짐)
 #define HORIZONTAL_MOVE_COOLDOWN 0.08f  // 약 1초에 12.5칸 이동
 
+DamageText damage_texts[MAX_DAMAGE_TEXTS];
+
+
 #define HP_BAR_WIDTH 20
 
 // 각 픽셀을 표현할 구조체
@@ -105,6 +108,63 @@ static const PlayerSpritePixel player_sprite_walk_armed[2][PLAYER_SPRITE_HEIGHT]
     }
 };
 
+// 대미지 텍스트 생성 함수
+void create_damage_text(int damage_value) {
+    for (int i = 0; i < MAX_DAMAGE_TEXTS; ++i) {
+        if (!damage_texts[i].active) {
+            damage_texts[i].active = true;
+            damage_texts[i].damage_value = damage_value;
+            damage_texts[i].precise_y = (float)player.y;
+            damage_texts[i].timer = 1.5f; // 1.5초 동안 화면에 표시
+            break;
+        }
+    }
+}
+
+static void update_damage_texts() 
+{
+    for (int i = 0; i < MAX_DAMAGE_TEXTS; ++i) {
+        if (damage_texts[i].active) {
+            // 위로 움직이는 효과
+            damage_texts[i].precise_y -= delta_time * 5.0f; //움직이는 속도
+
+            // 타이머 감소
+            damage_texts[i].timer -= delta_time;
+            if (damage_texts[i].timer <= 0.0f) {
+                damage_texts[i].active = false; // 시간이 지나면 비활성화
+            }
+        }
+    }
+}
+
+static void render_damage_texts() 
+{
+    COORD center_pos = { console.size.X / 2, console.size.Y / 2 };
+
+    for (int i = 0; i < MAX_DAMAGE_TEXTS; ++i) {
+        if (damage_texts[i].active) {
+            COORD draw_pos;
+
+            draw_pos.X = center_pos.X;
+            draw_pos.Y = (SHORT)(center_pos.Y - (PLAYER_SPRITE_HEIGHT / 2) - 1 - (player.precise_y - damage_texts[i].precise_y));
+
+            wchar_t damage_str[20];
+            swprintf(damage_str, 20, L" Heat! - %d ! ", damage_texts[i].damage_value);
+
+            for (int j = 0; damage_str[j] != L'\0'; ++j) {
+                COORD char_pos = draw_pos;
+                char_pos.X = draw_pos.X + (SHORT)j - (SHORT)(wcslen(damage_str) / 2);
+
+                if (char_pos.X >= 0 && char_pos.X < console.size.X &&
+                    char_pos.Y >= 0 && char_pos.Y < console.size.Y) {
+                    print_color_tchar((color_tchar_t) { damage_str[j], BACKGROUND_T_BLACK, FOREGROUND_T_RED }, char_pos);
+                }
+            }
+        }
+    }
+}
+
+
 
 static void movement(void) {
     // 점프 키 확인
@@ -157,110 +217,126 @@ static void movement(void) {
     }
 }
 
-static void update_player_offset(void) {
-    player.x += map.offset_x;
-}
 
 
-void player_update(void) {
 
-    // 입력 처리
-    movement();
-
-    // 물리 업데이트
-    // 땅에 있는지 확인
-    // 플레이어 바로 아래 블록이 걸을 수 없는 블록인지 확인
-    if (!is_walkable(player.x, player.y + 1)) {
-        player.is_on_ground = true;
-        // 땅에 있다면 수직 속도 초기화
-        if (player.velocity_y > 0) {
-            player.velocity_y = 0;
+        static void update_player_offset(void) 
+        {
+            player.x += map.offset_x;
         }
-    }
-    else {
-        player.is_on_ground = false;
-    }
 
-    // 중력 적용 (공중에 있을 때만)
-    if (!player.is_on_ground) {
-        player.velocity_y += GRAVITY * delta_time;
-    }
 
-    // 속도에 따라 정밀 y좌표 업데이트
-    player.precise_y += player.velocity_y * delta_time;
+        
+        void player_update(void)
+        {
 
-    // 정밀 y좌표를 정수 y좌표로 변환하여 충돌 처리
-    int new_y = (int)player.precise_y;
+            // 입력 처리
+            movement();
 
-    // 수직 이동에 대한 충돌 처리
-    if (new_y > player.y) { // 아래로 이동 시
-        while (!is_walkable(player.x, new_y)) {
-            new_y--;
-            player.velocity_y = 0;
-            player.precise_y = (float)new_y;
-            player.is_on_ground = true;
+            //데미지 출력 업데이트
+            update_damage_texts();
+
+            // 물리 업데이트
+            // 땅에 있는지 확인
+            // 플레이어 바로 아래 블록이 걸을 수 없는 블록인지 확인
+            if (!is_walkable(player.x, player.y + 1)) {
+                player.is_on_ground = true;
+                // 땅에 있다면 수직 속도 초기화
+                if (player.velocity_y > 0) {
+                    player.velocity_y = 0;
+                }
+            }
+            else {
+                player.is_on_ground = false;
+            }
+
+            // 중력 적용 (공중에 있을 때만)
+            if (!player.is_on_ground) {
+                player.velocity_y += GRAVITY * delta_time;
+            }
+
+            // 속도에 따라 정밀 y좌표 업데이트
+            player.precise_y += player.velocity_y * delta_time;
+
+            // 정밀 y좌표를 정수 y좌표로 변환하여 충돌 처리
+            int new_y = (int)player.precise_y;
+
+            // 수직 이동에 대한 충돌 처리
+            if (new_y > player.y) { // 아래로 이동 시
+                while (!is_walkable(player.x, new_y)) {
+                    new_y--;
+                    player.velocity_y = 0;
+                    player.precise_y = (float)new_y;
+                    player.is_on_ground = true;
+                }
+            }
+            else if (new_y < player.y) { // 위로 이동 시
+                while (!is_walkable(player.x, new_y)) {
+                    new_y++;
+                    player.velocity_y = 0;
+                    player.precise_y = (float)new_y;
+                }
+            }
+            player.y = new_y;
+
+
+            // 3. 애니메이션 업데이트
+            if (player.is_moving) {
+                player.animation_timer += delta_time;
+                if (player.animation_timer >= 1.0f / ANIMATION_SPEED) {
+                    player.animation_timer = 0.0f;
+                    player.current_frame = (player.current_frame + 1) % 2;
+                }
+            }
+            else {
+                player.current_frame = 0;
+                player.animation_timer = 0.0f;
+            }
         }
-    }
-    else if (new_y < player.y) { // 위로 이동 시
-        while (!is_walkable(player.x, new_y)) {
-            new_y++;
-            player.velocity_y = 0;
-            player.precise_y = (float)new_y;
+
+    
+
+
+        void player_init(void) 
+        {
+            if (pCurrent_save) {
+                player.x = pCurrent_save->x;
+                player.y = pCurrent_save->y;
+                player.hp = pCurrent_save->hp;
+            }
+            else {
+                player.x = map.size.x / 2;
+                player.y = find_ground_pos(player.x);
+                if (player.y - 1 >= 0)
+                    --player.y; // 가능할 시 찾은 블록 위로 설정
+
+
+                player.max_hp = 1000;
+                player.hp = 1000; // 초기 체력
+                player.atk_power = 10;
+
+                // 물리 변수 초기화
+                player.precise_y = (float)player.y;
+                player.velocity_y = 0.0f;
+                player.is_on_ground = false; // 시작 시 공중에서 떨어지도록
+
+                // 애니메이션 변수 초기화
+                player.is_moving = 0;
+                player.current_frame = 0;
+                player.animation_timer = 0.0f;
+
+                // 이동 쿨다운 타이머 초기화
+                player.move_cooldown_timer = 0.0f;
+
+                // 초기 방향: 오른쪽
+                player.facing_direction = 1;
+
+                //subscribe_keyhit(movement);
+                subscribe_offset_change(update_player_offset);
+            }
         }
-    }
-    player.y = new_y;
+    
 
-
-    // 3. 애니메이션 업데이트
-    if (player.is_moving) {
-        player.animation_timer += delta_time;
-        if (player.animation_timer >= 1.0f / ANIMATION_SPEED) {
-            player.animation_timer = 0.0f;
-            player.current_frame = (player.current_frame + 1) % 2;
-        }
-    }
-    else {
-        player.current_frame = 0;
-        player.animation_timer = 0.0f;
-    }
-}
-
-
-void player_init(void) {
-    if (pCurrent_save) {
-        player.x = pCurrent_save->x;
-        player.y = pCurrent_save->y;
-        player.hp = pCurrent_save->hp;
-    }
-    else {
-        player.x = map.size.x / 2;
-        player.y = find_ground_pos(player.x);
-        if (player.y - 1 >= 0)
-            --player.y; // 가능할 시 찾은 블록 위로 설정
-
-        player.max_hp = 1000;
-        player.hp = 1000; // 초기 체력
-
-        // 물리 변수 초기화
-        player.precise_y = (float)player.y;
-        player.velocity_y = 0.0f;
-        player.is_on_ground = false; // 시작 시 공중에서 떨어지도록
-
-        // 애니메이션 변수 초기화
-        player.is_moving = 0;
-        player.current_frame = 0;
-        player.animation_timer = 0.0f;
-
-        // 이동 쿨다운 타이머 초기화
-        player.move_cooldown_timer = 0.0f;
-
-        // 초기 방향: 오른쪽
-        player.facing_direction = 1;
-
-        //subscribe_keyhit(movement);
-        subscribe_offset_change(update_player_offset);
-    }
-}
 
 // 충돌 감지 함수 구현
 bool is_walkable(int x, int y) {
@@ -357,6 +433,11 @@ void render_player(void) {
         }
     }
 
+    //데미지 텍스트 렌더링 함수 호출
+    render_damage_texts();
+
+   
+
     const int bar_width = HP_BAR_WIDTH;
 
     int current_hp = player.hp < 0 ? 0 : player.hp;
@@ -388,6 +469,8 @@ void render_player(void) {
     fprint_string("HP: %d / %d", pos, BACKGROUND_T_BLACK, FOREGROUND_T_YELLOW, current_hp, max_hp);
 }
 
+
+
 //특정 x좌표에서 가장 높은 지상 의 Y좌표를 찾아 반환
 int find_ground_pos(int x)
 {
@@ -414,6 +497,8 @@ void player_take_damage(int damage)
     if (player.hp < 0) {
         player.hp = 0;
     }
+    create_damage_text(damage);
+
 }
 
 void add_health_to_player(const int additional_health) {
