@@ -20,6 +20,9 @@
 #define HOTBAR_SIZE_IN_CHARACTERS_X (TEXTURE_SIZE * HOTBAR_COUNT + HOTBAR_COUNT + 1)
 #define HOTBAR_SIZE_IN_CHARACTERS_Y (TEXTURE_SIZE + 2)
 
+static bool should_render_name = false;
+static float name_render_timer = 0.0f;
+
 inventory_t inventory = { 0 };
 
 static const int max_selection_index = ITEMS_PER_PAGE - 1,
@@ -271,6 +274,17 @@ void render_hotbar(void) {
     if (position.X < 0 || position.Y < 0)
         return;
 
+    if (should_render_name && inventory.pHotbar[inventory.selected_hotbar_index].index_in_inventory != -1) {
+        if (name_render_timer >= 3.0f) {
+            should_render_name = false;
+            name_render_timer = 0.0f;
+        }
+        name_render_timer += delta_time;
+
+        const item_information_t const * pInformation = find_item_by_index(inventory.pHotbar[inventory.selected_hotbar_index].pPlayer_Item->item_db_index);
+        print_center("%s", position.Y - 2, BACKGROUND_T_BLACK, FOREGROUND_T_WHITE, pInformation->name);
+    }
+
     for (int i = 0; i < HOTBAR_COUNT; ++i) {
         bool is_selected = (inventory.selected_hotbar_index == i);
 
@@ -355,8 +369,11 @@ void inventory_input(void) {
     
     if (character == 'i')
         is_inventory_open = !is_inventory_open;
-    else if (is_number && number <= max_hotbar_index)
+    else if (is_number && number <= max_hotbar_index) {
         inventory.selected_hotbar_index = number;
+        should_render_name = true;
+        name_render_timer = 0.0f;
+    }
 
     if (!is_inventory_open)
         return;
