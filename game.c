@@ -4,6 +4,7 @@
 #include "Mob.h"
 #include "map.h"
 #include "save.h"
+#include "astar.h"
 #include "input.h"
 #include "delta.h"
 #include "player.h"
@@ -69,7 +70,7 @@ void initialize_game(void) {
     free_save();
     register_mob_click_handler();
 
-    pause_hook();
+    //pause_hook();
 }
 
 void run_game(void) {
@@ -95,6 +96,7 @@ void run_game(void) {
 
 void destroy_game(void) {
     destroy_mob();
+    destroy_astar();
     destroy_block_control();
     destroy_map();
 }

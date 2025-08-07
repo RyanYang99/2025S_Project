@@ -58,12 +58,6 @@ Mob mobs[Max_Mob];
 int mob_count = 0;
 int mob_level = 1;
 
-COORD console_c()
-{
-    COORD center_m = { console.size.X / 2, console.size.Y / 2 };
-    return center_m;
-}
-
 void Mob_Spawn_Time()
 {
     static float spawnTimer = 0.0f;
@@ -203,7 +197,10 @@ static void render_mob_damage_texts() {
 
 void Mob_render()
 {
-    COORD center_m = console_c();
+    COORD center_m = {
+        .X = console.size.X / 2,
+        .Y = console.size.Y / 2,
+    };
 
     for (int i = 0; i < mob_count; i++)
     {
@@ -388,17 +385,7 @@ void update_mob_ai() {
         if (mobs[i].ai_timer >= MOB_SPD) {
             mobs[i].ai_timer = 0.0f;
 
-            bool is_movable_start_pos = is_mob_movable(mobs[i].x, mobs[i].y);
-
             path_t mob_path = find_path(mobs[i].x, mobs[i].y, player.x, player.y, is_mob_movable);
-
-           
-			/*
-            snprintf(mob_debug_message, MAX_MOB_DEBUG_MESSAGE_LEN,
-                "Mob %d - Pos: (%d, %d), Movable: %s, Path count: %d",
-                i, mobs[i].x, mobs[i].y, is_movable_start_pos ? "True" : "False", mob_path.count);
-			*/
-
             if (mob_path.count > 1) {
                 int next_x = mob_path.path[1].X;
                 int next_y = mob_path.path[1].Y;

@@ -1,141 +1,162 @@
-﻿#include "astar.h"
+﻿#include "leak.h"
+#include "astar.h"
+
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <string.h>
 #include "map.h"
 
+// A* 알고리즘을 위한 노드 구조체
+typedef struct PathNode {
+    int x, y, g, h, f;
+    struct PathNode *parent;
+} PathNode;
 
-extern map_t map;
+static PathNode *all_allocated_nodes = NULL, *open_list_heap = NULL;
+static bool** close_list_visited = NULL, **in_open_list_check = NULL;
+static int **open_list_index = NULL, allocated_x = 0;
 
-PathNode* Create_node(int x, int y, int g, int h, PathNode* parent) {
-    PathNode* newNode = (PathNode*)malloc(sizeof(PathNode));
-    if (newNode == NULL) {
-        fprintf(stderr, "메모리 할당 실패 (PathNode)\n");
-        exit(EXIT_FAILURE);
-    }
-    newNode->x = x;
-    newNode->y = y;
-    newNode->g = g;
-    newNode->h = h;
-    newNode->f = g + h;
-    newNode->parent = parent;
-    return newNode;
-}
-
-int Calculate_Heuristic(int x1, int y1, int x2, int y2) {
+static const int Calculate_Heuristic(const int x1, const int y1, const int x2, const int y2) {
     return abs(x1 - x2) + abs(y1 - y2);
 }
 
-
-void swap_nodes(PathNode** a, PathNode** b, int** open_list_index) {
-    PathNode* temp = *a;
+static void swap_nodes(PathNode * const a, PathNode * const b) {
+    PathNode temp = *a;
     *a = *b;
     *b = temp;
 
-    
     if (open_list_index) {
-        int temp_index = open_list_index[(*a)->x][(*a)->y];
-        open_list_index[(*a)->x][(*a)->y] = open_list_index[(*b)->x][(*b)->y];
-        open_list_index[(*b)->x][(*b)->y] = temp_index;
+        int temp_index = open_list_index[a->x][a->y];
+        open_list_index[a->x][a->y] = open_list_index[b->x][b->y];
+        open_list_index[b->x][b->y] = temp_index;
     }
 }
-void heapify_up(PathNode** heap, int heap_size, int index, int** open_list_index) {
+
+static void heapify_up(int index) {
     while (index > 0) {
         int parent_index = (index - 1) / 2;
-        if (heap[index]->f < heap[parent_index]->f) {
-            swap_nodes(&heap[index], &heap[parent_index], open_list_index);
+        if (open_list_heap[index].f < open_list_heap[parent_index].f) {
+            swap_nodes(&open_list_heap[index], &open_list_heap[parent_index]);
             index = parent_index;
         }
-        else {
+        else
             break;
-        }
     }
 }
-void heapify_down(PathNode** heap, int heap_size, int index, int** open_list_index) {
-    int min_index = index;
-    int left_child = 2 * index + 1;
-    int right_child = 2 * index + 2;
 
-    if (left_child < heap_size && heap[left_child]->f < heap[min_index]->f) {
+static void heapify_down(const int heap_size, const int index) {
+    const int left_child = 2 * index + 1, right_child = 2 * index + 2;
+    int min_index = index;
+
+    if (left_child < heap_size && open_list_heap[left_child].f < open_list_heap[min_index].f)
         min_index = left_child;
-    }
-    if (right_child < heap_size && heap[right_child]->f < heap[min_index]->f) {
+
+    if (right_child < heap_size && open_list_heap[right_child].f < open_list_heap[min_index].f)
         min_index = right_child;
-    }
 
     if (min_index != index) {
-        swap_nodes(&heap[index], &heap[min_index], open_list_index);
-        heapify_down(heap, heap_size, min_index, open_list_index);
+        swap_nodes(&open_list_heap[index], &open_list_heap[min_index]);
+        heapify_down(heap_size, min_index);
     }
 }
-void heap_push(PathNode** heap, int* heap_size, PathNode* node, int** open_list_index) {
+
+static void heap_push(int * const heap_size, const PathNode * const node) {
     if (*heap_size < MAX_HEAP_SIZE) {
-        heap[*heap_size] = node;
+        open_list_heap[*heap_size] = *node;
         (*heap_size)++;
-      
+
         open_list_index[node->x][node->y] = *heap_size - 1;
-        heapify_up(heap, *heap_size, *heap_size - 1, open_list_index);
+        heapify_up(*heap_size - 1);
     }
 }
-PathNode* heap_pop(PathNode** heap, int* heap_size, int** open_list_index) {
-    if (*heap_size <= 0) return NULL;
-    PathNode* min_node = heap[0];
+
+static PathNode * const heap_pop(int * const heap_size) {
+    if (*heap_size <= 0)
+        return NULL;
+
+    PathNode * const min_node = &open_list_heap[0];
     (*heap_size)--;
     if (*heap_size > 0) {
-        heap[0] = heap[*heap_size];
-     
-        open_list_index[heap[0]->x][heap[0]->y] = 0;
-        heapify_down(heap, *heap_size, 0, open_list_index);
+        open_list_heap[0] = open_list_heap[*heap_size];
+
+        open_list_index[open_list_heap[0].x][open_list_heap[0].y] = 0;
+        heapify_down(*heap_size, 0);
     }
     return min_node;
 }
 
+static void *recalloc(void *pBuffer, const size_t old, const size_t new) {
+    void *pNew = realloc(pBuffer, new);
+    if (new > old && pNew)
+        memset((void *)(((char *)pNew) + old), 0, new - old);
+
+    return pNew;
+}
 
 path_t find_path(int start_x, int start_y, int target_x, int target_y, IsMovableFunc is_movable) {
-    PathNode** all_allocated_nodes = (PathNode**)malloc(sizeof(PathNode*) * MAX_NODES_FOR_ASTAR_SEARCH);
-    PathNode** open_list_heap = (PathNode**)malloc(sizeof(PathNode*) * MAX_HEAP_SIZE);
+    if (!all_allocated_nodes)
+        all_allocated_nodes = malloc(sizeof(PathNode) * MAX_NODES_FOR_ASTAR_SEARCH);
+
+    if (!open_list_heap)
+        open_list_heap = malloc(sizeof(PathNode) * MAX_HEAP_SIZE);
 
     int allocated_node_count = 0;
     int open_list_size = 0;
 
-    bool** close_list_visited = (bool**)malloc(map.size.x * sizeof(bool*));
-    bool** in_open_list_check = (bool**)malloc(map.size.x * sizeof(bool*));
-    int** open_list_index = (int**)malloc(map.size.x * sizeof(int*));
+    if (map.size.x != allocated_x) {
+        int size = map.size.x * sizeof(bool *), old = allocated_x * sizeof(bool *);
+        close_list_visited = recalloc(close_list_visited, old, size);
+        in_open_list_check = recalloc(in_open_list_check, old, size);
+        open_list_index = recalloc(open_list_index, allocated_x * sizeof(int *), map.size.x * sizeof(int *));
+    }
 
-    path_t result_path = { .count = 0, .current_index = 0 };
+    path_t result_path = { 0 };
     bool path_found = false;
 
-    if (!close_list_visited || !in_open_list_check || !open_list_index || !all_allocated_nodes || !open_list_heap) {
-        fprintf(stderr, "A* 배열 메모리 할당 실패!\n");
-        return result_path;
+    if (allocated_x != map.size.x) {
+        allocated_x = map.size.x;
+
+        for (int i = 0; i < allocated_x; i++) {
+            int size = map.size.y * sizeof(bool);
+            close_list_visited[i] = realloc(close_list_visited[i], size);
+            memset(close_list_visited[i], false, size);
+
+            in_open_list_check[i] = realloc(in_open_list_check[i], size);
+            memset(in_open_list_check[i], false, size);
+
+            size = map.size.y * sizeof(int);
+            open_list_index[i] = realloc(open_list_index[i], size);
+            memset(open_list_index[i], 0, size);
+        }
     }
 
+    const int size = sizeof(bool) * map.size.y;
     for (int i = 0; i < map.size.x; i++) {
-        close_list_visited[i] = (bool*)malloc(map.size.y * sizeof(bool));
-        in_open_list_check[i] = (bool*)malloc(map.size.y * sizeof(bool));
-        open_list_index[i] = (int*)malloc(map.size.y * sizeof(int));
+        memset(close_list_visited[i], false, size);
+        memset(in_open_list_check[i], false, size);
     }
 
-    for (int i = 0; i < map.size.x; i++) {
-        memset(close_list_visited[i], 0, map.size.y * sizeof(bool));
-        memset(in_open_list_check[i], 0, map.size.y * sizeof(bool));
-        memset(open_list_index[i], 0, map.size.y * sizeof(int));
-    }
+    PathNode start_node = {
+        .x = start_x,
+        .y = start_y,
+        .g = 0,
+        .h = Calculate_Heuristic(start_x, start_y, target_x, target_y),
+        .parent = NULL
+    };
+    start_node.f = start_node.g + start_node.h;
 
-    PathNode* start_node = Create_node(start_x, start_y, 0, Calculate_Heuristic(start_x, start_y, target_x, target_y), NULL);
-    heap_push(open_list_heap, &open_list_size, start_node, open_list_index);
+    heap_push(&open_list_size, &start_node);
     in_open_list_check[start_x][start_y] = true;
     all_allocated_nodes[allocated_node_count++] = start_node;
 
     while (open_list_size > 0 && allocated_node_count < MAX_NODES_FOR_ASTAR_SEARCH) {
-        PathNode* current_node = heap_pop(open_list_heap, &open_list_size, open_list_index);
+        PathNode *current_node = heap_pop(&open_list_size);
 
-       
         in_open_list_check[current_node->x][current_node->y] = false;
 
         if (current_node->x == target_x && current_node->y == target_y) {
-            PathNode* temp = current_node;
+            PathNode *temp = current_node;
             int path_len = 0;
             while (temp != NULL && path_len < MAX_PATH_LENGTH) {
                 result_path.path[path_len].X = (SHORT)temp->x;
@@ -171,47 +192,56 @@ path_t find_path(int start_x, int start_y, int target_x, int target_y, IsMovable
 
                 if (in_open_list_check[neighbor_x][neighbor_y]) {
                     int existing_index = open_list_index[neighbor_x][neighbor_y];
-                    PathNode* existing_node = open_list_heap[existing_index];
+                    PathNode *existing_node = &open_list_heap[existing_index];
                     if (new_g < existing_node->g) {
                         existing_node->g = new_g;
                         existing_node->f = existing_node->g + existing_node->h;
                         existing_node->parent = current_node;
-                        heapify_up(open_list_heap, open_list_size, existing_index, open_list_index);
+                        heapify_up(existing_index);
                     }
                 }
                 else {
-                    PathNode* neighbor_node = Create_node(
-                        neighbor_x, neighbor_y, new_g,
-                        Calculate_Heuristic(neighbor_x, neighbor_y, target_x, target_y),
-                        current_node
-                    );
+                    PathNode neighbor_node = {
+                        .x = neighbor_x,
+                        .y = neighbor_y,
+                        .g = new_g,
+                        .h = Calculate_Heuristic(neighbor_x, neighbor_y, target_x, target_y),
+                        .parent = current_node
+                    };
+                    neighbor_node.f = neighbor_node.g + neighbor_node.h;
 
                     if (open_list_size < MAX_HEAP_SIZE && allocated_node_count < MAX_NODES_FOR_ASTAR_SEARCH) {
-                        heap_push(open_list_heap, &open_list_size, neighbor_node, open_list_index);
+                        heap_push(&open_list_size, &neighbor_node);
                         in_open_list_check[neighbor_x][neighbor_y] = true;
                         all_allocated_nodes[allocated_node_count++] = neighbor_node;
-                    }
-                    else {
-                        free(neighbor_node);
                     }
                 }
             }
         }
     }
 
-    for (int i = 0; i < allocated_node_count; ++i) {
-        free(all_allocated_nodes[i]);
-    }
-    for (int i = 0; i < map.size.x; i++) {
-        free(close_list_visited[i]);
-        free(in_open_list_check[i]);
-        free(open_list_index[i]);
-    }
-    free(all_allocated_nodes);
-    free(open_list_heap);
-    free(close_list_visited);
-    free(in_open_list_check);
-    free(open_list_index);
-
     return result_path;
+}
+
+void destroy_astar(void) {
+    free(all_allocated_nodes);
+    all_allocated_nodes = NULL;
+
+    free(open_list_heap);
+    open_list_heap = NULL;
+
+    for (int i = 0; i < allocated_x; ++i)
+        free(close_list_visited[i]);
+    free(close_list_visited);
+    close_list_visited = NULL;
+    
+    for (int i = 0; i < allocated_x; ++i)
+        free(in_open_list_check[i]);
+    free(in_open_list_check);
+    in_open_list_check = NULL;
+
+    for (int i = 0; i < allocated_x; ++i)
+        free(open_list_index[i]);
+    free(open_list_index);
+    open_list_index = NULL;
 }

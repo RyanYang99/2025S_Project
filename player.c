@@ -1,4 +1,4 @@
-﻿#include "leak.h"﻿
+﻿#include "leak.h"
 #include "player.h"
 
 #include "Tool.h"
