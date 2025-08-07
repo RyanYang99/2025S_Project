@@ -29,10 +29,17 @@
 #define MOB_SPD 0.2f
 #define JUMP_SPD -12.0f
 
+typedef struct {
+    int damage_value, mob_x, mob_y;
+    float precise_y;
+    float timer;
+    bool active;
+} MobDamageText;
+
 char mob_debug_message[MAX_MOB_DEBUG_MESSAGE_LEN] = ""; 
 
 static int mob_count = 0, mob_level = 1;
-static Mob mobs[Max_Mob] = { 0 };
+static Mob mobs[MAX_MOB] = { 0 };
 
 const static color_tchar_t zombie_sprite_data[MOB_SPRITE_HEIGHT][MOB_SPRITE_WIDTH] = {
     { {L' ',0,0}, {L'▀', BG_BLACK, FG_RED}, {L'▀', BG_BLACK, FG_RED}, {L'▀', BG_BLACK, FG_RED}, {L' ',0,0} },
@@ -49,6 +56,7 @@ static bool is_walkable_block(const block_t block) {
         case BLOCK_AIR:
         case BLOCK_STAR:
         case BLOCK_WATER:
+        case BLOCK_LOG:
         case BLOCK_LEAF:
             return false;
     }
@@ -98,7 +106,7 @@ static void Mob_Spawn_Time(void) {
 
     if (spawnTimer >= 3.0f) {
         spawnTimer = 0;
-        if (mob_count < Max_Mob)
+        if (mob_count < MAX_MOB)
             MobSpawn();
     }
 
@@ -153,7 +161,7 @@ static void render_mob_damage_texts(void) {
         }
 }
 
-static void Mob_render(void) {
+void Mob_render(void) {
     const COORD center_m = {
         .X = console.size.X / 2,
         .Y = console.size.Y / 2,
@@ -242,65 +250,42 @@ void save_mob(void) {
 
 static void Mob_physics(void) {
     for (int i = 0; i < mob_count; ++i) {
-        int block_below_y = mobs[i].y;
-        bool is_standing_on_ground = false;
+        const int below = mobs[i].y + 1;
 
-        for (int x_offset = 0; x_offset < MOB_SPRITE_WIDTH; ++x_offset) {
-            block_info_t block_below = get_block_info_at(mobs[i].x + x_offset, block_below_y);
-
-            if (block_below.type != BLOCK_AIR && block_below.type != BLOCK_WATER && block_below.type != BLOCK_LEAF) {
-                is_standing_on_ground = true;
-                break;
-            }
-        }
-
-        if (is_standing_on_ground) {
+        if (below >= map.size.y)
             mobs[i].is_on_ground = true;
-            if (mobs[i].velocity_y > 0) {
-                mobs[i].velocity_y = 0;
-            }
-            mobs[i].y = block_below_y - MOB_SPRITE_HEIGHT;
+        else
+            mobs[i].is_on_ground = is_walkable_block(map.ppBlocks[below][mobs[i].x].type);
+
+        if (mobs[i].is_on_ground) {
+            if (mobs[i].velocity_y > 0.0f)
+                mobs[i].velocity_y = 0.0f;
+            
             mobs[i].precise_y = (float)mobs[i].y;
-
-        }
-        else {
-            mobs[i].is_on_ground = false;
-        }
-
-        if (!mobs[i].is_on_ground) {
+        } else
             mobs[i].velocity_y += GRAVITY * delta_time;
-        }
 
-        // 💡 몬스터의 x축 이동 충돌 감지 로직 추가
-        float new_precise_x = mobs[i].precise_x + mobs[i].velocity_x * delta_time;
-        int new_x = (int)new_precise_x;
+        //💡 몬스터의 x축 이동 충돌 감지 로직 추가
+        const float new_precise_x = mobs[i].precise_x + mobs[i].velocity_x * delta_time;
+        const int new_x = (int)new_precise_x;
 
-        bool can_move_horizontally = true;
-        for (int y_offset = 0; y_offset < MOB_SPRITE_HEIGHT; ++y_offset) {
-            block_info_t block_at_new_pos = get_block_info_at(new_x, mobs[i].y + y_offset);
-            if (block_at_new_pos.type != BLOCK_AIR && block_at_new_pos.type != BLOCK_WATER && block_at_new_pos.type != BLOCK_LEAF) {
-                can_move_horizontally = false;
-                break;
-            }
-        }
+        bool can_move_horizontally = false;
+        if (new_x >= 0 && new_x < map.size.x)
+            can_move_horizontally = !is_walkable_block(map.ppBlocks[mobs[i].y][new_x].type);
 
-        if (can_move_horizontally) {
+        if (can_move_horizontally)
             mobs[i].precise_x = new_precise_x;
-        }
-        else {
-            mobs[i].velocity_x = 0; // 벽에 부딪히면 속도를 0으로 설정
-        }
+        else
+            mobs[i].velocity_x = 0.0f; //벽에 부딪히면 속도를 0으로 설정
 
         mobs[i].precise_y += mobs[i].velocity_y * delta_time;
-
         mobs[i].x = (int)mobs[i].precise_x;
         mobs[i].y = (int)mobs[i].precise_y;
     }
 }
 
 static bool is_mob_movable(const int x, const int y) {
-    // 1. 맵 경계 확인
-    return !(x < 0 || x >= map.size.x || y < 0 || y >= map.size.y);
+    return (x >= 0 && x < map.size.x && y >= 0 && y < map.size.y && !is_walkable_block(map.ppBlocks[y][x].type));
 }
 
 static void update_mob_ai(void) {
@@ -308,20 +293,14 @@ static void update_mob_ai(void) {
         if (mobs[i].ai_timer >= MOB_SPD) {
             mobs[i].ai_timer = 0.0f;
 
-            const path_t mob_path = find_path(mobs[i].x, mobs[i].y, player.x, player.y, is_mob_movable);
-            if (mob_path.count > 1) {
-                const int next_x = mob_path.path[1].X;
-
-                if (next_x < mobs[i].x)
-                    mobs[i].velocity_x = -1.0f;
-                else if (next_x > mobs[i].x)
-                    mobs[i].velocity_x = 1.0f;
-                else
-                    mobs[i].velocity_x = 0;
-
-                if (mob_path.path[1].Y < mobs[i].y && mobs[i].is_on_ground)
-                    mobs[i].velocity_y = JUMP_SPD;
-            } else
+            const direction_t direction = find_next_direction(mobs[i].x, mobs[i].y, player.x, player.y, is_mob_movable);
+            if (direction == DIRECTION_UP && mobs[i].is_on_ground)
+                mobs[i].velocity_y = JUMP_SPD;
+            else if (direction == DIRECTION_RIGHT)
+                mobs[i].velocity_x = 1.0f;
+            else if (direction == DIRECTION_LEFT)
+                mobs[i].velocity_x = -1.0f;
+            else if (direction == DIRECTION_NONE)
                 mobs[i].velocity_x = 0;
         } else
             mobs[i].ai_timer += delta_time;

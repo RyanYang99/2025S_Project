@@ -68,8 +68,6 @@ void initialize_game(void) {
     initialize_crafting_ui();
     initialize_save();
     free_save();
-
-    pause_hook();
 }
 
 void run_game(void) {

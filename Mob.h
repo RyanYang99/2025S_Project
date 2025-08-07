@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include "console.h"
 
-#define Max_Mob 5
+#define MAX_MOB 5
 #define MAX_MOB_DEBUG_MESSAGE_LEN 100
 #define MAX_MOB_DAMAGE_TEXTS 20
 
@@ -22,13 +22,6 @@ typedef struct {
     float last_attack_time, atk_cooltime_timer;
 } Mob;
 #pragma pack(pop)
-
-typedef struct {
-    int damage_value, mob_x, mob_y;        
-    float precise_y;
-    float timer;
-    bool active;
-} MobDamageText;
 
 extern char mob_debug_message[MAX_MOB_DEBUG_MESSAGE_LEN];
 
