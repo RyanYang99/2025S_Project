@@ -62,6 +62,11 @@
       <AdditionalDependencies>csfml-audio.lib;csfml-window.lib;csfml-system.lib;openal32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)libs\lib\msvc</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>if not exist "$(TargetDir)csfml-audio-2.dll" (
+    xcopy /Y /F "$(SolutionDir)libs\bin\*.dll" "$(TargetDir)"
+)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
