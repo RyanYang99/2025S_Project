@@ -20,14 +20,22 @@ static const char* footstepSounds[MAX_FOOTSTEP_SOUNDS] = {
     "Footstep/Footstep_Dirt_09.wav"
 };
 
+static const char* swingSounds[MAX_SWING_SOUNDS] = {
+    "Swing/swing.wav",
+    "Swing/swing2.wav",
+    "Swing/swing3.wav"
+};
+
 typedef struct {
     sfMusic* bgm;
 } SoundManager;
 
 typedef struct {
     sfSoundBuffer* buffers[MAX_FOOTSTEP_SOUNDS];
+    sfSoundBuffer* swingBuffers[MAX_SWING_SOUNDS];
     sfSound* sound;
     int footstepCount;
+    int swingCount;
 } SFXManager;
 
 
@@ -48,6 +56,7 @@ void Sound_init() {
 
     s_sfx->sound = sfSound_create();
     s_sfx->footstepCount = 0;
+    s_sfx->swingCount = 0;
 
     for (int i = 0; i < MAX_FOOTSTEP_SOUNDS; i++) {
         if (footstepSounds[i] == NULL) break;
@@ -58,6 +67,15 @@ void Sound_init() {
         s_sfx->buffers[i] = sfSoundBuffer_createFromFile(fullPath);
         if (s_sfx->buffers[i]) {
             s_sfx->footstepCount++;
+        }
+    }
+
+    for (int i = 0; i < MAX_SWING_SOUNDS; i++) {
+        char fullPath[256];
+        snprintf(fullPath, sizeof(fullPath), "SoundFile/%s", swingSounds[i]);
+        s_sfx->swingBuffers[i] = sfSoundBuffer_createFromFile(fullPath);
+        if (s_sfx->swingBuffers[i]) {
+            s_sfx->swingCount++;
         }
     }
 
@@ -101,6 +119,21 @@ void Sound_playFootstep() {
     sfSound_play(s_sfx->sound);
 }
 
+void Sound_playSwing() {
+    // 스윙 소리가 로드되지 않았으면 즉시 종료
+    if (!s_sfx || s_sfx->swingCount == 0) return;
+
+    // 다른 효과음이 재생 중이면 중복 재생 방지
+    if (sfSound_getStatus(s_sfx->sound) == sfPlaying) return;
+
+    // 0부터 로드된 스윙 소리 개수 사이에서 무작위 인덱스 선택
+    int index = rand() % s_sfx->swingCount;
+
+    // 선택된 스윙 소리를 플레이어에 설정하고 재생
+    sfSound_setBuffer(s_sfx->sound, s_sfx->swingBuffers[index]);
+    sfSound_play(s_sfx->sound);
+}
+
 void Sound_shutdown() {
     if (!s_manager) return;
 
@@ -119,6 +152,13 @@ void Sound_shutdown() {
                 sfSoundBuffer_destroy(s_sfx->buffers[i]);
             }
         }
+
+        for (int i = 0; i < s_sfx->swingCount; i++) {
+            if (s_sfx->swingBuffers[i]) {
+                sfSoundBuffer_destroy(s_sfx->swingBuffers[i]);
+            }
+        }
+
         if (s_sfx->sound) {
             sfSound_destroy(s_sfx->sound);
         }
