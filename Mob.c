@@ -393,9 +393,11 @@ void update_mob_ai() {
             path_t mob_path = find_path(mobs[i].x, mobs[i].y, player.x, player.y, is_mob_movable);
 
            
+			/*
             snprintf(mob_debug_message, MAX_MOB_DEBUG_MESSAGE_LEN,
                 "Mob %d - Pos: (%d, %d), Movable: %s, Path count: %d",
                 i, mobs[i].x, mobs[i].y, is_movable_start_pos ? "True" : "False", mob_path.count);
+			*/
 
             if (mob_path.count > 1) {
                 int next_x = mob_path.path[1].X;
@@ -494,9 +496,6 @@ void mob_init() {
         mob_count = 0;
 
     subscribe_offset_change(update_mob_offset);
-    MobSpawn(player.x, player.y);
-    mobs[0].x = player.x;
-    mobs[0].y = player.y;
 }
 
 //몬스터 업데이트 

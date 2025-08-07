@@ -69,7 +69,7 @@ void initialize_game(void) {
     free_save();
     register_mob_click_handler();
 
-    //pause_hook();
+    pause_hook();
 }
 
 void run_game(void) {
@@ -88,7 +88,6 @@ void run_game(void) {
         inventory_input();
         Crafting_UI_input();
         save_input();
-       
 
         render();
     }
