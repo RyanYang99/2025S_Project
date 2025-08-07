@@ -67,6 +67,7 @@ void initialize_game(void) {
     initialize_save();
     load_mob();
     free_save();
+    add_item_to_inventory(109, 1);
     register_mob_click_handler();
 }
 

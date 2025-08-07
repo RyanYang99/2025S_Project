@@ -1,4 +1,4 @@
-resultItemIndex,resultItemName,resultQuantity,materialCount,materials
+﻿resultItemIndex,resultItemName,resultQuantity,materialCount,materials
 202,Stone_Sword,1,2,105:2@103:3
 203,Iron_Sword,1,2,105:2@104:3
 205,Stone_Pickaxe,1,2,105:2@103:4
