@@ -1,22 +1,12 @@
 ﻿#include "leak.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <Windows.h>
-#include <stdbool.h>
-#include <math.h>
+#include "Mob.h"
 
 #include "save.h"
-#include "Mob.h"
 #include "player.h"
-#include "Mob.h" 
 #include "map.h"
-#include "console.h"
 #include "astar.h"
 #include "delta.h"
-#include "input.h"
 #include "BlockCtrl.h"
-
 
 #define GRAVITY 25.0f
 #define BG_BLACK BACKGROUND_T_BLACK
@@ -33,7 +23,6 @@
 #define MOB_SPRITE_HEIGHT 5
 #define MOB_ATK_COOLTIME 2.0f
 
-
 #define PLAYER_SPRITE_WIDTH 5
 #define PLAYER_SPRITE_HEIGHT 5
 
@@ -42,9 +31,10 @@
 
 char mob_debug_message[MAX_MOB_DEBUG_MESSAGE_LEN] = ""; 
 
-MobDamageText mob_damage_texts[MAX_MOB_DAMAGE_TEXTS];
+static int mob_count = 0, mob_level = 1;
+static Mob mobs[Max_Mob] = { 0 };
 
-const color_tchar_t zombie_sprite_data[MOB_SPRITE_HEIGHT][MOB_SPRITE_WIDTH] = {
+const static color_tchar_t zombie_sprite_data[MOB_SPRITE_HEIGHT][MOB_SPRITE_WIDTH] = {
     { {L' ',0,0}, {L'▀', BG_BLACK, FG_RED}, {L'▀', BG_BLACK, FG_RED}, {L'▀', BG_BLACK, FG_RED}, {L' ',0,0} },
     { {L' ',0,0}, {L'o', BG_BLACK, FG_WHITE}, {L' ',0,0}, {L'o', BG_BLACK, FG_WHITE}, {L' ',0,0} },
     { {L'█', BG_BLACK, FG_DARKGREEN}, {L'█', BG_BLACK, FG_DARKGREEN}, {L'█', BG_BLACK, FG_DARKGREEN}, {L'█', BG_BLACK, FG_DARKGREEN}, {L'█', BG_BLACK, FG_DARKGREEN} },
@@ -52,91 +42,75 @@ const color_tchar_t zombie_sprite_data[MOB_SPRITE_HEIGHT][MOB_SPRITE_WIDTH] = {
     { {L' ',0,0}, {L'█', BG_BLACK, FG_GREEN}, {L' ',0,0}, {L'█', BG_BLACK, FG_GREEN}, {L' ',0,0} }
 };
 
+static MobDamageText mob_damage_texts[MAX_MOB_DAMAGE_TEXTS];
 
-Mob mobs[Max_Mob];
+static bool is_walkable_block(const block_t block) {
+    switch (block) {
+        case BLOCK_AIR:
+        case BLOCK_STAR:
+        case BLOCK_WATER:
+        case BLOCK_LEAF:
+            return false;
+    }
 
-int mob_count = 0;
-int mob_level = 1;
+    return true;
+}
 
-void Mob_Spawn_Time()
-{
-    static float spawnTimer = 0.0f;
-    static float levelUpTimer = 0.0f;
+static void MobSpawn(void) {
+    srand((unsigned int)time(NULL));
+
+    const int random = rand() % 20;
+    const bool positive = rand() % 2;
+
+    int mob_x = player.x;
+    if (positive)
+        mob_x += random;
+    else
+        mob_x -= random;
+
+    int mob_y = player.y;
+    for (int y = 0; y < map.size.y; ++y)
+        if (is_walkable_block(map.ppBlocks[y][mob_x].type)) {
+            mob_y = y;
+            break;
+        }
+
+    mobs[mob_count].x = mob_x;
+    mobs[mob_count].y = mob_y - 1;
+    mobs[mob_count].HP = mob_level * 10;
+    mobs[mob_count].atk = mob_level * 2;
+    mobs[mob_count].precise_x = (float)mobs[mob_count].x;
+    mobs[mob_count].precise_y = (float)mobs[mob_count].y;
+    mobs[mob_count].velocity_y = 0;
+    mobs[mob_count].is_on_ground = true;
+
+    mobs[mob_count].ai_timer = 0.0f;
+    mobs[mob_count].despawn_timer = 0.0f;
+
+    ++mob_count;
+}
+
+static void Mob_Spawn_Time(void) {
+    static float spawnTimer = 0.0f, levelUpTimer = 0.0f;
 
     spawnTimer += delta_time;
     levelUpTimer += delta_time;
 
-    if (spawnTimer >= 3.0f)
-    {
+    if (spawnTimer >= 3.0f) {
         spawnTimer = 0;
         if (mob_count < Max_Mob)
-        {
-            MobSpawn(player.x, player.y);
-        }
+            MobSpawn();
     }
 
-    if (levelUpTimer >= 100.0f && mob_level < 10)
-    {
-        mob_level++;
+    if (levelUpTimer >= 100.0f && mob_level < 10) {
+        ++mob_level;
         levelUpTimer = 0.0f;
     }
 }
 
-
-void MobSpawn(int player_x, int player_y)
-{
-    srand((unsigned int)time(NULL));
-
-    int spawn_x, spawn_y;
-    int max_attempts = 1000;
-    int ground_y;
-
-    for (int attempt = 0; attempt < max_attempts; attempt++)
-    {
-        spawn_x = player_x + (rand() % 101) - 50;
-        spawn_y = player_y + (rand() % 101) - 50;
-
-        if (spawn_x >= 0 && spawn_x < map.size.x && spawn_y >= 0 && spawn_y < map.size.y - 1)
-        {
-            if (abs(spawn_x - player.x) <= 20 && abs(spawn_y - player.y) <= 20)
-            {
-                continue;
-            }
-
-            ground_y = -1;
-            for (int y = spawn_y; y < map.size.y; y++) {
-                block_info_t block_at_y = get_block_info_at(spawn_x, y);
-            
-                if (block_at_y.type != BLOCK_AIR && block_at_y.type != BLOCK_WATER && block_at_y.type != BLOCK_LEAF) {
-                    ground_y = y;
-                    break;
-                }
-            }
-
-            if (ground_y != -1)
-            {
-                mobs[mob_count].x = spawn_x;
-                mobs[mob_count].y = ground_y - MOB_SPRITE_HEIGHT;
-                mobs[mob_count].HP = mob_level * 10;
-                mobs[mob_count].atk = mob_level * 2;
-                mobs[mob_count].precise_x = (float)mobs[mob_count].x;
-                mobs[mob_count].precise_y = (float)mobs[mob_count].y;
-                mobs[mob_count].velocity_y = 0;
-                mobs[mob_count].is_on_ground = true;
-
-                mobs[mob_count].ai_timer = 0.0f;
-                mobs[mob_count].despawn_timer = 0.0f;
-
-                mob_count++;
-                break;
-            }
-        }
-    }
-}
-
 // 몬스터 피격 시 대미지 텍스트 생성 함수
-void create_mob_damage_text(int mob_index, int damage_value) {
-    for (int i = 0; i < MAX_MOB_DAMAGE_TEXTS; ++i) {
+static void create_mob_damage_text(const int mob_index, const int damage_value) {
+    for (int i = 0; i < MAX_MOB_DAMAGE_TEXTS; ++i)
         if (!mob_damage_texts[i].active) {
             mob_damage_texts[i].active = true;
             mob_damage_texts[i].damage_value = damage_value;
@@ -146,148 +120,106 @@ void create_mob_damage_text(int mob_index, int damage_value) {
             mob_damage_texts[i].timer = 1.0f; // 1.0초 동안 화면에 표시
             break;
         }
-    }
 }
 
 // 몬스터 대미지 텍스트 업데이트 함수 (매 프레임 호출)
-static void update_mob_damage_texts() {
-    for (int i = 0; i < MAX_MOB_DAMAGE_TEXTS; ++i) {
+static void update_mob_damage_texts(void) {
+    for (int i = 0; i < MAX_MOB_DAMAGE_TEXTS; ++i)
         if (mob_damage_texts[i].active) {
             // 위로 움직이는 효과
             mob_damage_texts[i].precise_y -= delta_time * 5.0f;
             // 타이머 감소
             mob_damage_texts[i].timer -= delta_time;
-            if (mob_damage_texts[i].timer <= 0.0f) {
+            if (mob_damage_texts[i].timer <= 0.0f)
                 mob_damage_texts[i].active = false;
-            }
         }
-    }
 }
 
 // 몬스터 대미지 텍스트 렌더링 함수 
-static void render_mob_damage_texts() {
-    COORD center_pos = { console.size.X / 2, console.size.Y / 2 };
+static void render_mob_damage_texts(void) {
+    const COORD center_pos = {
+        .X = console.size.X / 2,
+        .Y = console.size.Y / 2
+    };
 
-    for (int i = 0; i < MAX_MOB_DAMAGE_TEXTS; ++i) {
+    for (int i = 0; i < MAX_MOB_DAMAGE_TEXTS; ++i)
         if (mob_damage_texts[i].active) {
-            COORD draw_pos;
+            const COORD draw_pos = {
+                .X = center_pos.X + 8,
+                .Y = (SHORT)(center_pos.Y - (PLAYER_SPRITE_HEIGHT / 2) - 1 - (player.precise_y - mob_damage_texts[i].precise_y))
+            };
 
-          
-            draw_pos.X = center_pos.X + 8; 
-            draw_pos.Y = (SHORT)(center_pos.Y - (PLAYER_SPRITE_HEIGHT / 2) - 1 - (player.precise_y - mob_damage_texts[i].precise_y));
-
-            wchar_t damage_str[16];
-            swprintf(damage_str, 16, L"atk! %d", mob_damage_texts[i].damage_value);
-
-           
-            for (int j = 0; damage_str[j] != L'\0'; ++j) {
-                COORD char_pos = draw_pos;
-                char_pos.X += (SHORT)j;
-                if (char_pos.X >= 0 && char_pos.X < console.size.X &&
-                    char_pos.Y >= 0 && char_pos.Y < console.size.Y) {
-                    print_color_tchar((color_tchar_t) { damage_str[j], BACKGROUND_T_BLACK, FOREGROUND_T_YELLOW }, char_pos);
-                }
-            }
+            fprint_string("Attack %d HP!", draw_pos, BACKGROUND_T_BLACK, FOREGROUND_T_YELLOW, mob_damage_texts[i].damage_value);
         }
-    }
 }
 
-
-
-
-void Mob_render()
-{
-    COORD center_m = {
+static void Mob_render(void) {
+    const COORD center_m = {
         .X = console.size.X / 2,
         .Y = console.size.Y / 2,
     };
 
-    for (int i = 0; i < mob_count; i++)
-    {
-        int screen_x = center_m.X + (mobs[i].x * TEXTURE_SIZE - player.x * TEXTURE_SIZE);
-        int screen_y = center_m.Y + (mobs[i].y * TEXTURE_SIZE - player.y * TEXTURE_SIZE);
+    for (int i = 0; i < mob_count; i++) {
+        const int screen_x = center_m.X + (mobs[i].x * TEXTURE_SIZE - player.x * TEXTURE_SIZE),
+                  screen_y = center_m.Y + (mobs[i].y * TEXTURE_SIZE - player.y * TEXTURE_SIZE) - MOB_SPRITE_HEIGHT / 2;
 
-        int sprite_width = MOB_SPRITE_WIDTH;
-        int sprite_height = MOB_SPRITE_HEIGHT;
-        if (screen_x + sprite_width < 0 || screen_x >= console.size.X ||
-            screen_y + sprite_height < 0 || screen_y >= console.size.Y)
-        {
+        if (screen_x < 0 || screen_x + MOB_SPRITE_WIDTH >= console.size.X ||
+            screen_y < 0 || screen_y >= console.size.Y)
             continue;
-        }
 
-        COORD hp_pos;
-        hp_pos.X = (SHORT)screen_x;
-        hp_pos.Y = (SHORT)(screen_y - 1);
+        const COORD hp_pos = {
+            .X = (SHORT)screen_x,
+            .Y = (SHORT)(screen_y - 1)
+        };
+        fprint_string("HP: %d", hp_pos, BACKGROUND_T_BLACK, FOREGROUND_T_RED, mobs[i].HP);
 
-        wchar_t hp_str[16];
-        swprintf(hp_str, 16, L"HP: %d", mobs[i].HP);
-
-        for (int j = 0; hp_str[j] != L'\0'; ++j) {
-            COORD char_pos = { hp_pos.X + (SHORT)j, hp_pos.Y };
-
-            color_tchar_t hp_char = { hp_str[j], BACKGROUND_T_BLACK, FOREGROUND_T_RED };
-            print_color_tchar(hp_char, char_pos);
-        }
-
-        for (int j = 0; j < MOB_SPRITE_HEIGHT; ++j) {
+        for (int j = 0; j < MOB_SPRITE_HEIGHT; ++j)
             for (int k = 0; k < MOB_SPRITE_WIDTH; ++k) {
-                color_tchar_t mob_pixel = zombie_sprite_data[j][k];
-
-                COORD current_pos = { (SHORT)(screen_x + k), (SHORT)(screen_y + j) };
+                const color_tchar_t mob_pixel = zombie_sprite_data[j][k];
+                const COORD current_pos = {
+                    .X = (SHORT)(screen_x + k),
+                    .Y =(SHORT)(screen_y + j)
+                };
 
                 if (current_pos.X >= 0 && current_pos.X < console.size.X &&
-                    current_pos.Y >= 0 && current_pos.Y < console.size.Y) {
-                    if (mob_pixel.character != L' ') {
-                        print_color_tchar(mob_pixel, current_pos);
-                    }
-                }
+                    current_pos.Y >= 0 && current_pos.Y < console.size.Y &&
+                    mob_pixel.character != L' ')
+                    print_color_tchar(mob_pixel, current_pos);
             }
-        }
     }
 
     render_mob_damage_texts();
 }
 
-void DespawnMob()
-{
-    for (int i = 0; i < mob_count; )
-    {
-        int x = abs(mobs[i].x - player.x);
-        int y = abs(mobs[i].y - player.y);
-        if (x > 70 || y > 70)
-        {
+static void DespawnMob(void) {
+    for (int i = 0; i < mob_count;) {
+        int x = abs(mobs[i].x - player.x), y = abs(mobs[i].y - player.y);
+
+        if (x > 70 || y > 70) {
             mobs[i].despawn_timer += delta_time;
-            if (mobs[i].despawn_timer >= 5.0f)
-            {
+            if (mobs[i].despawn_timer >= 5.0f) {
                 for (int j = i; j < mob_count - 1; j++)
-                {
                     mobs[j] = mobs[j + 1];
-                }
                 mob_count--;
                 continue;
             }
-        }
-        else {
+        } else
             mobs[i].despawn_timer = 0.0f;
-        }
-        i++;
+
+        ++i;
     }
 }
 
-void Mob_deadcheck()
-{
-    for (int i = 0; i < mob_count; )
-    {
-        if (mobs[i].HP <= 0)
-        {
+static void Mob_deadcheck(void) {
+    for (int i = 0; i < mob_count;) {
+        if (mobs[i].HP <= 0) {
             for (int j = i; j < mob_count - 1; j++)
-            {
                 mobs[j] = mobs[j + 1];
-            }
             mob_count--;
             continue;
         }
-        i++;
+
+        ++i;
     }
 }
 
@@ -308,12 +240,9 @@ void save_mob(void) {
         pCurrent_save->pMobs[i] = mobs[i];
 }
 
-void Mob_physics()
-{
-    for (int i = 0; i < mob_count; i++)
-    {
-        int block_below_y = mobs[i].y + MOB_SPRITE_HEIGHT;
-
+static void Mob_physics(void) {
+    for (int i = 0; i < mob_count; ++i) {
+        int block_below_y = mobs[i].y;
         bool is_standing_on_ground = false;
 
         for (int x_offset = 0; x_offset < MOB_SPRITE_WIDTH; ++x_offset) {
@@ -369,103 +298,68 @@ void Mob_physics()
     }
 }
 
-
-static bool is_mob_movable(int x, int y) {
+static bool is_mob_movable(const int x, const int y) {
     // 1. 맵 경계 확인
-    if (x < 0 || x + MOB_SPRITE_WIDTH > map.size.x || y < 0 || y + MOB_SPRITE_HEIGHT > map.size.y) {
-        return false;
-    }
-
-   
-    return true;
+    return !(x < 0 || x >= map.size.x || y < 0 || y >= map.size.y);
 }
 
-void update_mob_ai() {
-    for (int i = 0; i < mob_count; ++i) {
+static void update_mob_ai(void) {
+    for (int i = 0; i < mob_count; ++i)
         if (mobs[i].ai_timer >= MOB_SPD) {
             mobs[i].ai_timer = 0.0f;
 
-            path_t mob_path = find_path(mobs[i].x, mobs[i].y, player.x, player.y, is_mob_movable);
+            const path_t mob_path = find_path(mobs[i].x, mobs[i].y, player.x, player.y, is_mob_movable);
             if (mob_path.count > 1) {
-                int next_x = mob_path.path[1].X;
-                int next_y = mob_path.path[1].Y;
+                const int next_x = mob_path.path[1].X;
 
-                if (next_x < mobs[i].x) {
+                if (next_x < mobs[i].x)
                     mobs[i].velocity_x = -1.0f;
-                }
-                else if (next_x > mobs[i].x) {
+                else if (next_x > mobs[i].x)
                     mobs[i].velocity_x = 1.0f;
-                }
-                else {
+                else
                     mobs[i].velocity_x = 0;
-                }
 
-                if (next_y < mobs[i].y && mobs[i].is_on_ground) {
+                if (mob_path.path[1].Y < mobs[i].y && mobs[i].is_on_ground)
                     mobs[i].velocity_y = JUMP_SPD;
-                }
-            }
-            else {
+            } else
                 mobs[i].velocity_x = 0;
-            }
-        }
-        else {
+        } else
             mobs[i].ai_timer += delta_time;
-        }
-    }
 }
 
 //몬스터 피격 함수
-void handle_mob_click(const bool left_click)
-{
+static void handle_mob_click(const bool left_click) {
     // 왼쪽 클릭이 아니면 리턴
-    if (!left_click) return;
+    if (!left_click)
+        return;
 
-    for (int i = 0; i < mob_count; i++)
-    {
+    for (int i = 0; i < mob_count; ++i)
         // 몬스터의 스프라이트 범위 안에 있는지 확인
         if (selected_block_x >= mobs[i].x && selected_block_x < mobs[i].x + MOB_SPRITE_WIDTH &&
-            selected_block_y >= mobs[i].y && selected_block_y < mobs[i].y + MOB_SPRITE_HEIGHT)
-        {
+            selected_block_y >= mobs[i].y && selected_block_y < mobs[i].y + MOB_SPRITE_HEIGHT) {
             //데미지 입히는 부분
-            int atk_damage = player.atk_power;
-
-            mobs[i].HP -= atk_damage;
-
+            mobs[i].HP -= player.atk_power;
             create_mob_damage_text(i, player.atk_power);
-
             return; 
-
-          
         }
-    }
 }
 
-static void check_mob_player_collision()
-{
-    for (int i = 0; i < mob_count; ++i)
-    {
-        bool collision_x = (mobs[i].x < player.x + PLAYER_SPRITE_WIDTH) && (mobs[i].x + MOB_SPRITE_WIDTH > player.x);
-        bool collision_y = (mobs[i].y < player.y + PLAYER_SPRITE_HEIGHT) && (mobs[i].y + MOB_SPRITE_HEIGHT > player.y);
+static void check_mob_player_collision(void) {
+    for (int i = 0; i < mob_count; ++i) {
+        const bool collision_x = (mobs[i].x < player.x + PLAYER_SPRITE_WIDTH) && (mobs[i].x + MOB_SPRITE_WIDTH > player.x),
+                   collision_y = (mobs[i].y < player.y + PLAYER_SPRITE_HEIGHT) && (mobs[i].y + MOB_SPRITE_HEIGHT > player.y);
 
-        if (collision_x && collision_y)
-        {
+        if (collision_x && collision_y) {
             // 충돌했을 때만 쿨타임 
             mobs[i].atk_cooltime_timer += delta_time;
 
             // 쿨타임이 지났는지 확인
-            if (mobs[i].atk_cooltime_timer  >= MOB_ATK_COOLTIME)
-            {
+            if (mobs[i].atk_cooltime_timer  >= MOB_ATK_COOLTIME) {
                 player_take_damage(mobs[i].atk);
                 mobs[i].atk_cooltime_timer = 0.0f; // 공격 후 타이머 리셋
             }
         }
     }
-}
-
-
-
-void register_mob_click_handler() {
-    subscribe_mouse_click(handle_mob_click);
 }
 
 static void update_mob_offset(void) {
@@ -482,6 +376,7 @@ void mob_init() {
     } else
         mob_count = 0;
 
+    subscribe_mouse_click(handle_mob_click);
     subscribe_offset_change(update_mob_offset);
 }
 
@@ -495,6 +390,8 @@ void mob_update()
     Mob_Spawn_Time();
     Mob_deadcheck();
     DespawnMob();
+
+    fprint_string("%d", (COORD) { 0, 0 }, BACKGROUND_T_BLACK, FOREGROUND_T_DARKGREEN, mob_count);
 
     Mob_render();
 }

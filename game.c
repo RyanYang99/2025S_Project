@@ -68,9 +68,8 @@ void initialize_game(void) {
     initialize_crafting_ui();
     initialize_save();
     free_save();
-    register_mob_click_handler();
 
-    //pause_hook();
+    pause_hook();
 }
 
 void run_game(void) {
