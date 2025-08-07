@@ -64,16 +64,6 @@ COORD console_c()
     return center_m;
 }
 
-void load_mob(void) {
-    if (!pCurrent_save)
-        return;
-
-    mob_count = pCurrent_save->mob_count;
-    mob_level = pCurrent_save->mob_level;
-    for (int i = 0; i < mob_count; ++i)
-        mobs[i] = pCurrent_save->pMobs[i];
-}
-
 void Mob_Spawn_Time()
 {
     static float spawnTimer = 0.0f;
@@ -217,8 +207,8 @@ void Mob_render()
 
     for (int i = 0; i < mob_count; i++)
     {
-        int screen_x = center_m.X + (mobs[i].x - player.x);
-        int screen_y = center_m.Y + (mobs[i].y - player.y);
+        int screen_x = center_m.X + (mobs[i].x * TEXTURE_SIZE - player.x * TEXTURE_SIZE);
+        int screen_y = center_m.Y + (mobs[i].y * TEXTURE_SIZE - player.y * TEXTURE_SIZE);
 
         int sprite_width = MOB_SPRITE_WIDTH;
         int sprite_height = MOB_SPRITE_HEIGHT;
@@ -489,8 +479,24 @@ void register_mob_click_handler() {
     subscribe_mouse_click(handle_mob_click);
 }
 
+static void update_mob_offset(void) {
+    for (int i = 0; i < mob_count; ++i)
+        mobs[i].x += map.offset_x;
+}
+
 void mob_init() {
-    mob_count = 0;
+    if (pCurrent_save) {
+        mob_count = pCurrent_save->mob_count;
+        mob_level = pCurrent_save->mob_level;
+        for (int i = 0; i < mob_count; ++i)
+            mobs[i] = pCurrent_save->pMobs[i];
+    } else
+        mob_count = 0;
+
+    subscribe_offset_change(update_mob_offset);
+    MobSpawn(player.x, player.y);
+    mobs[0].x = player.x;
+    mobs[0].y = player.y;
 }
 
 //몬스터 업데이트 
@@ -505,4 +511,9 @@ void mob_update()
     DespawnMob();
 
     Mob_render();
+}
+
+void destroy_mob(void) {
+    unsubscribe_mouse_click(handle_mob_click);
+    unsubscribe_offset_change(update_mob_offset);
 }

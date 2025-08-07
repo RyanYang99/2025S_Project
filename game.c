@@ -61,13 +61,15 @@ void initialize_game(void) {
     initialize_date_time();
     create_map();
     player_init();
+    mob_init();
     initialize_block_control();
     initialize_inventory();
     initialize_crafting_ui();
     initialize_save();
-    load_mob();
     free_save();
     register_mob_click_handler();
+
+    //pause_hook();
 }
 
 void run_game(void) {
@@ -93,6 +95,7 @@ void run_game(void) {
 }
 
 void destroy_game(void) {
+    destroy_mob();
     destroy_block_control();
     destroy_map();
 }

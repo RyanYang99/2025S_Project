@@ -58,7 +58,6 @@ extern char mob_debug_message[MAX_MOB_DEBUG_MESSAGE_LEN];
 extern MobDamageText mob_damage_texts[MAX_MOB_DAMAGE_TEXTS];
 
 // 함수 선언
-void load_mob(void);
 void save_mob(void);
 void Mob_physics();
 void update_mob_ai(void);
@@ -71,5 +70,6 @@ void DespawnMob();
 void Mob_deadcheck();
 void handle_mob_click(const bool left_click);
 void register_mob_click_handler();
+void destroy_mob(void);
 
 static void Mob_player_collision();
