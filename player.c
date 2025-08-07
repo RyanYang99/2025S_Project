@@ -11,6 +11,7 @@
 #include <time.h>
 #include <conio.h>
 #include <Windows.h> // VK_SPACE 사용을 위해 추가
+#include "sound.h" //발소리 추가
 
 player_t player = { 0 };
 
@@ -98,6 +99,7 @@ static void movement(void) {
         if (is_a_down && !is_d_down) {
             int new_x = player.x - 1;
             if (is_walkable(new_x, player.y)) {
+                Sound_playFootstep();
                 player.x = new_x;
                 moved_horizontally = true;
             }
@@ -106,6 +108,7 @@ static void movement(void) {
         else if (is_d_down && !is_a_down) {
             int new_x = player.x + 1;
             if (is_walkable(new_x, player.y)) {
+                Sound_playFootstep();
                 player.x = new_x;
                 moved_horizontally = true;
             }

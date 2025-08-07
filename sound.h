@@ -7,7 +7,7 @@
 void Sound_init();
 void Sound_playBGM(const char* filename);
 void Sound_shutdown();
-
+void Sound_playFootstep();
 
 
 

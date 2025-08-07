@@ -7,10 +7,31 @@
 
 #include "SFML/Audio.h"
 
+static const char* footstepSounds[MAX_FOOTSTEP_SOUNDS] = {
+    "Footstep/Footstep_Dirt_00.wav",
+    "Footstep/Footstep_Dirt_01.wav",
+    "Footstep/Footstep_Dirt_02.wav",
+    "Footstep/Footstep_Dirt_03.wav",
+    "Footstep/Footstep_Dirt_04.wav",
+    "Footstep/Footstep_Dirt_05.wav",
+    "Footstep/Footstep_Dirt_06.wav",
+    "Footstep/Footstep_Dirt_07.wav",
+    "Footstep/Footstep_Dirt_08.wav",
+    "Footstep/Footstep_Dirt_09.wav"
+};
+
 typedef struct {
     sfMusic* bgm;
 } SoundManager;
 
+typedef struct {
+    sfSoundBuffer* buffers[MAX_FOOTSTEP_SOUNDS];
+    sfSound* sound;
+    int footstepCount;
+} SFXManager;
+
+
+static SFXManager* s_sfx = NULL;
 static SoundManager* s_manager = NULL;
 
 void Sound_init() {
@@ -20,6 +41,26 @@ void Sound_init() {
     if (!s_manager) return;
 
     s_manager->bgm = NULL;
+
+    // 효과음 매니저 초기화
+    s_sfx = (SFXManager*)malloc(sizeof(SFXManager));
+    if (!s_sfx) return;
+
+    s_sfx->sound = sfSound_create();
+    s_sfx->footstepCount = 0;
+
+    for (int i = 0; i < MAX_FOOTSTEP_SOUNDS; i++) {
+        if (footstepSounds[i] == NULL) break;
+
+        char fullPath[256];
+        snprintf(fullPath, sizeof(fullPath), "SoundFile/%s", footstepSounds[i]);
+
+        s_sfx->buffers[i] = sfSoundBuffer_createFromFile(fullPath);
+        if (s_sfx->buffers[i]) {
+            s_sfx->footstepCount++;
+        }
+    }
+
     srand((unsigned int)time(NULL));
 }
 
@@ -47,6 +88,19 @@ void Sound_playBGM(const char* filename) {
     sfMusic_play(s_manager->bgm);
 }
 
+void Sound_playFootstep() {
+    if (!s_sfx || s_sfx->footstepCount == 0) return;
+
+    if (sfSound_getStatus(s_sfx->sound) == sfPlaying) return;
+
+
+    int index = rand() % s_sfx->footstepCount;
+
+    sfSound_stop(s_sfx->sound);  // 이전 소리 멈추기
+    sfSound_setBuffer(s_sfx->sound, s_sfx->buffers[index]);
+    sfSound_play(s_sfx->sound);
+}
+
 void Sound_shutdown() {
     if (!s_manager) return;
 
@@ -58,9 +112,20 @@ void Sound_shutdown() {
 
     free(s_manager);
     s_manager = NULL;
+
+    if (s_sfx) {
+        for (int i = 0; i < s_sfx->footstepCount; i++) {
+            if (s_sfx->buffers[i]) {
+                sfSoundBuffer_destroy(s_sfx->buffers[i]);
+            }
+        }
+        if (s_sfx->sound) {
+            sfSound_destroy(s_sfx->sound);
+        }
+        free(s_sfx);
+        s_sfx = NULL;
+    }
 }
-
-
 
 
 
