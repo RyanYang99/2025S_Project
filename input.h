@@ -33,6 +33,7 @@ bool is_key_down(int virtual_key_code);
 
 void initialize_input_handler(void);
 
+void handle_windows_messages(void);
 void update_input(void);
 
 void destroy_input_handler(void);

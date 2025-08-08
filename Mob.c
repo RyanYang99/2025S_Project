@@ -465,8 +465,6 @@ void mob_update() {
 	Mob_deadcheck();
 	DespawnMob();
 
-	fprint_string("%d", (COORD) { 0, 0 }, BACKGROUND_T_BLACK, FOREGROUND_T_DARKGREEN, mob_count);
-
 	Mob_render();
 }
 

@@ -82,7 +82,6 @@ void initialize_inventory(void) {
 */
 bool add_item_to_inventory(const int item_db_index, int quantity) {
     item_information_t *pItem_info = find_item_by_index(item_db_index);
-    assert(pItem_info != NULL && "DB에 존재하지 않는 아이템을 추가하려고 시도했습니다!");
 
     while (quantity) {
         if (pItem_info->max_stack > 1) {
@@ -113,10 +112,8 @@ bool add_item_to_inventory(const int item_db_index, int quantity) {
             }
         }
 
-        if (emptySlot == -1) {
-            printf("인벤토리가 가득 차서 아이템 [%s] %d개를 더는 얻을 수 없습니다.\n", pItem_info->name, quantity);
+        if (emptySlot == -1)
             return false;
-        }
 
         inventory.item[emptySlot].item_db_index = item_db_index; // items -> item
         inventory.item[emptySlot].durability = pItem_info->base_durability; // items -> item
@@ -224,7 +221,7 @@ void render_inventory(void) {
     }
 
     ++position.Y;
-    fprint_string("=== (W / S: Select, A / D: Page, 0 ~ 9: Hotbar, I: Close) ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
+    fprint_string("=== [W / S]: Select, [A / D]: Page, [0 ~ 9]: Hotbar, [I]: Close ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
 
     const player_item_t * const pItem = &inventory.item[start_index + current_selection_index];
     if (!pItem->item_db_index)
@@ -281,7 +278,7 @@ void render_hotbar(void) {
         }
         name_render_timer += delta_time;
 
-        const item_information_t const * pInformation = find_item_by_index(inventory.pHotbar[inventory.selected_hotbar_index].pPlayer_Item->item_db_index);
+        const item_information_t *pInformation = find_item_by_index(inventory.pHotbar[inventory.selected_hotbar_index].pPlayer_Item->item_db_index);
         print_center("%s", position.Y - 2, BACKGROUND_T_BLACK, FOREGROUND_T_WHITE, pInformation->name);
     }
 

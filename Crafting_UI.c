@@ -121,8 +121,10 @@ void update_crafting_ui(void) {
     while (crafting_ui.is_open) {
         render_crafting_ui();
 
+        handle_windows_messages();
+
         if (_kbhit()) {
-            char key = (char)_getch();
+            char key = (char)tolower(_getch());
             switch (key) {
             case 'w':
                 if (crafting_ui.selected_recipe_index > 0)
@@ -146,7 +148,7 @@ void update_crafting_ui(void) {
 void render_crafting_ui(void) {
     clear();
     COORD pos = { .X = 2, .Y = 1 };
-    fprint_string("[ 제 작  가 능 한  아 이 템  목 록  ]", pos, BACKGROUND_T_BLACK, FOREGROUND_T_YELLOW);
+    fprint_string("[ Craftable Items ]", pos, BACKGROUND_T_BLACK, FOREGROUND_T_YELLOW);
     pos.Y += 1;
 
     for (int i = 0; i < crafting_ui.recipe_count; ++i) {
@@ -185,7 +187,7 @@ void render_crafting_ui(void) {
     }
 
     
-    fprint_string(" [W/S] 선 택 이 동  [E] 제 작 [C] 닫 기 ", pos, BACKGROUND_T_BLACK, FOREGROUND_T_GREEN);
+    fprint_string("[W / S]: Select [E]: Craft [C]: Close", pos, BACKGROUND_T_BLACK, FOREGROUND_T_GREEN);
     update_console();
 }
 

@@ -36,9 +36,6 @@ static void render_debug_text(void) {
 
     fprint_string("Mouse: (%d, %d)", position, background, foreground, selected_block_x, selected_block_y);
     ++position.Y;
-
-    //몬스터 알고리즘
-    fprint_string(mob_debug_message, position, background, FOREGROUND_T_RED);
 }
 #endif
 
@@ -76,11 +73,6 @@ void run_game(void) {
     while (!game_exit) {
         update_delta_time();
 
-        MSG msg = { 0 };
-        while (PeekMessage(&msg, NULL, WM_MOUSEFIRST, WM_MOUSELAST, PM_REMOVE)) {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
         update_console();
         update_input();
         update_date_time();
