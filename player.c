@@ -16,8 +16,7 @@
 // 전역 인벤토리 객체 extern 선언
 extern inventory_t inventory;
 
-// ItemDB에서 아이템 정보를 가져오는 함수 extern 선언 (가정)
-// item_db_index를 받아 해당 아이템의 정보를 담은 구조체 포인터를 반환합니다.
+// item_db_index를 받아 해당 아이템의 정보를 담은 구조체 포인터를 반환
 extern item_information_t* find_item_by_index(const int index);
 
 player_t player = { 0 };
@@ -487,8 +486,6 @@ void render_player(void) {
 
     //데미지 텍스트 렌더링 함수 호출
     render_damage_texts();
-
-   
 
     const int bar_width = HP_BAR_WIDTH;
 

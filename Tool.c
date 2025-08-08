@@ -251,6 +251,7 @@ const color_tchar_t get_tool_texture(const tool_t tool, const int x, const int y
 
     return (color_tchar_t){ 0 };
 }
+
 // 스윙 텍스처 반환
 const color_tchar_t get_tool_swing_texture(const tool_t tool, const int x, const int y) {
     switch (tool) {
