@@ -68,6 +68,9 @@ void initialize_game(void) {
     initialize_crafting_ui();
     initialize_save();
     free_save();
+
+    add_item_to_inventory(109, 1);
+    register_mob_click_handler();
 }
 
 void run_game(void) {

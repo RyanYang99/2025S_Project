@@ -447,7 +447,7 @@ void render_player(void) {
     int empty = bar_width - filled;
 
     COORD pos = {
-        .X = console.size.X - (bar_width + 22),  // 오른쪽 끝에서 약간 여유
+        .X = (SHORT)(console.size.X - (bar_width + 22)),  // 오른쪽 끝에서 약간 여유
         .Y = 2
     };
 
