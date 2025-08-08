@@ -382,6 +382,7 @@ static void handle_mob_click(const bool left_click) {
 	// 왼쪽 클릭이 아니면 리턴
 	if (!left_click)
 		return;
+
 	for (int i = 0; i < mob_count; ++i)
 		if (!mobs[i].is_dead && selected_block_x >= mobs[i].x && selected_block_x < mobs[i].x + MOB_SPRITE_WIDTH &&
 			selected_block_y >= mobs[i].y && selected_block_y < mobs[i].y + MOB_SPRITE_HEIGHT) {

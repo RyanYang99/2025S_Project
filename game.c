@@ -2,6 +2,7 @@
 #include "game.h"
 
 #include "Mob.h"
+#include "BossMalakh.h"
 #include "map.h"
 #include "save.h"
 #include "astar.h"
@@ -13,7 +14,9 @@
 #include "date_time.h"
 #include "Crafting_UI.h"
 
+
 bool game_exit = false;
+bool is_boss_spawned;
 
 #if _DEBUG
 static void render_debug_text(void) {
@@ -46,7 +49,11 @@ static void render(void) {
     render_map();
     render_player();
     render_virtual_cursor();
-    mob_update();
+
+    //mob_update();
+    /*Boss_update();
+    Boss_Render();*/
+
     render_inventory();
     render_hotbar();
     render_time();
@@ -59,6 +66,7 @@ static void render(void) {
 
 void initialize_game(void) {
     game_exit = false;
+    is_boss_spawned = false;
     initialize_date_time();
     create_map();
     player_init();
@@ -73,6 +81,14 @@ void initialize_game(void) {
 }
 
 void run_game(void) {
+
+    //if (!is_boss_spawned) {
+    //    Boss_Init(player.x -10, player.y, 100, 10); // 보스 위치를 플레이어와 분리하여 초기화
+    //    is_boss_spawned = true; 
+    //}
+
+
+
     while (!game_exit) {
         update_delta_time();
 
@@ -84,10 +100,16 @@ void run_game(void) {
         update_console();
         update_input();
         update_date_time();
+
+
         player_update();
         inventory_input();
         Crafting_UI_input();
         save_input();
+
+
+
+      
 
         render();
     }
