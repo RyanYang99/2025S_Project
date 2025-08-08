@@ -19,6 +19,7 @@
 
 
 #define GRAVITY 25.0f
+
 #define BG_BLACK BACKGROUND_T_BLACK
 #define FG_WHITE FOREGROUND_T_WHITE
 #define FG_YELLOW FOREGROUND_T_YELLOW
@@ -36,6 +37,8 @@
 
 #define PLAYER_SPRITE_WIDTH 5
 #define PLAYER_SPRITE_HEIGHT 5
+#define ANIMATION_SPEED 2.0f // 1초에 2번 프레임 변경
+
 
 #define MOB_SPD 0.2f
 #define JUMP_SPD -12.0f
@@ -45,6 +48,7 @@ char mob_debug_message[MAX_MOB_DEBUG_MESSAGE_LEN] = "";
 MobDamageText mob_damage_texts[MAX_MOB_DAMAGE_TEXTS];
 
 const color_tchar_t zombie_sprite_data[MOB_SPRITE_HEIGHT][MOB_SPRITE_WIDTH] = {
+    // {문자, 배경색, 전경색}
     { {L' ',0,0}, {L'▀', BG_BLACK, FG_RED}, {L'▀', BG_BLACK, FG_RED}, {L'▀', BG_BLACK, FG_RED}, {L' ',0,0} },
     { {L' ',0,0}, {L'o', BG_BLACK, FG_WHITE}, {L' ',0,0}, {L'o', BG_BLACK, FG_WHITE}, {L' ',0,0} },
     { {L'█', BG_BLACK, FG_DARKGREEN}, {L'█', BG_BLACK, FG_DARKGREEN}, {L'█', BG_BLACK, FG_DARKGREEN}, {L'█', BG_BLACK, FG_DARKGREEN}, {L'█', BG_BLACK, FG_DARKGREEN} },
@@ -52,6 +56,25 @@ const color_tchar_t zombie_sprite_data[MOB_SPRITE_HEIGHT][MOB_SPRITE_WIDTH] = {
     { {L' ',0,0}, {L'█', BG_BLACK, FG_GREEN}, {L' ',0,0}, {L'█', BG_BLACK, FG_GREEN}, {L' ',0,0} }
 };
 
+// 걷기 애니메이션 (2 프레임)
+static const color_tchar_t zombie_sprite_walk[2][MOB_SPRITE_HEIGHT][MOB_SPRITE_WIDTH] = {
+    // 프레임 0
+    {
+        { {L' ',0,0}, {L'▀', BG_BLACK, FG_RED}, {L'▀', BG_BLACK, FG_RED}, {L'▀', BG_BLACK, FG_RED}, {L' ',0,0} },
+    { {L' ',0,0}, {L'o', BG_BLACK, FG_WHITE}, {L' ',0,0}, {L'o', BG_BLACK, FG_WHITE}, {L' ',0,0} },
+    { {L'█', BG_BLACK, FG_DARKGREEN}, {L'█', BG_BLACK, FG_DARKGREEN}, {L'█', BG_BLACK, FG_DARKGREEN}, {L'█', BG_BLACK, FG_DARKGREEN}, {L'█', BG_BLACK, FG_DARKGREEN} },
+    { {L' ',0,0}, {L'█', BG_BLACK, FG_DARKYELLOW}, {L' ',0,0}, {L' ',0,0}, {L' ',0,0} },
+    { {L' ',0,0}, {L' ',0,0}, {L'█', BG_BLACK, FG_GREEN}, {L' ',0,0}, {L' ',0,0} }
+    },
+    // 프레임 1
+    {
+        { {L' ',0,0}, {L'▀', BG_BLACK, FG_RED}, {L'▀', BG_BLACK, FG_RED}, {L'▀', BG_BLACK, FG_RED}, {L' ',0,0} },
+    { {L' ',0,0}, {L'o', BG_BLACK, FG_WHITE}, {L' ',0,0}, {L'o', BG_BLACK, FG_WHITE}, {L' ',0,0} },
+    { {L'█', BG_BLACK, FG_DARKGREEN}, {L'█', BG_BLACK, FG_DARKGREEN}, {L'█', BG_BLACK, FG_DARKGREEN}, {L'█', BG_BLACK, FG_DARKGREEN}, {L'█', BG_BLACK, FG_DARKGREEN} },
+    { {L' ',0,0}, {L' ',0,0}, {L' ',0,0}, {L'█', BG_BLACK, FG_DARKYELLOW}, {L' ',0,0} },
+    { {L' ',0,0}, {L'█', BG_BLACK, FG_GREEN}, {L' ',0,0}, {L' ',0,0}, {L' ',0,0} }
+    }
+};
 
 Mob mobs[Max_Mob];
 
@@ -142,6 +165,12 @@ void MobSpawn(int player_x, int player_y)
 
                 mobs[mob_count].ai_timer = 0.0f;
                 mobs[mob_count].despawn_timer = 0.0f;
+
+
+                // 애니메이션 변수 초기화
+                mobs[mob_count].is_moving = 0;
+                mobs[mob_count].current_frame = 0;
+                mobs[mob_count].animation_timer = 0.0f;
 
                 mob_count++;
                 break;
@@ -242,9 +271,19 @@ void Mob_render()
             print_color_tchar(hp_char, char_pos);
         }
 
+        // 애니메이션 스프라이트 선택
+        const color_tchar_t(*sprite_to_draw)[MOB_SPRITE_WIDTH];
+        if (mobs[i].is_moving) {
+            sprite_to_draw = zombie_sprite_walk[mobs[i].current_frame];
+        }
+        else {
+            sprite_to_draw = zombie_sprite_data;
+        }
+
+        // 스프라이트 그리기
         for (int j = 0; j < MOB_SPRITE_HEIGHT; ++j) {
             for (int k = 0; k < MOB_SPRITE_WIDTH; ++k) {
-                color_tchar_t mob_pixel = zombie_sprite_data[j][k];
+                color_tchar_t mob_pixel = sprite_to_draw[j][k];
 
                 COORD current_pos = { (SHORT)(screen_x + k), (SHORT)(screen_y + j) };
 
@@ -355,7 +394,7 @@ void Mob_physics()
             mobs[i].velocity_y += GRAVITY * delta_time;
         }
 
-        // 💡 몬스터의 x축 이동 충돌 감지 로직 추가
+        // 몬스터의 x축 이동 충돌 감지 로직 추가
         float new_precise_x = mobs[i].precise_x + mobs[i].velocity_x * delta_time;
         int new_x = (int)new_precise_x;
 
@@ -379,6 +418,27 @@ void Mob_physics()
 
         mobs[i].x = (int)mobs[i].precise_x;
         mobs[i].y = (int)mobs[i].precise_y;
+
+
+
+        // x축 이동 속도에 따라 is_moving 설정
+        mobs[i].is_moving = (fabsf(mobs[i].velocity_x) > 0.01f);
+
+        // 애니메이션 타이머 갱신
+        if (mobs[i].is_moving)
+        {
+            mobs[i].animation_timer += delta_time * ANIMATION_SPEED;
+            if (mobs[i].animation_timer >= 1.0f)
+            {
+                mobs[i].animation_timer = 0.0f;
+                mobs[i].current_frame = (mobs[i].current_frame + 1) % 2; // 0 또는 1
+            }
+        }
+        else
+        {
+            mobs[i].animation_timer = 0.0f;
+            mobs[i].current_frame = 0;
+        }
     }
 }
 

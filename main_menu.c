@@ -1,4 +1,6 @@
-﻿#include "leak.h"
+﻿#define _CRT_SECURE_NO_WARNINGS
+
+#include "leak.h"
 #include "main_menu.h"
 
 #include <time.h>

@@ -33,6 +33,13 @@ typedef struct {
 
 	float last_attack_time;
 	float atk_cooltime_timer;
+
+
+	// 애니메이션 상태 변수
+	int is_moving;           // 현재 움직이는 중인지 (0 또는 1)
+	float animation_timer;   // 현재 프레임을 얼마나 오래 보여줬는지 추적
+	int current_frame;       // 현재 보여줄 애니메이션 프레임 인덱스
+
 } Mob;
 #pragma pack(pop)
 
