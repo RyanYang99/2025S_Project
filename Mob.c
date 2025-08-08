@@ -97,7 +97,7 @@ static bool is_walkable_block(const block_t block) {
 	return true;
 }
 
-static void MobSpawn(void) {
+ void MobSpawn(void) {
 	srand((unsigned int)time(NULL));
 
 	const int random = rand() % 20;
@@ -115,6 +115,10 @@ static void MobSpawn(void) {
 			mob_y = y;
 			break;
 		}
+
+	if (mob_count >= MAX_MOB) {
+		return;
+	}
 
 	mobs[mob_count].x = mob_x;
 	mobs[mob_count].y = mob_y - 1;
@@ -135,23 +139,21 @@ static void MobSpawn(void) {
 	++mob_count;
 }
 
-static void Mob_Spawn_Time(void) {
-	static float spawnTimer = 0.0f, levelUpTimer = 0.0f;
+ static float mob_spawn_timer = 0.0f;
+ const float Mob_Spawn_Cooltime = 2.0f;
 
-	spawnTimer += delta_time;
-	levelUpTimer += delta_time;
+ void mob_spawn_manager()
+ {
+	 if (is_night_time()) {
+		 mob_spawn_timer += delta_time;
+		 if (mob_spawn_timer >= Mob_Spawn_Cooltime) {
+			 MobSpawn();
+			 mob_spawn_timer = 0.0f;
+		 }
+	 }
+ }
 
-	if (spawnTimer >= 3.0f) {
-		spawnTimer = 0;
-		if (mob_count < MAX_MOB)
-			MobSpawn();
-	}
 
-	if (levelUpTimer >= 100.0f && mob_level < 10) {
-		++mob_level;
-		levelUpTimer = 0.0f;
-	}
-}
 
 // 몬스터 피격 시 대미지 텍스트 생성 함수
 static void create_mob_damage_text(const int mob_index, const int damage_value) {
@@ -436,8 +438,13 @@ void mob_init() {
 // 몬스터 업데이트
 void mob_update() {
 	update_mob_damage_texts();
-	Mob_Spawn_Time();
-
+	
+	static float levelUpTimer = 0.0f;
+	levelUpTimer += delta_time;
+	if (levelUpTimer >= 100.0f && mob_level < 10) {
+		++mob_level;
+		levelUpTimer = 0.0f;
+	}
 
 	update_mob_ai();
 	Mob_physics();
@@ -465,10 +472,6 @@ void mob_update() {
 
 	Mob_deadcheck();
 	DespawnMob();
-
-	fprint_string("%d", (COORD) { 0, 0 }, BACKGROUND_T_BLACK, FOREGROUND_T_DARKGREEN, mob_count);
-
-	Mob_render();
 }
 
 

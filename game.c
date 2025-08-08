@@ -49,8 +49,6 @@ static void render(void) {
     render_map();
     render_player();
     render_virtual_cursor();
-
-    //mob_update();
     /*Boss_update();
     Boss_Render();*/
 
@@ -58,6 +56,7 @@ static void render(void) {
     render_hotbar();
     render_time();
     render_save_menu();
+    Mob_render();
 
 #if _DEBUG
     render_debug_text();
@@ -87,8 +86,7 @@ void run_game(void) {
     //    is_boss_spawned = true; 
     //}
 
-
-
+   
     while (!game_exit) {
         update_delta_time();
 
@@ -101,15 +99,13 @@ void run_game(void) {
         update_input();
         update_date_time();
 
+        mob_spawn_manager();
 
         player_update();
         inventory_input();
         Crafting_UI_input();
         save_input();
-
-
-
-      
+        mob_update();
 
         render();
     }
