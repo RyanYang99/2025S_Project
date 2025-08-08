@@ -5,6 +5,7 @@
 #include "input.h"
 #include "ItemDB.h"
 #include "main_menu.h"
+#include "Crafting_UI.h"
 
 static bool force_old_console(void) {
     if (is_new_console()) {
@@ -60,8 +61,8 @@ int main(void)
         return 0;
 
     call_database(false);
+    initialize_crafting_UI();
     initialize_console(true, false);
-    
 
     while (true) {
         const main_menu_state_t main_menu_state = main_menu();

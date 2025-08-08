@@ -48,6 +48,7 @@ static void render(void) {
     render_hotbar();
     render_time();
     render_save_menu();
+    render_crafting_UI();
 
 #if _DEBUG
     render_debug_text();
@@ -62,7 +63,6 @@ void initialize_game(void) {
     mob_init();
     initialize_block_control();
     initialize_inventory();
-    initialize_crafting_ui();
     initialize_save();
     free_save();
 
@@ -78,7 +78,7 @@ void run_game(void) {
         update_date_time();
         player_update();
         inventory_input();
-        Crafting_UI_input();
+        crafting_UI_input();
         save_input();
 
         render();

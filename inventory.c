@@ -156,6 +156,14 @@ void decrement_item_from_inventory(player_item_t * const pItem) {
 
 }
 
+void decrement_durability(void) {
+    if (inventory.pHotbar[inventory.selected_hotbar_index].pPlayer_Item) {
+        player_item_t * const pEquipped = &inventory.item[inventory.pHotbar[inventory.selected_hotbar_index].index_in_inventory];
+        if (pEquipped->durability > 0 && --pEquipped->durability <= 0)
+            decrement_item_from_inventory(pEquipped);
+    }
+}
+
 static void render_inventory_item(const int y,
                                   const int inventory_index,
                                   const bool selected,
