@@ -10,16 +10,13 @@
 #pragma pack(push, 1)
 typedef struct {
     int x, y, HP, atk, state, despawn_check;
-
     float precise_y, precise_x, velocity_y,velocity_x;
-
     bool is_on_ground;
-
+    bool is_dead;
     int last_move_time;
-
-    float ai_timer, despawn_timer;
-
-    float last_attack_time, atk_cooltime_timer;
+    int current_frame;
+    float ai_timer, despawn_timer, animation_timer;
+    float last_attack_time, atk_cooltime_timer, dying_timer;
 } Mob;
 #pragma pack(pop)
 

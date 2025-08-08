@@ -46,8 +46,6 @@ typedef struct
 	long special_attack_cooltime; //특수 공격 쿨타임
 	long last_special_attack_time; //마지막 특수 공격 시간
 
-	// A* 경로 캐싱을 위한 변수 추가
-	path_t cached_path;
 	COORD last_player_pos; // 마지막으로 경로를 계산한 시점의 플레이어 위치
 
 	color_tchar_t sprite_data[20][20];
