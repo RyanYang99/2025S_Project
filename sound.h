@@ -10,6 +10,7 @@ void Sound_playBGM(const char* filename);
 void Sound_shutdown();
 void Sound_playFootstep();
 void Sound_playSwing();
+void Sound_playMenuBGM(const char* filename);
 
 
 

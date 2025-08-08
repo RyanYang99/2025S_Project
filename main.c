@@ -62,6 +62,7 @@ int main(void)
     call_database(false);
     initialize_console(true, false);
     Sound_init();
+    Sound_playMenuBGM("BGM/song18_1.wav");
 
 
     while (true) {
