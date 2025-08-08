@@ -216,9 +216,27 @@ static void movement(void) {
         }
     }
 }
+// 좌 클릭을 했는지
+static void handle_player_actions(const bool is_left_click) {
+    if (is_left_click) {
+        player_swing_tool();
+    }
+}
 
+// 플레이어의 도구 스윙
+void player_swing_tool(void) {
+    // 이미 스윙 중이거나, 도구를 들고 있지 않으면 실행하지 않음
+    if (player.is_swinging) return;
 
-
+    player_item_t* equipped_item = inventory.pHotbar[inventory.selected_hotbar_index].pPlayer_Item;
+    if (equipped_item && equipped_item->quantity > 0) {
+        item_information_t* pToolInfo = find_item_by_index(equipped_item->item_db_index);
+        if (pToolInfo && pToolInfo->type == ITEM_TYPE_TOOL) {
+            player.is_swinging = true;
+            player.swing_timer = 0.2f; // 0.2초 동안 스윙 애니메이션 표시
+        }
+    }
+}
 
         static void update_player_offset(void) 
         {
@@ -235,6 +253,14 @@ static void movement(void) {
 
             //데미지 출력 업데이트
             update_damage_texts();
+
+            // 스윙 타이머 업데이트
+            if (player.is_swinging) {
+                player.swing_timer -= delta_time;
+                if (player.swing_timer <= 0.0f) {
+                    player.is_swinging = false;
+                }
+            }
 
             // 물리 업데이트
             // 땅에 있는지 확인
@@ -324,6 +350,8 @@ static void movement(void) {
                 player.is_moving = 0;
                 player.current_frame = 0;
                 player.animation_timer = 0.0f;
+                player.is_swinging = false; // 스윙 상태 초기화
+                player.swing_timer = 0.0f;  // 스윙 타이머 초기화
 
                 // 이동 쿨다운 타이머 초기화
                 player.move_cooldown_timer = 0.0f;
@@ -331,7 +359,9 @@ static void movement(void) {
                 // 초기 방향: 오른쪽
                 player.facing_direction = 1;
 
-                //subscribe_keyhit(movement);
+                // 마우스 클릭
+                subscribe_mouse_click(handle_player_actions);
+                // subscribe_keyhit(movement);
                 subscribe_offset_change(update_player_offset);
             }
         }
@@ -410,13 +440,35 @@ void render_player(void) {
     // 4. 장착한 도구 렌더링 (좌우 반전 적용)
     if (is_tool_equipped) {
         // 도구를 들 손의 위치 계산
-        int tool_hand_offset_x = (player.facing_direction == 1) ? 5 : -TEXTURE_SIZE;
-        int tool_hand_offset_y = -1;
+        int tool_hand_offset_x;
+        int tool_hand_offset_y;
+
+        // 스윙 상태에 따라 도구의 렌더링 위치를 조정합니다.
+        if (player.is_swinging) {
+            // 스윙 애니메이션일 때의 위치입니다.
+            // 오른쪽을 보고 휘두를 경우, 텍스처를 좀 더 수평으로 넓게 배치하여
+            // 휘두르는 듯한 느낌을 줄 수 있습니다. 이 값은 원하는 모션에 맞게 조절하세요.
+            tool_hand_offset_x = (player.facing_direction == 1) ? 6 : -TEXTURE_SIZE - 1;
+            tool_hand_offset_y = 0;
+        }
+        else {
+            // 평상시 도구를 들고 있을 때의 위치입니다.
+            tool_hand_offset_x = (player.facing_direction == 1) ? 4 : -TEXTURE_SIZE + 1;
+            tool_hand_offset_y = -1;
+        }
 
         for (int y = 0; y < TEXTURE_SIZE; ++y) {
             for (int x = 0; x < TEXTURE_SIZE; ++x) {
                 int source_x = (player.facing_direction == 1) ? x : (TEXTURE_SIZE - 1 - x);
-                color_tchar_t tool_pixel = get_tool_texture((tool_t)pToolInfo->index, source_x, y);
+                color_tchar_t tool_pixel;
+                if (player.is_swinging) {
+                    // 스윙 중일 때는 스윙 텍스처를 가져옴
+                    tool_pixel = get_tool_swing_texture((tool_t)pToolInfo->index, source_x, y);
+                }
+                else {
+                    // 평상시에는 기본 도구 텍스처를 가져옴
+                    tool_pixel = get_tool_texture((tool_t)pToolInfo->index, source_x, y);
+                }
 
                 if (tool_pixel.foreground == FOREGROUND_T_TRANSPARENT) continue;
 

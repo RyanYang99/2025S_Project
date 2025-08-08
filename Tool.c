@@ -251,3 +251,21 @@ const color_tchar_t get_tool_texture(const tool_t tool, const int x, const int y
 
     return (color_tchar_t){ 0 };
 }
+// 스윙 텍스처 반환
+const color_tchar_t get_tool_swing_texture(const tool_t tool, const int x, const int y) {
+    switch (tool) {
+        case TOOL_WOODEN_SWORD:     return pWooden_sword_Swing[y][x];
+        case TOOL_STONE_SWORD:      return pStone_sword_Swing[y][x];
+        case TOOL_IRON_SWORD:       return pIron_sword_Swing[y][x];
+        case TOOL_WOODEN_PICKAXE:   return pWooden_pickaxe_Swing[y][x];
+        case TOOL_STONE_PICKAXE:    return pStone_pickaxe_Swing[y][x];
+        case TOOL_IRON_PICKAXE:     return pIron_pickaxe_Swing[y][x];
+        case TOOL_WOODEN_AXE:       return pWooden_axe_Swing[y][x];
+        case TOOL_STONE_AXE:        return pStone_axe_Swing[y][x];
+        case TOOL_IRON_AXE:         return pIron_axe_Swing[y][x];
+        case TOOL_WOODEN_SHOVEL:    return pWooden_shovel_Swing[y][x];
+        case TOOL_STONE_SHOVEL:     return pStone_shovel_Swing[y][x];
+        case TOOL_IRON_SHOVEL:      return pIron_shovel_Swing[y][x];
+    }
+    return (color_tchar_t) { 0 };
+}
