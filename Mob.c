@@ -1,5 +1,6 @@
 ﻿#include "leak.h"
 #include "Mob.h"
+#include "game.h"
 
 #include "save.h"
 #include "player.h"
@@ -7,6 +8,8 @@
 #include "astar.h"
 #include "delta.h"
 #include "BlockCtrl.h"
+
+#include "BossMalakh.h"
 
 #define GRAVITY 25.0f
 #define BG_BLACK BACKGROUND_T_BLACK
@@ -139,21 +142,23 @@ static bool is_walkable_block(const block_t block) {
 	++mob_count;
 }
 
- static float mob_spawn_timer = 0.0f;
- const float Mob_Spawn_Cooltime = 2.0f;
 
- void mob_spawn_manager()
+ void mob_spawn_manager(void) 
  {
-	 if (is_night_time()) {
-		 mob_spawn_timer += delta_time;
-		 if (mob_spawn_timer >= Mob_Spawn_Cooltime) {
-			 MobSpawn();
-			 mob_spawn_timer = 0.0f;
+	 // 보스가 없을 때만 몬스터 생성 
+	 if (boss.state == E_BOSS_STATE_DEFEATED) {
+		 if (is_night_time()) {
+			 static float mob_spawn_timer = 0.0f;
+			 const float Mob_Spawn_Cooltime = 2.0f;
+
+			 mob_spawn_timer += delta_time;
+			 if (mob_spawn_timer >= Mob_Spawn_Cooltime) {
+				 MobSpawn();
+				 mob_spawn_timer = 0.0f;
+			 }
 		 }
 	 }
  }
-
-
 
 // 몬스터 피격 시 대미지 텍스트 생성 함수
 static void create_mob_damage_text(const int mob_index, const int damage_value) {

@@ -49,9 +49,7 @@ static void render(void) {
     render_map();
     render_player();
     render_virtual_cursor();
-    /*Boss_update();
-    Boss_Render();*/
-
+    if (is_boss_spawned) { Boss_Render();}
     render_inventory();
     render_hotbar();
     render_time();
@@ -82,7 +80,7 @@ void initialize_game(void) {
 void run_game(void) {
 
     //if (!is_boss_spawned) {
-    //    Boss_Init(player.x -10, player.y, 100, 10); // 보스 위치를 플레이어와 분리하여 초기화
+    //    Boss_Init(player.x -20, player.y, 100, 10); // 보스 위치를 플레이어와 분리하여 초기화
     //    is_boss_spawned = true; 
     //}
 
@@ -106,6 +104,7 @@ void run_game(void) {
         Crafting_UI_input();
         save_input();
         mob_update();
+        Boss_update();
 
         render();
     }

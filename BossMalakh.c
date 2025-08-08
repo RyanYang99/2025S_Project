@@ -301,6 +301,9 @@ void Boss_Update_Ai()
 		break;
 	}
 	case E_BOSS_STATE_DEFEATED:
+		if (is_boss_spawned) {
+			is_boss_spawned = false;
+		}
 		break;
 	default:
 		break;
