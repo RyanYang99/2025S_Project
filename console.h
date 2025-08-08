@@ -1,6 +1,8 @@
 ﻿#pragma once
 
+#include <stdarg.h>
 #include <stdbool.h>
+
 #include <Windows.h>
 
 //https://stackoverflow.com/a/17125539
@@ -52,6 +54,10 @@ void update_console(void);
 void write(const COORD position, const TCHAR character, const WORD attribute);
 void clear(void);
 void print_color_tchar(const color_tchar_t character, const COORD position);
+void fill(const color_tchar_t character);
 const COORD convert_monitor_to_console(const POINT point);
+const bool is_cursor_inside_console(const POINT point);
 int fprint_string(const char * const pFormat, const COORD position, const BACKGROUND_color_t background, const FOREGROUND_color_t foreground, ...);
+int fprint_string_v(const char * const pFormat, const COORD position, const BACKGROUND_color_t background, const FOREGROUND_color_t foreground, const va_list args);
+void print_center(const char * const string, const int y, const BACKGROUND_color_t background, const FOREGROUND_color_t foreground, ...);
 void destroy_console(void);

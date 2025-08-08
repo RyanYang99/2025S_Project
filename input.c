@@ -5,93 +5,77 @@
 #include <Windows.h>
 #include "console.h"
 
-#define CALLBACK_SUBSCRIBE_IMPLEMENTATION(type, array, count) \
-    if (!array) \
-        array = malloc(sizeof(type)); \
+#define CALLBACK_CALLBACKS_NAME(type) p##type##_callbacks
+#define CALLBACK_COUNT_NAME(type) type##_callback_count
+
+#define CALLBACK_VARIABLES(type) \
+static type *CALLBACK_CALLBACKS_NAME(type) = NULL; \
+static int CALLBACK_COUNT_NAME(type)
+
+#define CALLBACK_SUBSCRIBE_IMPLEMENTATION(type) \
+    if (!CALLBACK_CALLBACKS_NAME(type)) \
+        CALLBACK_CALLBACKS_NAME(type) = malloc(sizeof(type)); \
     else \
-        array = realloc(array, sizeof(type) * (count + 1)); \
-    array[count++] = callback
+        CALLBACK_CALLBACKS_NAME(type) = realloc(CALLBACK_CALLBACKS_NAME(type), sizeof(type) * (CALLBACK_COUNT_NAME(type) + 1)); \
+    CALLBACK_CALLBACKS_NAME(type)[CALLBACK_COUNT_NAME(type)++] = callback
 
-#define CALLBACK_UNSUBSCRIBE_IMPLEMENTATION(array, count) \
-    for (int i = 0; i < count; ++i) \
-        if (array[i] == callback) \
-            array[i] = NULL
+#define CALLBACK_UNSUBSCRIBE_IMPLEMENTATION(type) \
+    for (int i = 0; i < CALLBACK_COUNT_NAME(type); ++i) \
+        if (CALLBACK_CALLBACKS_NAME(type)[i] == callback) \
+            CALLBACK_CALLBACKS_NAME(type)[i] = NULL
 
-bool keyboard_pressed = false;
+#define CALLBACK_DESTROY(type) \
+    free(CALLBACK_CALLBACKS_NAME(type)); \
+    CALLBACK_CALLBACKS_NAME(type) = NULL; \
+    CALLBACK_COUNT_NAME(type) = 0
+
+    bool keyboard_pressed = false;
 char input_character = 0;
 
-HANDLE input_handle = NULL;
-DWORD original_mode = 0;
-HHOOK hook = NULL;
+static HANDLE input_handle = NULL;
+static DWORD original_mode = 0;
+static HHOOK hook = NULL;
 
-mouse_click_t* pMouseClick_callbacks = NULL;
-int mouse_click_callback_count = 0;
+CALLBACK_VARIABLES(mouse_click_t);
+CALLBACK_VARIABLES(mouse_position_t);
+CALLBACK_VARIABLES(mouse_in_console_t);
+//CALLBACK_VARIABLES(mouse_click_with_pos_t);
 
-mouse_position_t* pMousePosition_callbacks = NULL;
-int mouse_position_callback_count = 0;
-
-static void mouse_click_callback(const bool left)
-{
-    for (int i = 0; i < mouse_click_callback_count; ++i)
-        if (pMouseClick_callbacks[i])
-            pMouseClick_callbacks[i](left);
+static void mouse_click_callback(const bool left) {
+    for (int i = 0; i < CALLBACK_COUNT_NAME(mouse_click_t); ++i)
+        if (CALLBACK_CALLBACKS_NAME(mouse_click_t)[i])
+            CALLBACK_CALLBACKS_NAME(mouse_click_t)[i](left);
 }
 
-static const COORD convert_to_console(const POINT point)
-{
-    POINT client_point =
-    {
-        .x = point.x,
-        .y = point.y
-    };
-    ScreenToClient(GetConsoleWindow(), &client_point);
-
-    CONSOLE_FONT_INFO font = { 0 };
-    GetCurrentConsoleFont(GetStdHandle(STD_OUTPUT_HANDLE), false, &font);
-
-    if (font.dwFontSize.X == 0) font.dwFontSize.X = 8;
-    if (font.dwFontSize.Y == 0) font.dwFontSize.Y = 16;
-
-    const COORD consoleCoord =
-    {
-        .X = (SHORT)(client_point.x / font.dwFontSize.X),
-        .Y = (SHORT)(client_point.y / font.dwFontSize.Y)
-    };
-    return consoleCoord;
+static void mouse_position_callback(const COORD position) {
+    for (int i = 0; i < CALLBACK_COUNT_NAME(mouse_position_t); ++i)
+        if (CALLBACK_CALLBACKS_NAME(mouse_position_t)[i])
+            CALLBACK_CALLBACKS_NAME(mouse_position_t)[i](position);
 }
 
-static void mouse_position_callback(const COORD position)
-{
-    for (int i = 0; i < mouse_position_callback_count; ++i)
-        if (pMousePosition_callbacks[i])
-            pMousePosition_callbacks[i](position);
+static void mouse_in_console_callback(const bool in_console) {
+    for (int i = 0; i < CALLBACK_COUNT_NAME(mouse_in_console_t); ++i)
+        if (CALLBACK_CALLBACKS_NAME(mouse_in_console_t)[i])
+            CALLBACK_CALLBACKS_NAME(mouse_in_console_t)[i](in_console);
 }
 
-static LRESULT CALLBACK LowLevelMouseProc(const int nCode, const WPARAM wParam, const LPARAM lParam)
-{
-    if (nCode == HC_ACTION)
-    {
-        const MSLLHOOKSTRUCT *pMouse_struct = (MSLLHOOKSTRUCT *)lParam;
-        const COORD position = convert_monitor_to_console(pMouse_struct->pt);
-        mouse_position_callback(position);
+static LRESULT CALLBACK LowLevelMouseProc(const int nCode, const WPARAM wParam, const LPARAM lParam) {
+    if (nCode == HC_ACTION) {
+        const POINT point = ((MSLLHOOKSTRUCT *)lParam)->pt;
+        mouse_position_callback(convert_monitor_to_console(point));
 
-        switch (wParam)
-        {
-            case WM_LBUTTONUP:
-                mouse_click_callback(true);
-                break;
+        if (wParam == WM_LBUTTONUP)
+            mouse_click_callback(true);
+        else if (wParam == WM_RBUTTONUP)
+            mouse_click_callback(false);
 
-            case WM_RBUTTONUP:
-                mouse_click_callback(false);
-                break;
-        }
+        mouse_in_console_callback(is_cursor_inside_console(point));
     }
 
     return CallNextHookEx(NULL, nCode, wParam, lParam);
 }
 
-void initialize_input_handler(void)
-{
+void initialize_input_handler(void) {
     input_handle = GetStdHandle(STD_INPUT_HANDLE);
     GetConsoleMode(input_handle, &original_mode);
     SetConsoleMode(input_handle, ENABLE_EXTENDED_FLAGS | ENABLE_MOUSE_INPUT);
@@ -99,12 +83,14 @@ void initialize_input_handler(void)
     hook = SetWindowsHookEx(WH_MOUSE_LL, LowLevelMouseProc, NULL, 0);
 }
 
-void update_input(void)
-{
+void update_input(void) {
     keyboard_pressed = _kbhit();
     if (keyboard_pressed)
         input_character = (char)_getch();
 }
+
+
+
 
 // GetAsyncKeyState를 사용하여 키의 현재 상태를 반환
 // 0x8000 비트가 설정되어 있으면 키가 현재 눌려있다는 의미
@@ -117,36 +103,38 @@ void destroy_input_handler(void)
 {
     SetConsoleMode(input_handle, original_mode);
 
-    free(pMouseClick_callbacks);
-    pMouseClick_callbacks = NULL;
-    mouse_click_callback_count = 0;
+    CALLBACK_DESTROY(mouse_click_t);
+    CALLBACK_DESTROY(mouse_position_t);
+    CALLBACK_DESTROY(mouse_in_console_t);
 
-    free(pMousePosition_callbacks);
-    pMousePosition_callbacks = NULL;
-    mouse_position_callback_count = 0;
 
     UnhookWindowsHookEx(hook);
 }
 
-void subscribe_mouse_click(const mouse_click_t callback)
-{
-    CALLBACK_SUBSCRIBE_IMPLEMENTATION(mouse_click_t, pMouseClick_callbacks, mouse_click_callback_count);
+void subscribe_mouse_click(const mouse_click_t callback) {
+    CALLBACK_SUBSCRIBE_IMPLEMENTATION(mouse_click_t);
 }
 
-void unsubscribe_mouse_click(const mouse_click_t callback)
-{
-    CALLBACK_UNSUBSCRIBE_IMPLEMENTATION(pMouseClick_callbacks, mouse_click_callback_count);
+void unsubscribe_mouse_click(const mouse_click_t callback) {
+    CALLBACK_UNSUBSCRIBE_IMPLEMENTATION(mouse_click_t);
 }
 
-void subscribe_mouse_position(const mouse_position_t callback)
-{
-    CALLBACK_SUBSCRIBE_IMPLEMENTATION(mouse_position_t, pMousePosition_callbacks, mouse_position_callback_count);
+void subscribe_mouse_position(const mouse_position_t callback) {
+    CALLBACK_SUBSCRIBE_IMPLEMENTATION(mouse_position_t);
 }
 
-void unsubscribe_mouse_position(const mouse_position_t callback)
-{
-    CALLBACK_UNSUBSCRIBE_IMPLEMENTATION(pMousePosition_callbacks, mouse_position_callback_count);
+void unsubscribe_mouse_position(const mouse_position_t callback) {
+    CALLBACK_UNSUBSCRIBE_IMPLEMENTATION(mouse_position_t);
 }
+
+void subscribe_mouse_in_console(const mouse_in_console_t callback) {
+    CALLBACK_SUBSCRIBE_IMPLEMENTATION(mouse_in_console_t);
+}
+
+void unsubscribe_mouse_in_console(const mouse_in_console_t callback) {
+    CALLBACK_UNSUBSCRIBE_IMPLEMENTATION(mouse_in_console_t);
+}
+
 
 #if _DEBUG
 void pause_hook(void) {

@@ -1,35 +1,30 @@
-﻿// Mob.h
-#pragma once
+﻿#pragma once
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
 #include <stdbool.h>
-#include <windows.h> // COORD를 사용하기 위해 추가
-
-#include "player.h"
-#include "map.h"
 #include "console.h"
-#include "astar.h" 
 
+#define MAX_MOB 5
+#define MAX_MOB_DEBUG_MESSAGE_LEN 100
+#define MAX_MOB_DAMAGE_TEXTS 20
 
-#define Max_Mob 5
-
-
+#pragma pack(push, 1)
 typedef struct {
-    int x;  // 월드 좌표 X
-    int y;  // 월드 좌표 Y
-    int HP;
-    int atk;
-    long last_move_time; // 몬스터 개별 이동 시간 조절을 위한 타이머
+    int x, y, HP, atk, state, despawn_check;
+    float precise_y, precise_x, velocity_y,velocity_x;
+    bool is_on_ground;
+    bool is_dead;
+    int last_move_time;
+    int current_frame;
+    float ai_timer, despawn_timer, animation_timer;
+    float last_attack_time, atk_cooltime_timer, dying_timer;
 } Mob;
+#pragma pack(pop)
 
-extern Mob mobs[Max_Mob]; 
-extern int mob_count; // mobs 배열의 현재 유효한 몹 개수
-extern int mob_level; // 난이도
+extern char mob_debug_message[MAX_MOB_DEBUG_MESSAGE_LEN];
 
-void Mob_Spawn_Time();
-void MobSpawn(int x, int y);
+// 함수 선언
+void mob_init();
+void save_mob(void);
+void mob_update();
 void Mob_render();
-
-void update_mob_ai(void);
+void destroy_mob(void);
