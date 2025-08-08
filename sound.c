@@ -26,6 +26,14 @@ static const char* swingSounds[MAX_SWING_SOUNDS] = {
     "Swing/swing3.wav"
 };
 
+static const char* monsterHurtSounds[MAX_HURT_SOUNDS] = {
+    "Moster/Hurt/Hurt.wav",
+    "Moster/Hurt/Hurt2.wav",
+    "Moster/Hurt/Hurt3.wav",
+    "Moster/Hurt/Hurt4.wav",
+    "Moster/Hurt/Hurt5.wav"
+};
+
 typedef struct {
     sfMusic* bgm;
 } SoundManager;
@@ -33,9 +41,11 @@ typedef struct {
 typedef struct {
     sfSoundBuffer* buffers[MAX_FOOTSTEP_SOUNDS];
     sfSoundBuffer* swingBuffers[MAX_SWING_SOUNDS];
+    sfSoundBuffer* monsterHurtBuffers[MAX_HURT_SOUNDS];
     sfSound* sound;
     int footstepCount;
     int swingCount;
+    int monsterHurtCount;
 } SFXManager;
 
 
@@ -57,6 +67,7 @@ void Sound_init() {
     s_sfx->sound = sfSound_create();
     s_sfx->footstepCount = 0;
     s_sfx->swingCount = 0;
+    s_sfx->monsterHurtCount = 0;
 
     for (int i = 0; i < MAX_FOOTSTEP_SOUNDS; i++) {
         if (footstepSounds[i] == NULL) break;
@@ -76,6 +87,15 @@ void Sound_init() {
         s_sfx->swingBuffers[i] = sfSoundBuffer_createFromFile(fullPath);
         if (s_sfx->swingBuffers[i]) {
             s_sfx->swingCount++;
+        }
+    }
+
+    for (int i = 0; i < MAX_HURT_SOUNDS; i++) {
+        char fullPath[256];
+        snprintf(fullPath, sizeof(fullPath), "SoundFile/%s", monsterHurtSounds[i]);
+        s_sfx->monsterHurtBuffers[i] = sfSoundBuffer_createFromFile(fullPath);
+        if (s_sfx->monsterHurtBuffers[i]) {
+            s_sfx->monsterHurtCount++;
         }
     }
 
@@ -153,6 +173,21 @@ void Sound_playSwing() {
 
     // 선택된 스윙 소리를 플레이어에 설정하고 재생
     sfSound_setBuffer(s_sfx->sound, s_sfx->swingBuffers[index]);
+    sfSound_play(s_sfx->sound);
+}
+
+void Sound_playMonsterHurt() {
+    // 피격음이 로드되지 않았으면 즉시 종료
+    if (!s_sfx || s_sfx->monsterHurtCount == 0) return;
+
+    // 다른 효과음이 재생 중이면 중복 재생 방지
+    if (sfSound_getStatus(s_sfx->sound) == sfPlaying) return;
+
+    // 0부터 로드된 피격음 개수 사이에서 무작위 인덱스 선택
+    int index = rand() % s_sfx->monsterHurtCount;
+
+    // 선택된 피격음을 플레이어에 설정하고 재생
+    sfSound_setBuffer(s_sfx->sound, s_sfx->monsterHurtBuffers[index]);
     sfSound_play(s_sfx->sound);
 }
 

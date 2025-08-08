@@ -155,6 +155,7 @@ static void Mob_Spawn_Time(void) {
 
 // 몬스터 피격 시 대미지 텍스트 생성 함수
 static void create_mob_damage_text(const int mob_index, const int damage_value) {
+	Sound_playMonsterHurt();
 	for (int i = 0; i < MAX_MOB_DAMAGE_TEXTS; ++i)
 		if (!mob_damage_texts[i].active) {
 			mob_damage_texts[i].active = true;
