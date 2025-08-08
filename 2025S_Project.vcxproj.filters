@@ -67,9 +67,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="save.c">
-	  <Filter>Source Files</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BossMalakh.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Crafting_UI.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="item.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -126,14 +132,26 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="save.h">
-	  <Filter>Header Files</Filter>
-	</ClInclude>
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="BossMalakh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Crafting_UI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="item.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="items.csv">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="base_recipes.csv">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="workbench_recipes.csv">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

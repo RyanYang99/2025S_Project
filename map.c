@@ -119,8 +119,8 @@ color_tchar_t get_block_texture(const block_t block, const int x, const int y)
         { { ' ' , BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_T_BLACK, 0 } }
     }, pWorkbench[TEXTURE_SIZE][TEXTURE_SIZE] = {
         { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 } },
-        { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 } },
-        { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_TRANSPARENT, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 } }
+        { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_TRANSPARENT, 0 } },
+        { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 } }
     };
 
     if (is_air_or_star(block)) {
@@ -236,7 +236,7 @@ static int find_top(const int x)
         return -1;
 
     for (int y = 0; y < map.size.y; ++y)
-        if (is_air_or_star(map.ppBlocks[y][x].type))
+        if (!is_air_or_star(map.ppBlocks[y][x].type))
             return y;
 
     return -1;
@@ -501,8 +501,8 @@ static COORD render_block(const POINT map_position, const COORD console_position
             size.Y = (SHORT)ty + 1;
 
             print_color_tchar(get_block_texture(map.ppBlocks[map_position.y][map_position.x].type,
-                                                utd ? ty : (TEXTURE_SIZE - ty - 1),
-                                                ltr ? tx : (TEXTURE_SIZE - tx - 1)),
+                                                ltr ? tx : (TEXTURE_SIZE - tx - 1),
+                                                utd ? ty : (TEXTURE_SIZE - ty - 1)),
                               position);
         }
 

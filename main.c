@@ -74,8 +74,6 @@ int main(void)
             free_save();
 
         initialize_input_handler();
-        register_mob_click_handler();
-        mob_init();
         initialize_game();
         run_game();
         destroy_game();

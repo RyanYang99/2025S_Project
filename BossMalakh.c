@@ -137,7 +137,7 @@ void Boss_Render()
         for (int x_offset = 0; x_offset < 20; ++x_offset) {
             for (int py = 0; py < 3; ++py) {
                 for (int px = 0; px < 3; ++px) {
-                    COORD char_pos = { boss_screen_base_x + (x_offset * 3) + px, boss_screen_base_y + (y_offset * 3) + py };
+                    COORD char_pos = { (SHORT)(boss_screen_base_x + (x_offset * 3) + px), (SHORT)(boss_screen_base_y + (y_offset * 3) + py) };
                     if (char_pos.X >= 0 && char_pos.X < console.size.X &&
                         char_pos.Y >= 0 && char_pos.Y < console.size.Y) {
                         color_tchar_t char_to_print = boss.sprite_data[y_offset][x_offset];
@@ -153,7 +153,7 @@ void Boss_Render()
     // 보스 체력 바 렌더링
     wchar_t hp_text[50];
     swprintf(hp_text, sizeof(hp_text) / sizeof(wchar_t), L"HP: %d/%d", boss.hp, boss.Max_hp);
-    COORD hp_pos = { boss_screen_base_x + (20 * 3 / 2) - (int)(wcslen(hp_text) / 2.0), boss_screen_base_y - 1 };
+    COORD hp_pos = { (SHORT)(boss_screen_base_x + (20 * 3 / 2) - (int)(wcslen(hp_text) / 2.0)), (SHORT)(boss_screen_base_y - 1) };
     if (hp_pos.X < 0) hp_pos.X = 0;
     if (hp_pos.Y < 0) hp_pos.Y = 0;
     Boss_Print_String_Color_W(hp_text, hp_pos, BACKGROUND_T_BLACK, FOREGROUND_T_WHITE);
@@ -188,7 +188,7 @@ void Boss_Update_Ai()
         printf("Boss enters Phase 2 ! (Hp : %d / %d )\n", boss.hp, boss.Max_hp);
 #endif
         boss.last_action_time = current_time;
-        boss.atk = boss.atk * 1.5;
+        boss.atk = (int)(boss.atk * 1.5f);
         boss.special_attack_cooltime = 6000;
         boss.last_special_attack_time = current_time;
     }
@@ -218,8 +218,8 @@ void Boss_Update_Ai()
 
                 if (boss.cached_path.count > 0)
                 {
-                    boss.last_player_pos.X = player.x;
-                    boss.last_player_pos.Y = player.y;
+                    boss.last_player_pos.X = (SHORT)player.x;
+                    boss.last_player_pos.Y = (SHORT)player.y;
                     boss.cached_path.current_index = 0;
                 }
                 else
@@ -255,7 +255,7 @@ void Boss_Update_Ai()
 #if _DEBUG
             printf("Boss Phase %d uses Special Attack!\n", boss.state);
 #endif
-            player_take_damage(boss.atk * 1.5);
+            player_take_damage((int)(boss.atk * 1.5f));
             boss.last_special_attack_time = current_time;
         }
 

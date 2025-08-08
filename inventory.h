@@ -38,6 +38,7 @@ void initialize_inventory(void);
 
 bool add_item_to_inventory(const int item_db_index, int quantity);
 void decrement_item_from_inventory(player_item_t * const pItem);
+int get_inventory_count(int item_db_index);
 
 void render_inventory(void);
 void render_hotbar(void);

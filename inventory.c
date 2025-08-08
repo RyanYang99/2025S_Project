@@ -20,6 +20,9 @@
 #define HOTBAR_SIZE_IN_CHARACTERS_X (TEXTURE_SIZE * HOTBAR_COUNT + HOTBAR_COUNT + 1)
 #define HOTBAR_SIZE_IN_CHARACTERS_Y (TEXTURE_SIZE + 2)
 
+static bool should_render_name = false;
+static float name_render_timer = 0.0f;
+
 inventory_t inventory = { 0 };
 
 static const int max_selection_index = ITEMS_PER_PAGE - 1,
@@ -180,12 +183,12 @@ static void render_inventory_item(const int y,
         position.X += (SHORT)fprint_string("[ %s", position, INVENTORY_BACKGROUND, foreground, pItem_info->name);
 
         if (pItem_info->max_stack > 1)
-            position.X += (SHORT)fprint_string(" (x%d) ", position, INVENTORY_BACKGROUND, foreground, pItem->quantity);
+            position.X += (SHORT)fprint_string(" (x%d)", position, INVENTORY_BACKGROUND, foreground, pItem->quantity);
 
         if (pItem_info->type == ITEM_TYPE_TOOL || pItem_info->type == ITEM_TYPE_ARMOR)
-            position.X += (SHORT)fprint_string(" (Durability: %d/%d) ", position, INVENTORY_BACKGROUND, foreground, pItem->durability, pItem_info->base_durability);
+            position.X += (SHORT)fprint_string(" (Durability: %d/%d)", position, INVENTORY_BACKGROUND, foreground, pItem->durability, pItem_info->base_durability);
 
-        position.X += (SHORT)fprint_string("]", position, INVENTORY_BACKGROUND, foreground);
+        position.X += (SHORT)fprint_string(" ]", position, INVENTORY_BACKGROUND, foreground);
 
         for (int i = 0; i < max_hotbar_index; ++i)
             if (inventory.pHotbar[i].index_in_inventory == inventory_index)
@@ -264,12 +267,23 @@ void render_hotbar(void) {
     const int slot_height = TEXTURE_SIZE + 2; // 테두리 포함 세로 크기
 
     COORD position = {
-        .X = console.size.X / 2 - (HOTBAR_COUNT * slot_width) / 2,
-        .Y = console.size.Y - slot_height - 1 // 화면 하단 위치 (필요에 따라 조정)
+        .X = (SHORT)(console.size.X / 2 - (HOTBAR_COUNT * slot_width) / 2),
+        .Y = (SHORT)(console.size.Y - slot_height - 1) // 화면 하단 위치 (필요에 따라 조정)
     };
 
     if (position.X < 0 || position.Y < 0)
         return;
+
+    if (should_render_name && inventory.pHotbar[inventory.selected_hotbar_index].index_in_inventory != -1) {
+        if (name_render_timer >= 3.0f) {
+            should_render_name = false;
+            name_render_timer = 0.0f;
+        }
+        name_render_timer += delta_time;
+
+        const item_information_t const * pInformation = find_item_by_index(inventory.pHotbar[inventory.selected_hotbar_index].pPlayer_Item->item_db_index);
+        print_center("%s", position.Y - 2, BACKGROUND_T_BLACK, FOREGROUND_T_WHITE, pInformation->name);
+    }
 
     for (int i = 0; i < HOTBAR_COUNT; ++i) {
         bool is_selected = (inventory.selected_hotbar_index == i);
@@ -283,14 +297,14 @@ void render_hotbar(void) {
         // 1. 테두리 영역 출력
         // 위, 아래 가로줄 (빈칸 문자 + 테두리 배경색)
         for (int tx = 0; tx < slot_width; ++tx) {
-            print_color_tchar((color_tchar_t) { ' ', border_background, 0 }, (COORD) { slot_start_x + tx, slot_start_y });
-            print_color_tchar((color_tchar_t) { ' ', border_background, 0 }, (COORD) { slot_start_x + tx, slot_start_y + slot_height - 1 });
+            print_color_tchar((color_tchar_t) { ' ', border_background, 0 }, (COORD) { (SHORT)(slot_start_x + tx), (SHORT)slot_start_y });
+            print_color_tchar((color_tchar_t) { ' ', border_background, 0 }, (COORD) { (SHORT)(slot_start_x + tx), (SHORT)(slot_start_y + slot_height - 1) });
         }
 
         // 좌, 우 세로줄
         for (int ty = 1; ty < slot_height - 1; ++ty) {
-            print_color_tchar((color_tchar_t) { ' ', border_background, 0 }, (COORD) { slot_start_x, slot_start_y + ty });
-            print_color_tchar((color_tchar_t) { ' ', border_background, 0 }, (COORD) { slot_start_x + slot_width - 1, slot_start_y + ty });
+            print_color_tchar((color_tchar_t) { ' ', border_background, 0 }, (COORD) { (SHORT)(slot_start_x), (SHORT)(slot_start_y + ty) });
+            print_color_tchar((color_tchar_t) { ' ', border_background, 0 }, (COORD) { (SHORT)(slot_start_x + slot_width - 1), (SHORT)(slot_start_y + ty) });
         }
 
         // 2. 슬롯 내부 텍스처 출력 (기존 방식과 동일)
@@ -318,7 +332,7 @@ void render_hotbar(void) {
                         texture_char = get_item_texture(item_index, tex_x, tex_y);
                 }
 
-                print_color_tchar(texture_char, (COORD) { slot_start_x + tx, slot_start_y + ty });
+                print_color_tchar(texture_char, (COORD) { (SHORT)(slot_start_x + tx), (SHORT)(slot_start_y + ty) });
             }
         }
     }
@@ -355,8 +369,11 @@ void inventory_input(void) {
     
     if (character == 'i')
         is_inventory_open = !is_inventory_open;
-    else if (is_number && number <= max_hotbar_index)
+    else if (is_number && number <= max_hotbar_index) {
         inventory.selected_hotbar_index = number;
+        should_render_name = true;
+        name_render_timer = 0.0f;
+    }
 
     if (!is_inventory_open)
         return;
