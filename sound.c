@@ -27,11 +27,11 @@ static const char* swingSounds[MAX_SWING_SOUNDS] = {
 };
 
 static const char* monsterHurtSounds[MAX_HURT_SOUNDS] = {
-    "Moster/Hurt/Hurt.wav",
-    "Moster/Hurt/Hurt2.wav",
-    "Moster/Hurt/Hurt3.wav",
-    "Moster/Hurt/Hurt4.wav",
-    "Moster/Hurt/Hurt5.wav"
+    "Monster/Hurt/Hurt.wav",
+    "Monster/Hurt/Hurt2.wav",
+    "Monster/Hurt/Hurt3.wav",
+    "Monster/Hurt/Hurt4.wav",
+    "Monster/Hurt/Hurt5.wav"
 };
 
 typedef struct {
@@ -42,6 +42,7 @@ typedef struct {
     sfSoundBuffer* buffers[MAX_FOOTSTEP_SOUNDS];
     sfSoundBuffer* swingBuffers[MAX_SWING_SOUNDS];
     sfSoundBuffer* monsterHurtBuffers[MAX_HURT_SOUNDS];
+    sfSound* sfxPlayers[MAX_SFX_PLAYERS];
     sfSound* sound;
     int footstepCount;
     int swingCount;
@@ -51,6 +52,19 @@ typedef struct {
 
 static SFXManager* s_sfx = NULL;
 static SoundManager* s_manager = NULL;
+
+static void play_sfx(sfSoundBuffer* buffer) {
+    if (!s_sfx || !buffer) return;
+
+    // 비어있는 플레이어를 찾는다
+    for (int i = 0; i < MAX_SFX_PLAYERS; i++) {
+        if (sfSound_getStatus(s_sfx->sfxPlayers[i]) != sfPlaying) {
+            sfSound_setBuffer(s_sfx->sfxPlayers[i], buffer);
+            sfSound_play(s_sfx->sfxPlayers[i]);
+            return;
+        }
+    }
+}
 
 void Sound_init() {
     if (s_manager != NULL) return;
@@ -64,6 +78,9 @@ void Sound_init() {
     s_sfx = (SFXManager*)malloc(sizeof(SFXManager));
     if (!s_sfx) return;
 
+    for (int i = 0; i < MAX_SFX_PLAYERS; i++) {
+        s_sfx->sfxPlayers[i] = sfSound_create();
+    }
     s_sfx->sound = sfSound_create();
     s_sfx->footstepCount = 0;
     s_sfx->swingCount = 0;
@@ -153,42 +170,23 @@ void Sound_playFootstep() {
 
     if (sfSound_getStatus(s_sfx->sound) == sfPlaying) return;
 
-
     int index = rand() % s_sfx->footstepCount;
 
-    sfSound_stop(s_sfx->sound);  // 이전 소리 멈추기
+    // 전용 플레이어에 소리를 설정하고 재생합니다.
     sfSound_setBuffer(s_sfx->sound, s_sfx->buffers[index]);
     sfSound_play(s_sfx->sound);
 }
 
 void Sound_playSwing() {
-    // 스윙 소리가 로드되지 않았으면 즉시 종료
     if (!s_sfx || s_sfx->swingCount == 0) return;
-
-    // 다른 효과음이 재생 중이면 중복 재생 방지
-    if (sfSound_getStatus(s_sfx->sound) == sfPlaying) return;
-
-    // 0부터 로드된 스윙 소리 개수 사이에서 무작위 인덱스 선택
     int index = rand() % s_sfx->swingCount;
-
-    // 선택된 스윙 소리를 플레이어에 설정하고 재생
-    sfSound_setBuffer(s_sfx->sound, s_sfx->swingBuffers[index]);
-    sfSound_play(s_sfx->sound);
+    play_sfx(s_sfx->swingBuffers[index]);
 }
 
 void Sound_playMonsterHurt() {
-    // 피격음이 로드되지 않았으면 즉시 종료
     if (!s_sfx || s_sfx->monsterHurtCount == 0) return;
-
-    // 다른 효과음이 재생 중이면 중복 재생 방지
-    if (sfSound_getStatus(s_sfx->sound) == sfPlaying) return;
-
-    // 0부터 로드된 피격음 개수 사이에서 무작위 인덱스 선택
     int index = rand() % s_sfx->monsterHurtCount;
-
-    // 선택된 피격음을 플레이어에 설정하고 재생
-    sfSound_setBuffer(s_sfx->sound, s_sfx->monsterHurtBuffers[index]);
-    sfSound_play(s_sfx->sound);
+    play_sfx(s_sfx->monsterHurtBuffers[index]);
 }
 
 void Sound_shutdown() {
@@ -204,21 +202,19 @@ void Sound_shutdown() {
     s_manager = NULL;
 
     if (s_sfx) {
-        for (int i = 0; i < s_sfx->footstepCount; i++) {
-            if (s_sfx->buffers[i]) {
-                sfSoundBuffer_destroy(s_sfx->buffers[i]);
-            }
-        }
+        for (int i = 0; i < s_sfx->footstepCount; i++) { if (s_sfx->buffers[i]) sfSoundBuffer_destroy(s_sfx->buffers[i]); }
+        for (int i = 0; i < s_sfx->swingCount; i++) { if (s_sfx->swingBuffers[i]) sfSoundBuffer_destroy(s_sfx->swingBuffers[i]); }
+        for (int i = 0; i < s_sfx->monsterHurtCount; i++) { if (s_sfx->monsterHurtBuffers[i]) sfSoundBuffer_destroy(s_sfx->monsterHurtBuffers[i]); }
 
-        for (int i = 0; i < s_sfx->swingCount; i++) {
-            if (s_sfx->swingBuffers[i]) {
-                sfSoundBuffer_destroy(s_sfx->swingBuffers[i]);
-            }
+
+        for (int i = 0; i < MAX_SFX_PLAYERS; i++) {
+            if (s_sfx->sfxPlayers[i]) sfSound_destroy(s_sfx->sfxPlayers[i]);
         }
 
         if (s_sfx->sound) {
             sfSound_destroy(s_sfx->sound);
         }
+
         free(s_sfx);
         s_sfx = NULL;
     }

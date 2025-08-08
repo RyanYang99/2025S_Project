@@ -4,6 +4,7 @@
 #define MAX_FOOTSTEP_SOUNDS 10
 #define MAX_SWING_SOUNDS 3
 #define MAX_HURT_SOUNDS 5
+#define MAX_SFX_PLAYERS 10
 
 
 void Sound_init();
