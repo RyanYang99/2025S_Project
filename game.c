@@ -4,6 +4,7 @@
 #include "Mob.h"
 #include "map.h"
 #include "save.h"
+#include "astar.h"
 #include "input.h"
 #include "delta.h"
 #include "player.h"
@@ -61,12 +62,13 @@ void initialize_game(void) {
     initialize_date_time();
     create_map();
     player_init();
+    mob_init();
     initialize_block_control();
     initialize_inventory();
     initialize_crafting_ui();
     initialize_save();
-    load_mob();
     free_save();
+
     add_item_to_inventory(109, 1);
     register_mob_click_handler();
 }
@@ -87,13 +89,14 @@ void run_game(void) {
         inventory_input();
         Crafting_UI_input();
         save_input();
-       
 
         render();
     }
 }
 
 void destroy_game(void) {
+    destroy_mob();
+    destroy_astar();
     destroy_block_control();
     destroy_map();
 }
