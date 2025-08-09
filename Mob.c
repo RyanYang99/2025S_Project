@@ -1,18 +1,17 @@
 ﻿#include "leak.h"
 #include "Mob.h"
-#include "game.h"
 
+#include <time.h>
 #include "save.h"
-#include "player.h"
 #include "map.h"
+#include "sound.h"
 #include "input.h"
 #include "astar.h"
 #include "delta.h"
-#include "block_control.h"
+#include "player.h"
 #include "date_time.h"
-#include "sound.h"
-
 #include "boss_malakh.h"
+#include "block_control.h"
 
 #define GRAVITY 25.0f
 #define BG_BLACK BACKGROUND_T_BLACK
@@ -253,8 +252,10 @@ static void mob_physics(void) {
             continue;
         }
 
-        if (mobs[i].y >= map.size.y || mobs[i].precise_y >= map.size.y)
-            mobs[i].y = mobs[i].precise_y = (float)player_find_ground_position(mobs[i].x);
+        if (mobs[i].y >= map.size.y || mobs[i].precise_y >= map.size.y) {
+            mobs[i].y = player_find_ground_position(mobs[i].x);
+            mobs[i].precise_y = (float)mobs[i].y;
+        }
 
         const int below = mobs[i].y + 1;
         if (below >= map.size.y)

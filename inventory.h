@@ -1,10 +1,6 @@
 ﻿#pragma once
 
-#include <time.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <stdbool.h>
-#include "item_database.h"
 
 #define ITEMS_PER_PAGE 10 //한 페이지에 보여줄 아이템 수
 #define MAX_PAGES 5 //최대 페이지 수

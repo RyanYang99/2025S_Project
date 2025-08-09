@@ -1,8 +1,6 @@
 ﻿#pragma once
 
-#include <windows.h>
 #include <stdbool.h>
-#include "console.h"
 
 #define MAX_DAMAGE_TEXTS 10
 

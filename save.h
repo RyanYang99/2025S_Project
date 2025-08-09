@@ -2,7 +2,6 @@
 
 #include "mob.h"
 #include "map.h"
-#include "player.h"
 #include "perlin.h"
 #include "inventory.h"
 #include "date_time.h"

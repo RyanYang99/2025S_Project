@@ -1,17 +1,15 @@
 ﻿#include "leak.h"
 #include "boss_malakh.h"
 
-#include "delta.h"
-#include "console.h"
-#include "input.h"
-#include "map.h"
-#include "player.h"
-#include "astar.h"
-#include "Mob.h"
-#include <math.h>
 #include <stdlib.h>
-#include "block_control.h"
+#include "map.h"
+#include "delta.h"
+#include "astar.h"
+#include "input.h"
+#include "player.h"
+#include "console.h"
 #include "formatter.h"
+#include "block_control.h"
 
 //가독성을 위한 매크로
 #define FG_WHITE FOREGROUND_T_WHITE
@@ -103,15 +101,15 @@ static const color_character_t pBoss_malakh_sprite_data[BOSS_SPRITE_HEIGHT][BOSS
 
 //보스 데미지 텍스트 생성 함수
 static void boss_create_damage_text(const int damage_value) {
-	for (int i = 0; i < MAX_BOSS_DAMAGE_TEXTS; ++i)
-		if (!pBoss_damage_texts[i].active) {
-			pBoss_damage_texts[i].active = true;
-			pBoss_damage_texts[i].damage_value = damage_value;
-			pBoss_damage_texts[i].precise_x = (float)boss.x + (float)(rand() % (BOSS_SPRITE_WIDTH - 1));
-			pBoss_damage_texts[i].precise_y = (float)boss.y + (float)(rand() % (BOSS_SPRITE_HEIGHT - 1));
-			pBoss_damage_texts[i].timer = BOSS_DAMAGE_TEXT_DURATION;
-			break;
-		}
+    for (int i = 0; i < MAX_BOSS_DAMAGE_TEXTS; ++i)
+        if (!pBoss_damage_texts[i].active) {
+            pBoss_damage_texts[i].active = true;
+            pBoss_damage_texts[i].damage_value = damage_value;
+            pBoss_damage_texts[i].precise_x = (float)boss.x + (float)(rand() % (BOSS_SPRITE_WIDTH - 1));
+            pBoss_damage_texts[i].precise_y = (float)boss.y + (float)(rand() % (BOSS_SPRITE_HEIGHT - 1));
+            pBoss_damage_texts[i].timer = BOSS_DAMAGE_TEXT_DURATION;
+            break;
+        }
 }
 
 //보스 데미지 입히는 함수
@@ -489,19 +487,19 @@ static void boss_render_pattern(void) {
 
 //보스 대미지 텍스트 렌더링 함수
 static void boss_render_damage_texts(void) {
-    const COORD center_pos = {
+    const COORD center_position = {
         .X = console_size.X / 2,
         .Y = console_size.Y / 2
     };
 
     for (int i = 0; i < MAX_BOSS_DAMAGE_TEXTS; ++i) {
         if (pBoss_damage_texts[i].active) {
-            const COORD draw_pos = {
-                .X = (SHORT)(center_pos.X + (pBoss_damage_texts[i].precise_x - player.x)),
-                .Y = (SHORT)(center_pos.Y + (pBoss_damage_texts[i].precise_y - player.y))
+            const COORD draw_position = {
+                .X = (SHORT)(center_position.X + (pBoss_damage_texts[i].precise_x - player.x)),
+                .Y = (SHORT)(center_position.Y + (pBoss_damage_texts[i].precise_y - player.y))
             };
 
-            console_fprint_string("Attack! -%d", draw_pos, BACKGROUND_T_BLACK, FOREGROUND_T_WHITE, pBoss_damage_texts[i].damage_value);
+            console_fprint_string("Attack! -%d", draw_position, BACKGROUND_T_BLACK, FOREGROUND_T_WHITE, pBoss_damage_texts[i].damage_value);
         }
     }
 }

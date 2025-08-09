@@ -1,18 +1,14 @@
 ﻿#include "leak.h"
 #include "map.h"
 
-#if _DEBUG
-#include <stdio.h>
-#endif
-
 #include <time.h>
 #include <math.h>
 #include <stdbool.h>
 #include "save.h"
 #include "perlin.h"
 #include "player.h"
-#include "item_database.h"
 #include "date_time.h"
+#include "item_database.h"
 
 typedef enum {
     BIOME_PLAINS,

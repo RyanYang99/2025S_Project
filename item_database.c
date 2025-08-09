@@ -1,6 +1,12 @@
 ﻿#include "leak.h"
 #include "item_database.h"
 
+#include <stdio.h>
+#include <locale.h>
+#include <string.h>
+
+#include <Windows.h>
+
 item_database_t database = { 0 };
 
 static const char pFile_name[] = "items.csv";

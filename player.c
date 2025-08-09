@@ -1,29 +1,25 @@
 ﻿#include "leak.h"
 #include "player.h"
 
-#include "Tool.h"
+#include <Windows.h>
 #include "map.h"
+#include "tool.h"
 #include "save.h"
 #include "input.h"
 #include "delta.h"
+#include "sound.h"
 #include "console.h"
-#include <stdio.h> //swprintf 사용하기위해
-#include <wchar.h>
-#include <time.h>
-#include <conio.h>
-#include <Windows.h> //VK_SPACE 사용을 위해 추가
-#include "sound.h" //발소리 추가
 #include "formatter.h"
 
 #define PLAYER_SPRITE_WIDTH 5
 #define PLAYER_SPRITE_HEIGHT 5
 #define ANIMATION_SPEED 10.0f //1초에 4번 프레임 변경
 
-#define GRAVITY 50.0f         //중력 가속도
-#define JUMP_STRENGTH -12.0f  //점프 시 부여되는 초기 수직 속도
+#define GRAVITY 50.0f //중력 가속도
+#define JUMP_STRENGTH -12.0f //점프 시 부여되는 초기 수직 속도
 
 // 수평 이동 속도 조절 (값이 작을수록 빨라짐)
-#define HORIZONTAL_MOVE_COOLDOWN 0.08f  //약 1초에 12.5칸 이동8
+#define HORIZONTAL_MOVE_COOLDOWN 0.08f //약 1초에 12.5칸 이동8
 
 #define HP_BAR_WIDTH 20
 

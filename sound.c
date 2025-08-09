@@ -1,11 +1,10 @@
 #include "leak.h"
 #include "sound.h"
 
-#include "stdio.h"
-#include "stdlib.h"
-#include "time.h"
-
-#include "SFML/Audio.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <SFML/Audio.h>
 
 //한 번에 로드할 발소리 파일의 최대 개수
 #define MAX_FOOTSTEP_SOUNDS 10

@@ -1,11 +1,13 @@
 ﻿#include "leak.h"
+
+#include <stdio.h>
 #include "save.h"
 #include "game.h"
 #include "input.h"
-#include "item_database.h"
-#include "main_menu.h"
-#include "Crafting_UI.h"
 #include "sound.h"
+#include "main_menu.h"
+#include "crafting_UI.h"
+#include "item_database.h"
 
 static bool force_old_console(void) {
     if (console_is_new_windows_terminal()) {

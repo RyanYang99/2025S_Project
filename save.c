@@ -1,11 +1,13 @@
 ﻿#include "leak.h"
 #include "save.h"
 
+#include <stdio.h>
 #include <string.h>
 #include <ShlObj_core.h>
 #include "game.h"
 #include "input.h"
 #include "delta.h"
+#include "player.h"
 
 static bool should_render_save_menu = false;
 static bool pUsed[MAX_SAVE_SPOTS] = { 0 };

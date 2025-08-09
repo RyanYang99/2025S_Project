@@ -1,18 +1,18 @@
 ﻿#include "leak.h"
 #include "game.h"
 
-#include "Mob.h"
-#include "boss_malakh.h"
+#include "mob.h"
 #include "map.h"
 #include "save.h"
 #include "astar.h"
 #include "input.h"
 #include "delta.h"
 #include "player.h"
-#include "block_control.h"
 #include "inventory.h"
 #include "date_time.h"
-#include "Crafting_UI.h"
+#include "crafting_UI.h"
+#include "boss_malakh.h"
+#include "block_control.h"
 
 bool game_exit = false;
 

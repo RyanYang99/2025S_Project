@@ -7,6 +7,7 @@
 #include "input.h"
 #include "player.h"
 #include "inventory.h"
+#include "item_database.h"
 
 #define MATERIAL_STRING_COUNT 128
 #define CRAFTING_MAX_RECIPES 64

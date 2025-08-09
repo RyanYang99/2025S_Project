@@ -1,7 +1,6 @@
 ﻿#include "leak.h"
 #include "date_time.h"
 
-#include <math.h>
 #include "save.h"
 #include "delta.h"
 #include "console.h"

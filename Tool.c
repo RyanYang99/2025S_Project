@@ -4,10 +4,9 @@
 #include <stdbool.h>
 #include "map.h"
 #include "item.h"
-#include "item_database.h"
 #include "player.h"
-#include "block_control.h"
 #include "inventory.h"
+#include "item_database.h"
 
 static const color_character_t pWooden_sword[TEXTURE_SIZE][TEXTURE_SIZE] = {
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_YELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },

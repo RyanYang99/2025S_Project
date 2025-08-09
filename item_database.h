@@ -1,12 +1,6 @@
 ﻿#pragma once
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <locale.h> 
 #include <stdbool.h>
-#include <windows.h>
 
 typedef enum {
     ITEM_TYPE_NONE,

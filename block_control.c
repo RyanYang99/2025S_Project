@@ -1,8 +1,8 @@
 ﻿#include "leak.h"
 #include "block_control.h"
 
-#include <math.h> //floorf 함수 사용
-#include "Tool.h"
+#include <math.h>
+#include "tool.h"
 #include "input.h"
 #include "player.h"
 #include "boss_malakh.h"

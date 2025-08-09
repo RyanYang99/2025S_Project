@@ -1,15 +1,13 @@
 ﻿#include "leak.h"
 #include "inventory.h"
 
-#include <conio.h>
 #include "map.h"
 #include "save.h"
 #include "item.h"
-#include "Tool.h"
+#include "tool.h"
 #include "input.h"
 #include "delta.h"
 #include "console.h"
-#include "formatter.h"
 
 #define INVENTORY_BACKGROUND BACKGROUND_T_BLACK
 #define INVENTORY_FOREGROUND FOREGROUND_T_WHITE
