@@ -128,6 +128,7 @@
   <ItemGroup>
     <None Include="recipes.csv" />
     <None Include="items.csv" />
+    <None Include="workbench_recipes.csv" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

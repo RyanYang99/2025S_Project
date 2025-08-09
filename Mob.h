@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include "console.h"
 
-#define MAX_MOB 5
+#define MAX_MOB 50
 #define MAX_MOB_DEBUG_MESSAGE_LEN 100
 #define MAX_MOB_DAMAGE_TEXTS 20
 
@@ -23,8 +23,11 @@ typedef struct {
 extern char mob_debug_message[MAX_MOB_DEBUG_MESSAGE_LEN];
 
 // 함수 선언
+void MobSpawn();
 void mob_init();
-void save_mob(void);
+void save_mob();
 void mob_update();
 void Mob_render();
-void destroy_mob(void);
+void destroy_mob();
+
+void mob_spawn_manager();

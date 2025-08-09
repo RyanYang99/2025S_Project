@@ -9,8 +9,8 @@
 #include "inventory.h"
 
 #define MATERIAL_STRING_COUNT 128
-#define CRAFTING_MAX_RECIPES 32
-#define CRAFTING_SLOTS 3
+#define CRAFTING_MAX_RECIPES 64
+#define CRAFTING_SLOTS 20
 
 typedef struct {
     bool requires_workbench;                 //제작대 필요

@@ -1,70 +1,114 @@
 ﻿#pragma once
-
 #include "astar.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <time.h>
-#include <Windows.h> //COORD
-
-#include "player.h"
-#include "console.h"
 #include "map.h"
+#include "player.h"
+#include "Windows.h" 
+#include "conio.h"
 
+// 보스 상태
+typedef enum {
+	E_BOSS_STATE_PHASE1,
+	E_BOSS_STATE_PHASE2,
+	E_BOSS_STATE_PHASE3,
+	E_BOSS_STATE_DAMAGED,
+	E_BOSS_STATE_DEFEATED
+} E_BOOS_STATE;
 
-//보스 state
-typedef enum
-{
-	E_BOOS_STATE_IDLE,  //대기
-	E_BOOS_STATE_CHASE, //추격
-	E_BOOS_STATE_ATTACK, // 공격 
-	E_BOOS_STATE_ULTIMATE, //특수 공격 (궁극기)
-	E_BOOS_STATE_DAMAGED, //피격 시
+#define BOSS_SPRITE_WIDTH 20
+#define BOSS_SPRITE_HEIGHT 20
+#define BOSS_DRAW_SCALE 3 // 렌더링 스케일
 
-	//== 페이즈 상태 ===
-	E_BOOS_STATE_PHASE1,
-	E_BOOS_STATE_PHASE2,
-	E_BOOS_STATE_PHASE3,
+#define MAX_BOSS_DAMAGE_TEXTS 10
+#define BOSS_DAMAGE_TEXT_DURATION 1.0f 
 
-	E_BOOS_STATE_DEFEATED // 사망 (처치됨)
-
-}BossState;
-
-
-//보스 말라크 (히브리어로 천사란 의미 )
-typedef struct 
-{
-	int x;
-	int y;
-	int hp;
-	int Max_hp;
+// 보스 구조체
+typedef struct {
+	int x, y;
+	int hp, Max_hp;
 	int atk;
-	char display_char;
-	BossState state; //페이즈 상태 포함 현재 보스 상태
-	long last_action_time; // 마지막 행동 시간
-	long last_move_time; //마지막 이동 시간
-	long special_attack_cooltime; //특수 공격 쿨타임
-	long last_special_attack_time; //마지막 특수 공격 시간
+	E_BOOS_STATE state;
 
-	COORD last_player_pos; // 마지막으로 경로를 계산한 시점의 플레이어 위치
+	// 델타 타임 기반 타이머와 쿨타임
+	float action_timer; // 상태 전환용 타이머
+	float missile_timer;
+	float horizontal_laser_timer;
+	float vertical_laser_timer;
 
-	color_tchar_t sprite_data[20][20];
-}BossMalakh;
+	float missile_attack_cooltime;
+	float horizontal_laser_cooltime;
+	float vertical_laser_cooltime;
 
-//전역 변수
+	// 레이저 패턴 
+	bool is_horizontal_laser_active;
+	bool is_vertical_laser_active;
+	bool horizontal_laser_from_right;
+	bool is_vertical_laser_from_left;
+	int vertical_laser_target_x;
+	int horizontal_laser_target_y;
+	int current_horizontal_laser_y; 
+	int current_vertical_laser_x; 
+	float horizontal_laser_damage_cooltime;
+	float vertical_laser_damage_cooltime;
+
+	color_tchar_t sprite_data[BOSS_SPRITE_HEIGHT][BOSS_SPRITE_WIDTH];
+} BossMalakh;
+
+// 미사일 구조체
+#define MAX_MISSILES 10
+typedef struct {
+	int x, y;
+	float vel_x, vel_y; // 델타 타임 기반 이동을 위한 속도 변수
+	bool is_active;
+	float move_timer; // 미사일 타일 이동 타이머
+} Missile;
+
+//보스 데미지 텍스트
+typedef struct {
+	int damage_value;
+	float precise_x, precise_y;
+	float timer;
+	bool active;
+} BossDamageText;
+
+static BossDamageText boss_damage_texts[MAX_BOSS_DAMAGE_TEXTS];
+
 extern BossMalakh boss;
+extern Missile missiles[MAX_MISSILES];
+extern bool is_boss_spawned;
 
-//함수 
-//보스 초기화
+// 전역 변수
+//extern COORD console;
+extern player_t player;
+extern block_info_t get_block_info_at(int, int);
+
+
+// 함수 선언
 void Boss_Init(int start_x, int start_y, int init_hp, int attack_power);
-//보스 렌더링
 void Boss_Render();
-//보스 AI
 void Boss_Update_Ai();
-//보스 데미지 입히는 함수
 void Boss_Take_Damage(int damage);
-//보스 충돌 처리
-void Boss_Player_Collision();
+void Boss_Update_Pattern();
+void Boss_Render_Pattern();
+//static void handle_boss_click(const bool left_click);
 
-//문자열 색상 출력
-static void Boss_Print_String_Color_W(const wchar_t* wstr, const COORD position, unsigned short background_color, unsigned short foreground_color);
+static void handle_player_attack(const bool left_click);
+
+static void create_boss_damage_text(const int damage_value);
+static void update_boss_damage_texts();
+static void render_boss_damage_texts();
+
+
+void Boss_update();
+
+// 미사일 관련 함수
+void Boss_Launch_Missile(int count);
+void Update_Missiles();
+void Render_Missiles();
+
+// 레이저 관련 함수
+void Boss_Launch_Horizontal_Laser();
+void Boss_Launch_Vertical_Laser();
+void Boss_Launch_New_Horizontal_Laser();
+void Boss_Launch_New_Vertical_Laser();
+
+void destroy_Boss();

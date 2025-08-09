@@ -1,5 +1,6 @@
 ﻿#include "leak.h"
 #include "Mob.h"
+#include "game.h"
 
 #include "save.h"
 #include "player.h"
@@ -7,6 +8,8 @@
 #include "astar.h"
 #include "delta.h"
 #include "BlockCtrl.h"
+
+#include "BossMalakh.h"
 
 #define GRAVITY 25.0f
 #define BG_BLACK BACKGROUND_T_BLACK
@@ -116,18 +119,22 @@ static void MobSpawn(void) {
             break;
         }
 
-    mobs[mob_count].x = mob_x;
-    mobs[mob_count].y = mob_y - 1;
-    mobs[mob_count].HP = mob_level * 10;
-    mobs[mob_count].atk = mob_level * 2;
-    mobs[mob_count].precise_x = (float)mobs[mob_count].x;
-    mobs[mob_count].precise_y = (float)mobs[mob_count].y;
-    mobs[mob_count].velocity_y = 0;
-    mobs[mob_count].is_on_ground = true;
-    mobs[mob_count].is_dead = false; 
-    mobs[mob_count].dying_timer = 0.0f; 
-    mobs[mob_count].animation_timer = 0.0f; 
-    mobs[mob_count].current_frame = 0;     
+	if (mob_count >= MAX_MOB) {
+		return;
+	}
+
+	mobs[mob_count].x = mob_x;
+	mobs[mob_count].y = mob_y - 1;
+	mobs[mob_count].HP = mob_level * 10;
+	mobs[mob_count].atk = mob_level * 2;
+	mobs[mob_count].precise_x = (float)mobs[mob_count].x;
+	mobs[mob_count].precise_y = (float)mobs[mob_count].y;
+	mobs[mob_count].velocity_y = 0;
+	mobs[mob_count].is_on_ground = true;
+	mobs[mob_count].is_dead = false; 
+	mobs[mob_count].dying_timer = 0.0f; 
+	mobs[mob_count].animation_timer = 0.0f; 
+	mobs[mob_count].current_frame = 0;     
 
     mobs[mob_count].ai_timer = 0.0f;
     mobs[mob_count].despawn_timer = 0.0f;
@@ -135,23 +142,23 @@ static void MobSpawn(void) {
     ++mob_count;
 }
 
-static void Mob_Spawn_Time(void) {
-    static float spawnTimer = 0.0f, levelUpTimer = 0.0f;
 
-    spawnTimer += delta_time;
-    levelUpTimer += delta_time;
+ void mob_spawn_manager(void) 
+ {
+	 // 보스가 없을 때만 몬스터 생성 
+	 if (boss.state == E_BOSS_STATE_DEFEATED) {
+		 if (is_night_time()) {
+			 static float mob_spawn_timer = 0.0f;
+			 const float Mob_Spawn_Cooltime = 2.0f;
 
-    if (spawnTimer >= 3.0f) {
-        spawnTimer = 0;
-        if (mob_count < MAX_MOB)
-            MobSpawn();
-    }
-
-    if (levelUpTimer >= 100.0f && mob_level < 10) {
-        ++mob_level;
-        levelUpTimer = 0.0f;
-    }
-}
+			 mob_spawn_timer += delta_time;
+			 if (mob_spawn_timer >= Mob_Spawn_Cooltime) {
+				 MobSpawn();
+				 mob_spawn_timer = 0.0f;
+			 }
+		 }
+	 }
+ }
 
 // 몬스터 피격 시 대미지 텍스트 생성 함수
 static void create_mob_damage_text(const int mob_index, const int damage_value) {
@@ -439,9 +446,14 @@ void mob_init() {
 
 // 몬스터 업데이트
 void mob_update() {
-    update_mob_damage_texts();
-    Mob_Spawn_Time();
-
+	update_mob_damage_texts();
+	
+	static float levelUpTimer = 0.0f;
+	levelUpTimer += delta_time;
+	if (levelUpTimer >= 100.0f && mob_level < 10) {
+		++mob_level;
+		levelUpTimer = 0.0f;
+	}
 
     update_mob_ai();
     Mob_physics();
@@ -467,10 +479,8 @@ void mob_update() {
         }
     }
 
-    Mob_deadcheck();
-    DespawnMob();
-
-    Mob_render();
+	Mob_deadcheck();
+	DespawnMob();
 }
 
 
