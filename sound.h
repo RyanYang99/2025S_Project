@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 void sound_initialize(void);
 void sound_destroy(void);
