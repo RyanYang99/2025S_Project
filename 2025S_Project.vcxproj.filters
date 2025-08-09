@@ -1,192 +1,187 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="main.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="console.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="map.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="perlin.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="player.c">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="astar.c">
+      <Filter>Source File</Filter>
     </ClCompile>
     <ClCompile Include="BlockCtrl.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="input.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="astar.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Mob.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="delta.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="inventory.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ItemDB.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Tool.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="formatter.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-<<<<<<< HEAD
-    <ClCompile Include="sound.c">
-=======
-    <ClCompile Include="main_menu.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="game.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="date_time.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="save.c">
-      <Filter>Source Files</Filter>
+      <Filter>Source File</Filter>
     </ClCompile>
     <ClCompile Include="BossMalakh.c">
-      <Filter>Source Files</Filter>
+      <Filter>Source File</Filter>
+    </ClCompile>
+    <ClCompile Include="console.c">
+      <Filter>Source File</Filter>
     </ClCompile>
     <ClCompile Include="Crafting_UI.c">
-      <Filter>Source Files</Filter>
+      <Filter>Source File</Filter>
+    </ClCompile>
+    <ClCompile Include="date_time.c">
+      <Filter>Source File</Filter>
+    </ClCompile>
+    <ClCompile Include="delta.c">
+      <Filter>Source File</Filter>
+    </ClCompile>
+    <ClCompile Include="formatter.c">
+      <Filter>Source File</Filter>
+    </ClCompile>
+    <ClCompile Include="game.c">
+      <Filter>Source File</Filter>
+    </ClCompile>
+    <ClCompile Include="input.c">
+      <Filter>Source File</Filter>
+    </ClCompile>
+    <ClCompile Include="inventory.c">
+      <Filter>Source File</Filter>
     </ClCompile>
     <ClCompile Include="item.c">
->>>>>>> main
-      <Filter>Source Files</Filter>
+      <Filter>Source File</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemDB.c">
+      <Filter>Source File</Filter>
+    </ClCompile>
+    <ClCompile Include="main.c">
+      <Filter>Source File</Filter>
+    </ClCompile>
+    <ClCompile Include="main_menu.c">
+      <Filter>Source File</Filter>
+    </ClCompile>
+    <ClCompile Include="map.c">
+      <Filter>Source File</Filter>
+    </ClCompile>
+    <ClCompile Include="Mob.c">
+      <Filter>Source File</Filter>
+    </ClCompile>
+    <ClCompile Include="perlin.c">
+      <Filter>Source File</Filter>
+    </ClCompile>
+    <ClCompile Include="player.c">
+      <Filter>Source File</Filter>
+    </ClCompile>
+    <ClCompile Include="save.c">
+      <Filter>Source File</Filter>
+    </ClCompile>
+    <ClCompile Include="sound.c">
+      <Filter>Source File</Filter>
+    </ClCompile>
+    <ClCompile Include="Tool.c">
+      <Filter>Source File</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="console.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="map.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="leak.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="perlin.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="player.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="astar.h">
+      <Filter>Header File</Filter>
     </ClInclude>
     <ClInclude Include="BlockCtrl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="input.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="astar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Mob.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="delta.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="inventory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ItemDB.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Tool.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="formatter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-<<<<<<< HEAD
-    <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="resource1.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="resource2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="resource3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="resource4.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="resource5.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="sound.h">
-=======
-    <ClInclude Include="main_menu.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="date_time.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="save.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header File</Filter>
     </ClInclude>
     <ClInclude Include="BossMalakh.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="console.h">
+      <Filter>Header File</Filter>
     </ClInclude>
     <ClInclude Include="Crafting_UI.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="date_time.h">
+      <Filter>Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="delta.h">
+      <Filter>Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="formatter.h">
+      <Filter>Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="game.h">
+      <Filter>Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="input.h">
+      <Filter>Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="inventory.h">
+      <Filter>Header File</Filter>
     </ClInclude>
     <ClInclude Include="item.h">
->>>>>>> main
-      <Filter>Header Files</Filter>
+      <Filter>Header File</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="items.csv">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="base_recipes.csv">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="workbench_recipes.csv">
-      <Filter>Resource Files</Filter>
-    </None>
+    <ClInclude Include="ItemDB.h">
+      <Filter>Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="leak.h">
+      <Filter>Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="main_menu.h">
+      <Filter>Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="map.h">
+      <Filter>Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="Mob.h">
+      <Filter>Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="perlin.h">
+      <Filter>Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="player.h">
+      <Filter>Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="resource1.h">
+      <Filter>Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="resource2.h">
+      <Filter>Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="resource4.h">
+      <Filter>Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="resource3.h">
+      <Filter>Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="resource5.h">
+      <Filter>Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="save.h">
+      <Filter>Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="sound.h">
+      <Filter>Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="Tool.h">
+      <Filter>Header File</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Media Include="SoundFile\BGM\Caketown-1_1.wav">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource File</Filter>
     </Media>
     <Media Include="SoundFile\BGM\fixed_roop1.wav">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource File</Filter>
     </Media>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="base_recipes.csv">
+      <Filter>Resource File</Filter>
+    </None>
+    <None Include="items.csv">
+      <Filter>Resource File</Filter>
+    </None>
+    <None Include="workbench_recipes.csv">
+      <Filter>Resource File</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source File">
+      <UniqueIdentifier>{5262b4b2-aabf-4584-95b2-99eaf91d559a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header File">
+      <UniqueIdentifier>{20312d52-9a1d-4531-8d18-15ca9005f219}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource File">
+      <UniqueIdentifier>{3a664a58-48e6-4330-976a-cc5a5fca2efd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>
