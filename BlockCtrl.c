@@ -8,6 +8,8 @@
 #include "ItemDB.h"
 #include "inventory.h"
 
+int selected_block_x = 0, selected_block_y = 0;
+
 #include "BossMalakh.h"
 #include "game.h"
 
@@ -15,17 +17,17 @@
 static bool show = false;
 static COORD latestMousePos = { 0 };
 static float screen_cx = 0, screen_cy = 0, relative_mouse_x = 0, relative_mouse_y = 0;
-static int block_x = 0, block_y = 0, draw_x = 0, draw_y = 0;
+static int draw_x = 0, draw_y = 0;
 
-#if _DEBUG
-int selected_block_x = -1, selected_block_y = -1;
-#endif
+//#if _DEBUG
+//int selected_block_x = -1, selected_block_y = -1;
+//#endif
 
 
 
 //마우스 클릭 시 상호작용 처리
 static void handle_mouse_click(const bool left) {
-    if (block_x < 0 || block_x >= map.size.x || block_y < 0 || block_y >= map.size.y)
+    if (selected_block_x < 0 || selected_block_x >= map.size.x || selected_block_y < 0 || selected_block_y >= map.size.y)
         return;
 
     //1. 현재 장착된 아이템 가져오기
@@ -37,9 +39,9 @@ static void handle_mouse_click(const bool left) {
         pItem_information = find_item_by_index(pEquipped->item_db_index);
 
 
-        if (left) {
-            //2. 현재 블록 정보 확인
-            const block_info_t target_block = get_block_info_at(block_x, block_y);
+    if (left) {
+        //2. 현재 블록 정보 확인
+        const block_info_t target_block = get_block_info_at(selected_block_x, selected_block_y);
 
             //3. 도구가 해당 블록을 부술 수 있는지 확인
             if (!can_tool_break_block(pItem_information, target_block.type))
@@ -48,9 +50,9 @@ static void handle_mouse_click(const bool left) {
             //4. 도구의 데미지 계산
             const int damage = get_tool_damage_to_block(pItem_information, target_block.type);
 
-            //5. 데미지를 주고 파괴 여부 확인
-            if (damage_block_at(&map, block_x, block_y, damage)) {
-                const int drop = get_drop_from_block(target_block.type);
+        //5. 데미지를 주고 파괴 여부 확인
+        if (damage_block_at(&map, selected_block_x, selected_block_y, damage)) {
+            const int drop = get_drop_from_block(target_block.type);
 
                 if (drop != -1)
                     add_item_to_inventory(drop, 1);
@@ -61,15 +63,15 @@ static void handle_mouse_click(const bool left) {
             if (!pItem_information ||
                 !pItem_information->is_placeable ||
                 pEquipped->quantity <= 0 ||
-                !can_place_block(block_x, block_y))
+                !can_place_block(selected_block_x, selected_block_y))
                 return;
 
             if (pEquipped->item_db_index == BLOCK_SEED_OF_MALAKH) {
                 if (!is_boss_spawned) {
-                    if (set_block_at(block_x, block_y, pItem_information->index)) {
+                    if (set_block_at(selected_block_x, selected_block_y, pItem_information->index)) {
 
-                        const int boss_spawn_y = block_y - BOSS_SPRITE_HEIGHT;
-                        const int boss_spawn_x = block_x;
+                        const int boss_spawn_y = selected_block_y - BOSS_SPRITE_HEIGHT;
+                        const int boss_spawn_x = selected_block_x;
                         Boss_Init(boss_spawn_x, boss_spawn_y, 100, 10);
                         is_boss_spawned = true;
 
@@ -78,8 +80,8 @@ static void handle_mouse_click(const bool left) {
                 }
             }
 
-            else if (pItem_information->is_placeable && can_place_block(block_x, block_y)) {
-                if (set_block_at(block_x, block_y, pItem_information->index)) {
+            else if (pItem_information->is_placeable && can_place_block(selected_block_x, selected_block_y)) {
+                if (set_block_at(selected_block_x, selected_block_y, pItem_information->index)) {
                     decrement_item_from_inventory(pEquipped);
                 }
             }
@@ -96,16 +98,20 @@ static void handle_mouse_move(const COORD pos) {
     relative_mouse_x = latestMousePos.X - screen_cx;
     relative_mouse_y = latestMousePos.Y - screen_cy;
 
-    block_x = player.x + (int)floorf(relative_mouse_x / TEXTURE_SIZE);
-    block_y = player.y + (int)floorf(relative_mouse_y / TEXTURE_SIZE);
-    draw_x = (int)(screen_cx + (block_x - player.x) * TEXTURE_SIZE);
-    draw_y = (int)(screen_cy + (block_y - player.y) * TEXTURE_SIZE);
+    selected_block_x = player.x + (int)floorf(relative_mouse_x / TEXTURE_SIZE);
+    selected_block_y = player.y + (int)floorf(relative_mouse_y / TEXTURE_SIZE);
+    draw_x = (int)(screen_cx + (selected_block_x - player.x) * TEXTURE_SIZE);
+    draw_y = (int)(screen_cy + (selected_block_y - player.y) * TEXTURE_SIZE);
 
 
 #if _DEBUG
-    selected_block_x = block_x;
-    selected_block_y = block_y;
+    selected_block_x = selected_block_x;
+    selected_block_y = selected_block_y;
 #endif
+    selected_block_x = player.x + (int)floorf(relative_mouse_x / TEXTURE_SIZE);
+    selected_block_y = player.y + (int)floorf(relative_mouse_y / TEXTURE_SIZE);
+    draw_x = (int)(screen_cx + (selected_block_x - player.x) * TEXTURE_SIZE);
+    draw_y = (int)(screen_cy + (selected_block_y - player.y) * TEXTURE_SIZE);
 }
 
 static void handle_in_console(const bool in_console) {

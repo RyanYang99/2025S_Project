@@ -148,10 +148,7 @@
     <None Include="items.csv">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="base_recipes.csv">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="workbench_recipes.csv">
+    <None Include="recipes.csv">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

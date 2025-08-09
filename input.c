@@ -83,7 +83,17 @@ void initialize_input_handler(void) {
     hook = SetWindowsHookEx(WH_MOUSE_LL, LowLevelMouseProc, NULL, 0);
 }
 
+void handle_windows_messages(void) {
+    MSG msg = { 0 };
+    while (PeekMessage(&msg, NULL, WM_MOUSEFIRST, WM_MOUSELAST, PM_REMOVE)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+}
+
 void update_input(void) {
+    handle_windows_messages();
+
     keyboard_pressed = _kbhit();
     if (keyboard_pressed)
         input_character = (char)_getch();

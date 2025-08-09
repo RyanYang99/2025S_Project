@@ -121,8 +121,7 @@ color_tchar_t get_block_texture(const block_t block, const int x, const int y)
         { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 } },
         { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_TRANSPARENT, 0 } },
         { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 } }
-    },
-        pSeed_of_Malakh[TEXTURE_SIZE][TEXTURE_SIZE] = {
+    },  pSeed_of_Malakh[TEXTURE_SIZE][TEXTURE_SIZE] = {
         { { ' ' , BACKGROUND_T_BLACK, 0 }, { ' ' , BACKGROUND_T_RED, 0 }, { ' ' , BACKGROUND_T_BLACK, 0 } },
         { { ' ' , BACKGROUND_T_RED, 0 }, { ' ' , BACKGROUND_T_YELLOW, 0 }, { ' ' , BACKGROUND_T_RED, 0 } },
         { { ' ' , BACKGROUND_T_BLACK, 0 }, { ' ' , BACKGROUND_T_RED, 0 }, { ' ' , BACKGROUND_T_BLACK, 0 } }
