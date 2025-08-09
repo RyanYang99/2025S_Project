@@ -1,11 +1,11 @@
 ﻿#include "leak.h"
-
 #include "save.h"
 #include "game.h"
 #include "input.h"
 #include "ItemDB.h"
 #include "main_menu.h"
 #include "Crafting_UI.h"
+#include "sound.h"
 
 static bool force_old_console(void) {
     if (is_new_console()) {
@@ -13,7 +13,7 @@ static bool force_old_console(void) {
 
         int argc = 0;
 
-        LPWSTR *pArgv = CommandLineToArgvW(GetCommandLine(), &argc);
+        LPWSTR* pArgv = CommandLineToArgvW(GetCommandLine(), &argc);
 
         STARTUPINFO startup_info = {
             .cb = sizeof(startup_info)
@@ -27,15 +27,15 @@ static bool force_old_console(void) {
 
         const BOOL success = CreateProcess(TEXT("C:\\Windows\\System32\\conhost.exe"),
 
-                                           pArgument,
-                                           NULL,
-                                           NULL,
-                                           false,
-                                           0,
-                                           NULL,
-                                           NULL,
-                                           &startup_info,
-                                           &process_information);
+            pArgument,
+            NULL,
+            NULL,
+            false,
+            0,
+            NULL,
+            NULL,
+            &startup_info,
+            &process_information);
 
         LocalFree(pArgv);
         free(pArgument);
@@ -63,6 +63,9 @@ int main(void)
     call_database(false);
     initialize_crafting_UI();
     initialize_console(true, false);
+    Sound_init();
+    Sound_playMenuBGM("BGM/song18_1.wav");
+
 
     while (true) {
         const main_menu_state_t main_menu_state = main_menu();
@@ -71,9 +74,11 @@ int main(void)
         else if (main_menu_state == MAIN_MENU_STATE_LOAD_GAME) {
             if (!load_menu())
                 continue;
-        } else 
+        }
+        else
             free_save();
 
+        Sound_playBGM("BGM/fixed_roop1.wav");
         initialize_input_handler();
         initialize_game();
         run_game();
@@ -82,6 +87,7 @@ int main(void)
     }
 
     destroy_database();
+    Sound_shutdown();
     destroy_console();
     return EXIT_SUCCESS;
 }

@@ -1,4 +1,5 @@
 ﻿resultItemIndex,resultItemName,resultQuantity,requiresWorkbench,materialCount,materials
+110,Seed_of_Malakh,1,1,6,102:1@103:1@105:1@106:1@107:1@108:1
 109,Workbench,1,0,2,105:3@103:2
 201,Wooden_Sword,1,0,1,105:5
 204,Wooden_Pickaxe,1,0,1,105:6
