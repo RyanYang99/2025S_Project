@@ -5,6 +5,7 @@
 #include <ShlObj_core.h>
 #include "game.h"
 #include "input.h"
+#include "delta.h"
 
 static bool should_render_save_menu = false;
 static bool pUsed[MAX_SAVE_SPOTS] = { 0 };
@@ -67,6 +68,7 @@ void save_input(void) {
             get_save_spots();
 
         should_render_save_menu = !should_render_save_menu;
+        pMessage = "";
     } else if (should_render_save_menu) {
         if (tolower(input_character) == 'q')
             game_exit = true;
@@ -86,18 +88,32 @@ void save_input(void) {
                 LPCWSTR pFile = get_file_path(number - 1);
                 write_save(pFile);
                 free_save();
+
+                pMessage = "Saved";
             }
         }
     }
 }
 
 void render_save_menu(void) {
+    static float timer = 0.0f;
+
     if (!should_render_save_menu)
         return;
 
-    int y = console.size.Y / 2 - 5 / 2;
-    print_center("=============== Save ===============", y++, BACKGROUND_T_BLACK, FOREGROUND_T_BLUE);
-    print_center("1 ~ 3: Save, ESC: Close Q: Main Menu", y++, BACKGROUND_T_BLACK, FOREGROUND_T_BLUE);
+    const bool has_message = strcmp(pMessage, "");
+    if (has_message)
+        timer += delta_time;
+    if (timer >= 2.0f) {
+        timer = 0.0f;
+        pMessage = "";
+    }
+
+    int y = console.size.Y / 2 - (MAX_SAVE_SPOTS + 2 + has_message) / 2;
+    print_center("=== Save ===", y++, BACKGROUND_T_BLACK, FOREGROUND_T_BLUE);
+    if (has_message)
+        print_center("%s", y++, BACKGROUND_T_BLACK, FOREGROUND_T_CYAN, pMessage);
+    print_center("[1 ~ 3]: Save, [ESC]: Close [Q]: Main Menu", y++, BACKGROUND_T_BLACK, FOREGROUND_T_BLUE);
 
     for (int i = 0; i < MAX_SAVE_SPOTS; ++i)
         print_center("%d. %s", y++, BACKGROUND_T_BLACK, FOREGROUND_T_BLUE, i + 1, pUsed[i] ? "In Use (Overwrite)" : "Empty");

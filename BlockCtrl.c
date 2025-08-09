@@ -8,18 +8,16 @@
 #include "ItemDB.h"
 #include "inventory.h"
 
+int selected_block_x = 0, selected_block_y = 0;
+
 static bool show = false;
 static COORD latestMousePos = { 0 };
 static float screen_cx = 0, screen_cy = 0, relative_mouse_x = 0, relative_mouse_y = 0;
-static int block_x = 0, block_y = 0, draw_x = 0, draw_y = 0;
-
-#if _DEBUG
-int selected_block_x = -1, selected_block_y = -1;
-#endif
+static int draw_x = 0, draw_y = 0;
 
 //마우스 클릭 시 상호작용 처리
 static void handle_mouse_click(const bool left) {
-    if (block_x < 0 || block_x >= map.size.x || block_y < 0 || block_y >= map.size.y)
+    if (selected_block_x < 0 || selected_block_x >= map.size.x || selected_block_y < 0 || selected_block_y >= map.size.y)
         return;
 
     //1. 현재 장착된 아이템 가져오기
@@ -33,7 +31,7 @@ static void handle_mouse_click(const bool left) {
 
     if (left) {
         //2. 현재 블록 정보 확인
-        const block_info_t target_block = get_block_info_at(block_x, block_y);
+        const block_info_t target_block = get_block_info_at(selected_block_x, selected_block_y);
 
         //3. 도구가 해당 블록을 부술 수 있는지 확인
         if (!can_tool_break_block(pItem_information, target_block.type))
@@ -43,19 +41,21 @@ static void handle_mouse_click(const bool left) {
         const int damage = get_tool_damage_to_block(pItem_information, target_block.type);
 
         //5. 데미지를 주고 파괴 여부 확인
-        if (damage_block_at(&map, block_x, block_y, damage)) {
+        if (damage_block_at(&map, selected_block_x, selected_block_y, damage)) {
             const int drop = get_drop_from_block(target_block.type);
 
             if (drop != -1)
                 add_item_to_inventory(drop, 1);
+
+            decrement_durability();
         }
     } else {
         if (!pItem_information ||
             !pItem_information->is_placeable || //2. 설치 불가능한 아이템은 무시
             pEquipped->quantity <= 0 ||
             !pItem_information->is_placeable ||
-            !can_place_block(block_x, block_y) || //3. 설치 가능한 위치인지 확인
-            !set_block_at(block_x, block_y, pItem_information->index)) //4. 설치 시도
+            !can_place_block(selected_block_x, selected_block_y) || //3. 설치 가능한 위치인지 확인
+            !set_block_at(selected_block_x, selected_block_y, pItem_information->index)) //4. 설치 시도
             return;
 
         decrement_item_from_inventory(pEquipped);
@@ -71,19 +71,10 @@ static void handle_mouse_move(const COORD pos) {
     relative_mouse_x = latestMousePos.X - screen_cx;
     relative_mouse_y = latestMousePos.Y - screen_cy;
 
-    block_x = player.x + (int)floorf(relative_mouse_x / TEXTURE_SIZE);
-    block_y = player.y + (int)floorf(relative_mouse_y / TEXTURE_SIZE);
-    draw_x = (int)(screen_cx + (block_x - player.x) * TEXTURE_SIZE);
-    draw_y = (int)(screen_cy + (block_y - player.y) * TEXTURE_SIZE);
-
-
-
-
-
-#if _DEBUG
-    selected_block_x = block_x;
-    selected_block_y = block_y;
-#endif
+    selected_block_x = player.x + (int)floorf(relative_mouse_x / TEXTURE_SIZE);
+    selected_block_y = player.y + (int)floorf(relative_mouse_y / TEXTURE_SIZE);
+    draw_x = (int)(screen_cx + (selected_block_x - player.x) * TEXTURE_SIZE);
+    draw_y = (int)(screen_cy + (selected_block_y - player.y) * TEXTURE_SIZE);
 }
 
 static void handle_in_console(const bool in_console) {

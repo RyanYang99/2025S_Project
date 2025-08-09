@@ -148,7 +148,7 @@ static void render_damage_texts()
             draw_pos.Y = (SHORT)(center_pos.Y - (PLAYER_SPRITE_HEIGHT / 2) - 1 - (player.precise_y - damage_texts[i].precise_y));
 
             wchar_t damage_str[20];
-            swprintf(damage_str, 20, L" Heat! - %d ! ", damage_texts[i].damage_value);
+            swprintf(damage_str, 20, L" Hit -%d! ", damage_texts[i].damage_value);
 
             for (int j = 0; damage_str[j] != L'\0'; ++j) {
                 COORD char_pos = draw_pos;
