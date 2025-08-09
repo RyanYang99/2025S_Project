@@ -110,10 +110,10 @@ void render_save_menu(void) {
     }
 
     int y = console.size.Y / 2 - (MAX_SAVE_SPOTS + 2 + has_message) / 2;
-    print_center("=============== Save ===============", y++, BACKGROUND_T_BLACK, FOREGROUND_T_BLUE);
+    print_center("=== Save ===", y++, BACKGROUND_T_BLACK, FOREGROUND_T_BLUE);
     if (has_message)
         print_center("%s", y++, BACKGROUND_T_BLACK, FOREGROUND_T_CYAN, pMessage);
-    print_center("1 ~ 3: Save, ESC: Close Q: Main Menu", y++, BACKGROUND_T_BLACK, FOREGROUND_T_BLUE);
+    print_center("[1 ~ 3]: Save, [ESC]: Close [Q]: Main Menu", y++, BACKGROUND_T_BLACK, FOREGROUND_T_BLUE);
 
     for (int i = 0; i < MAX_SAVE_SPOTS; ++i)
         print_center("%d. %s", y++, BACKGROUND_T_BLACK, FOREGROUND_T_BLUE, i + 1, pUsed[i] ? "In Use (Overwrite)" : "Empty");
