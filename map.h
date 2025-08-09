@@ -22,7 +22,9 @@ typedef enum
     BLOCK_SAND = 108,
     BLOCK_WATER = 2,
     BLOCK_STAR = 3,
-    BLOCK_WORKBENCH = 109
+    BLOCK_WORKBENCH = 109,
+    BLOCK_SEED_OF_MALAKH = 110
+
 } block_t;
 
 // 블록 정보 구조체: 종류 + 체력 포함

@@ -121,7 +121,13 @@ color_tchar_t get_block_texture(const block_t block, const int x, const int y)
         { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 } },
         { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_TRANSPARENT, 0 } },
         { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 } }
+    },
+        pSeed_of_Malakh[TEXTURE_SIZE][TEXTURE_SIZE] = {
+        { { ' ' , BACKGROUND_T_BLACK, 0 }, { ' ' , BACKGROUND_T_RED, 0 }, { ' ' , BACKGROUND_T_BLACK, 0 } },
+        { { ' ' , BACKGROUND_T_RED, 0 }, { ' ' , BACKGROUND_T_YELLOW, 0 }, { ' ' , BACKGROUND_T_RED, 0 } },
+        { { ' ' , BACKGROUND_T_BLACK, 0 }, { ' ' , BACKGROUND_T_RED, 0 }, { ' ' , BACKGROUND_T_BLACK, 0 } }
     };
+
 
     if (is_air_or_star(block)) {
         if (date_time_elapsed_since_start.hour >= 0 && date_time_elapsed_since_start.hour <= 4 ||
@@ -176,6 +182,9 @@ color_tchar_t get_block_texture(const block_t block, const int x, const int y)
             
         case BLOCK_WORKBENCH:
             return pWorkbench[y][x];
+
+        case BLOCK_SEED_OF_MALAKH:
+            return pSeed_of_Malakh[y][x];
     }
 
     return (color_tchar_t){ 0 };

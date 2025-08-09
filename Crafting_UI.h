@@ -7,7 +7,7 @@
 #include "player.h"
 
 #define CRAFTING_MAX_RECIPES 32
-#define CRAFTING_SLOTS 3
+#define CRAFTING_SLOTS 10
 
 typedef struct {
     int ingredient_indices[CRAFTING_SLOTS]; // 아이템DB 인덱스 (재료)

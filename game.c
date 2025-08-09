@@ -18,6 +18,7 @@
 bool game_exit = false;
 bool is_boss_spawned;
 
+
 #if _DEBUG
 static void render_debug_text(void) {
     const BACKGROUND_color_t background = BACKGROUND_T_BLACK;
@@ -25,7 +26,7 @@ static void render_debug_text(void) {
 
     COORD position = {
         .X = 0,
-        .Y = console.size.Y - 3
+        .Y = console.size.Y - 5
     };
 
     int fps = -1;
@@ -40,8 +41,10 @@ static void render_debug_text(void) {
     fprint_string("Mouse: (%d, %d)", position, background, foreground, selected_block_x, selected_block_y);
     ++position.Y;
 
-    //몬스터 알고리즘
-    fprint_string(mob_debug_message, position, background, FOREGROUND_T_RED);
+    fprint_string("Boss Spawned: %s", position, background, foreground, is_boss_spawned ? "True" : "False");
+    ++position.Y;
+
+
 }
 #endif
 
@@ -49,16 +52,26 @@ static void render(void) {
     render_map();
     render_player();
     render_virtual_cursor();
-    if (is_boss_spawned) { Boss_Render();}
+    if (is_boss_spawned) { Boss_Render();}else{ Mob_render(); }
     render_inventory();
     render_hotbar();
     render_time();
     render_save_menu();
-    Mob_render();
-
+  
 #if _DEBUG
     render_debug_text();
 #endif
+}
+
+void test_create_Bossitem()
+{
+    add_item_to_inventory(109, 1);
+    add_item_to_inventory(102, 1);
+    add_item_to_inventory(107, 1);
+    add_item_to_inventory(106, 1);
+    add_item_to_inventory(103, 1);
+    add_item_to_inventory(105, 1);
+    add_item_to_inventory(108, 1);
 }
 
 void initialize_game(void) {
@@ -74,17 +87,12 @@ void initialize_game(void) {
     initialize_save();
     free_save();
 
-    add_item_to_inventory(109, 1);
+    test_create_Bossitem();
 }
+
 
 void run_game(void) {
 
-    //if (!is_boss_spawned) {
-    //    Boss_Init(player.x -20, player.y, 100, 10); // 보스 위치를 플레이어와 분리하여 초기화
-    //    is_boss_spawned = true; 
-    //}
-
-   
     while (!game_exit) {
         update_delta_time();
 
@@ -93,18 +101,24 @@ void run_game(void) {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
+
         update_console();
         update_input();
         update_date_time();
-
-        mob_spawn_manager();
 
         player_update();
         inventory_input();
         Crafting_UI_input();
         save_input();
-        mob_update();
+
+        if (is_boss_spawned) {
         Boss_update();
+        }
+        else
+        {
+        mob_spawn_manager();
+        mob_update();
+        }
 
         render();
     }
@@ -112,6 +126,7 @@ void run_game(void) {
 
 void destroy_game(void) {
     destroy_mob();
+    destroy_Boss();
     destroy_astar();
     destroy_block_control();
     destroy_map();

@@ -41,16 +41,14 @@ typedef struct {
 	// 레이저 패턴 
 	bool is_horizontal_laser_active;
 	bool is_vertical_laser_active;
-
 	bool horizontal_laser_from_right;
+	bool is_vertical_laser_from_left;
 	int vertical_laser_target_x;
 	int horizontal_laser_target_y;
-
-
 	int current_horizontal_laser_y; 
 	int current_vertical_laser_x; 
-	bool is_vertical_laser_from_left; // true: 왼쪽 -> 오른쪽, false: 오른쪽 -> 왼쪽
-	
+	float horizontal_laser_damage_cooltime;
+	float vertical_laser_damage_cooltime;
 
 	color_tchar_t sprite_data[BOSS_SPRITE_HEIGHT][BOSS_SPRITE_WIDTH];
 } BossMalakh;
@@ -89,9 +87,11 @@ void Boss_Init(int start_x, int start_y, int init_hp, int attack_power);
 void Boss_Render();
 void Boss_Update_Ai();
 void Boss_Take_Damage(int damage);
-static void handle_boss_click(const bool left_click);
 void Boss_Update_Pattern();
 void Boss_Render_Pattern();
+//static void handle_boss_click(const bool left_click);
+
+static void handle_player_attack(const bool left_click);
 
 static void create_boss_damage_text(const int damage_value);
 static void update_boss_damage_texts();
@@ -110,3 +110,5 @@ void Boss_Launch_Horizontal_Laser();
 void Boss_Launch_Vertical_Laser();
 void Boss_Launch_New_Horizontal_Laser();
 void Boss_Launch_New_Vertical_Laser();
+
+void destroy_Boss();

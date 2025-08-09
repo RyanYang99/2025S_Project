@@ -191,6 +191,8 @@ void Boss_Init(int start_x, int start_y, int init_hp, int attack_power)
 	boss.is_horizontal_laser_active = false;
 	boss.is_vertical_laser_active = false;
 
+	boss.horizontal_laser_damage_cooltime = 0.0f;
+	boss.vertical_laser_damage_cooltime = 0.0f;
 
 	for (int y = 0; y < BOSS_SPRITE_HEIGHT; y++) {
 		for (int x = 0; x < BOSS_SPRITE_WIDTH; x++) {
@@ -206,7 +208,7 @@ void Boss_Init(int start_x, int start_y, int init_hp, int attack_power)
 	for (int i = 0; i < MAX_BOSS_DAMAGE_TEXTS; ++i) {
 		boss_damage_texts[i].active = false;
 	}
-	subscribe_mouse_click(handle_boss_click);
+	subscribe_mouse_click(handle_player_attack);
 }
 
 // 보스 렌더링
@@ -216,15 +218,19 @@ void Boss_Render()
 
 	COORD center_m = { console.size.X / 2 , console.size.Y / 2 };
 
-	int boss_screen_base_x = center_m.X + (boss.x - player.x) * BOSS_DRAW_SCALE - (BOSS_SPRITE_WIDTH * BOSS_DRAW_SCALE / 2);
-	int boss_screen_base_y = center_m.Y + (boss.y - player.y) * BOSS_DRAW_SCALE - (BOSS_SPRITE_HEIGHT * BOSS_DRAW_SCALE / 2);
+	int boss_screen_base_x = center_m.X + (boss.x - player.x) * BOSS_DRAW_SCALE;
+	int boss_screen_base_y = center_m.Y + (boss.y - player.y) * BOSS_DRAW_SCALE;
+
 
 	// 스프라이트 렌더링
 	for (int y_offset = 0; y_offset < BOSS_SPRITE_HEIGHT; ++y_offset) {
 		for (int x_offset = 0; x_offset < BOSS_SPRITE_WIDTH; ++x_offset) {
 			for (int py = 0; py < BOSS_DRAW_SCALE; ++py) {
 				for (int px = 0; px < BOSS_DRAW_SCALE; ++px) {
-					COORD char_pos = { (SHORT)(boss_screen_base_x + (x_offset * BOSS_DRAW_SCALE) + px), (SHORT)(boss_screen_base_y + (y_offset * BOSS_DRAW_SCALE) + py) };
+					COORD char_pos = {
+						(SHORT)(boss_screen_base_x + (x_offset * BOSS_DRAW_SCALE) + px),
+						(SHORT)(boss_screen_base_y + (y_offset * BOSS_DRAW_SCALE) + py)
+					};
 					if (char_pos.X >= 0 && char_pos.X < console.size.X &&
 						char_pos.Y >= 0 && char_pos.Y < console.size.Y) {
 						color_tchar_t char_to_print = boss.sprite_data[y_offset][x_offset];
@@ -255,6 +261,9 @@ void Boss_Update_Ai()
 {
 	if (boss.state == E_BOSS_STATE_DEFEATED) return;
 
+	boss.horizontal_laser_damage_cooltime -= delta_time;
+	boss.vertical_laser_damage_cooltime -= delta_time;
+
 	// 페이즈 전환 로직
 	if (boss.hp <= boss.Max_hp * 0.3 && boss.state < E_BOSS_STATE_PHASE3)
 	{
@@ -279,11 +288,18 @@ void Boss_Update_Ai()
 		boss.missile_attack_cooltime = 4.0f;
 	}
 
-	if (boss.is_horizontal_laser_active && abs(boss.y - player.y) <= 1) {
-		player_take_damage(boss.atk * 2);
+	if (boss.is_horizontal_laser_active && abs(boss.current_horizontal_laser_y - player.y) <= 1) {
+		if (boss.horizontal_laser_damage_cooltime <= 0.0f) {
+			player_take_damage(100);
+			boss.horizontal_laser_damage_cooltime = 2.0f;
+		}
 	}
-	if (boss.is_vertical_laser_active && abs(boss.x - player.x) <= 1) {
-		player_take_damage(boss.atk * 2);
+
+	if (boss.is_vertical_laser_active && abs(boss.current_vertical_laser_x - player.x) <= 1) {
+		if (boss.vertical_laser_damage_cooltime <= 0.0f) {
+			player_take_damage(100);
+			boss.vertical_laser_damage_cooltime = 2.0f;
+		}
 	}
 
 
@@ -304,6 +320,7 @@ void Boss_Update_Ai()
 		if (is_boss_spawned) {
 			is_boss_spawned = false;
 		}
+
 		break;
 	default:
 		break;
@@ -333,7 +350,7 @@ void Boss_Update_Pattern() {
 	// 페이즈 2: 가로 레이저 패턴
 	if (boss.state == E_BOSS_STATE_PHASE2) {
 		if (boss.horizontal_laser_timer >= boss.horizontal_laser_cooltime) {
-			Boss_Launch_New_Horizontal_Laser(); // 새로운 가로 레이저 패턴 호출
+			Boss_Launch_New_Horizontal_Laser();
 			boss.horizontal_laser_timer = 0.0f;
 		}
 	}
@@ -341,7 +358,7 @@ void Boss_Update_Pattern() {
 	// 페이즈 3: 세로 레이저 패턴
 	if (boss.state == E_BOSS_STATE_PHASE3) {
 		if (boss.vertical_laser_timer >= boss.vertical_laser_cooltime) {
-			Boss_Launch_New_Vertical_Laser(); // 새로운 세로 레이저 패턴 호출
+			Boss_Launch_New_Vertical_Laser(); 
 			boss.vertical_laser_timer = 0.0f;
 		}
 	}
@@ -464,7 +481,7 @@ void Boss_Render_Pattern() {
 	Render_Missiles();
 
 
-	// 페이즈 2: 가로 레이저 (보스 머리부터 차례대로)
+	// 페이즈 2: 가로 레이저
 	if (boss.is_horizontal_laser_active) {
 		// 0.2초마다 한 줄씩 아래로 이동
 		if (boss.action_timer > 0.2f) {
@@ -472,9 +489,7 @@ void Boss_Render_Pattern() {
 			boss.action_timer = 0.0f;
 		}
 		boss.action_timer += delta_time;
-
-		// 보스 스프라이트를 벗어나면 패턴 종료
-		if (boss.current_horizontal_laser_y > boss.y + BOSS_SPRITE_HEIGHT / 2) {
+		if (boss.current_horizontal_laser_y > map.size.y) {
 			boss.is_horizontal_laser_active = false;
 		}
 
@@ -524,34 +539,59 @@ void Boss_Render_Pattern() {
 
 
 
-static void handle_boss_click(const bool left_click)
-{
-	// 보스가 패배했거나, 왼쪽 클릭이 아니면 리턴
-	if (boss.state == E_BOSS_STATE_DEFEATED || !left_click)
-	{
+//static void handle_boss_click(const bool left_click)
+//{
+//	// 보스가 패배했거나, 왼쪽 클릭이 아니면 리턴
+//	if (boss.state == E_BOSS_STATE_DEFEATED || !left_click)
+//	{
+//		return;
+//	}
+//
+//	// 보스가 생성되지 않았으면 리턴
+//	if (!is_boss_spawned) {
+//		return;
+//	}
+//
+//	// 마우스 클릭 좌표와 보스 스프라이트 범위 비교
+//	// 보스의 좌표(boss.x, boss.y)가 중심점이라고 가정하고 충돌 판정 영역을 재계산합니다.
+//	int boss_left = boss.x - (BOSS_SPRITE_WIDTH / 2);
+//	int boss_top = boss.y - (BOSS_SPRITE_HEIGHT / 2);
+//	int boss_right = boss.x + (BOSS_SPRITE_WIDTH / 2);
+//	int boss_bottom = boss.y + (BOSS_SPRITE_HEIGHT / 2);
+//
+//	if (selected_block_x >= boss_left && selected_block_x < boss_right &&
+//		selected_block_y >= boss_top && selected_block_y < boss_bottom)
+//	{
+//		// 보스에게 데미지 입히는 부분
+//		Boss_Take_Damage(player.atk_power);
+//		return;
+//	}
+//}
+
+//보스 핵(코어) 공격 처리 함수
+static void handle_player_attack(const bool left_click) {
+
+	if (boss.state == E_BOSS_STATE_DEFEATED || !left_click || !is_boss_spawned) {
 		return;
 	}
 
-	// 보스가 생성되지 않았으면 리턴
-	if (!is_boss_spawned) {
-		return;
-	}
+	block_info_t clicked_block = get_block_info_at(selected_block_x, selected_block_y);
 
-	// 마우스 클릭 좌표와 보스 스프라이트 범위 비교
-	// 보스의 좌표(boss.x, boss.y)가 중심점이라고 가정하고 충돌 판정 영역을 재계산합니다.
-	int boss_left = boss.x - (BOSS_SPRITE_WIDTH / 2);
-	int boss_top = boss.y - (BOSS_SPRITE_HEIGHT / 2);
-	int boss_right = boss.x + (BOSS_SPRITE_WIDTH / 2);
-	int boss_bottom = boss.y + (BOSS_SPRITE_HEIGHT / 2);
-
-	if (selected_block_x >= boss_left && selected_block_x < boss_right &&
-		selected_block_y >= boss_top && selected_block_y < boss_bottom)
-	{
-		// 보스에게 데미지 입히는 부분
+	if (clicked_block.type == BLOCK_SEED_OF_MALAKH) {
 		Boss_Take_Damage(player.atk_power);
 		return;
 	}
+
+	for (int i = 0; i < MAX_MISSILES; ++i) {
+		if (missiles[i].is_active) {
+			if (missiles[i].x == selected_block_x && missiles[i].y == selected_block_y) {
+				missiles[i].is_active = false;
+				return;
+			}
+		}
+	}
 }
+
 
 
 
@@ -566,6 +606,7 @@ void Boss_Take_Damage(int damage)
 	{
 		boss.hp = 0;
 		boss.state = E_BOSS_STATE_DEFEATED;
+		is_boss_spawned = false;
 	}
 	else
 	{
@@ -573,4 +614,9 @@ void Boss_Take_Damage(int damage)
 		boss.state = E_BOSS_STATE_DAMAGED;
 		boss.action_timer = 0.0f;
 	}
+}
+
+void destroy_Boss()
+{
+	unsubscribe_mouse_click(handle_player_attack);
 }
