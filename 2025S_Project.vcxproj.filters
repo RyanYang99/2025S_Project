@@ -155,6 +155,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+<<<<<<< HEAD
     <Media Include="SoundFile\BGM\Caketown-1_1.wav">
       <Filter>Resource File</Filter>
     </Media>
@@ -171,6 +172,13 @@
     </None>
     <None Include="workbench_recipes.csv">
       <Filter>Resource File</Filter>
+=======
+    <None Include="items.csv">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="recipes.csv">
+      <Filter>Resource Files</Filter>
+>>>>>>> 281c344d209bda710c9624d81713eae195dad647
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -2,6 +2,7 @@
 #include "game.h"
 
 #include "Mob.h"
+#include "BossMalakh.h"
 #include "map.h"
 #include "save.h"
 #include "astar.h"
@@ -13,7 +14,10 @@
 #include "date_time.h"
 #include "Crafting_UI.h"
 
+
 bool game_exit = false;
+bool is_boss_spawned;
+
 
 #if _DEBUG
 static void render_debug_text(void) {
@@ -22,7 +26,7 @@ static void render_debug_text(void) {
 
     COORD position = {
         .X = 0,
-        .Y = console.size.Y - 3
+        .Y = console.size.Y - 5
     };
 
     int fps = -1;
@@ -37,8 +41,10 @@ static void render_debug_text(void) {
     fprint_string("Mouse: (%d, %d)", position, background, foreground, selected_block_x, selected_block_y);
     ++position.Y;
 
-    //몬스터 알고리즘
-    fprint_string(mob_debug_message, position, background, FOREGROUND_T_RED);
+    fprint_string("Boss Spawned: %s", position, background, foreground, is_boss_spawned ? "True" : "False");
+    ++position.Y;
+
+
 }
 #endif
 
@@ -46,48 +52,67 @@ static void render(void) {
     render_map();
     render_player();
     render_virtual_cursor();
-    mob_update();
+    if (is_boss_spawned) { Boss_Render();}else{ Mob_render(); }
     render_inventory();
     render_hotbar();
     render_time();
     render_save_menu();
+    render_crafting_UI();
 
 #if _DEBUG
     render_debug_text();
 #endif
 }
 
+void test_create_Bossitem()
+{
+    add_item_to_inventory(109, 1);
+    add_item_to_inventory(102, 1);
+    add_item_to_inventory(107, 1);
+    add_item_to_inventory(106, 1);
+    add_item_to_inventory(103, 1);
+    add_item_to_inventory(105, 1);
+    add_item_to_inventory(108, 1);
+}
+
 void initialize_game(void) {
     game_exit = false;
+    is_boss_spawned = false;
     initialize_date_time();
     create_map();
     player_init();
     mob_init();
     initialize_block_control();
     initialize_inventory();
-    initialize_crafting_ui();
     initialize_save();
     free_save();
 
-    add_item_to_inventory(109, 1);
+    test_create_Bossitem();
 }
 
+
 void run_game(void) {
+
     while (!game_exit) {
         update_delta_time();
 
-        MSG msg = { 0 };
-        while (PeekMessage(&msg, NULL, WM_MOUSEFIRST, WM_MOUSELAST, PM_REMOVE)) {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
         update_console();
         update_input();
         update_date_time();
+
         player_update();
         inventory_input();
-        Crafting_UI_input();
+        crafting_UI_input();
         save_input();
+
+        if (is_boss_spawned) {
+        Boss_update();
+        }
+        else
+        {
+        mob_spawn_manager();
+        mob_update();
+        }
 
         render();
     }
@@ -95,6 +120,7 @@ void run_game(void) {
 
 void destroy_game(void) {
     destroy_mob();
+    destroy_Boss();
     destroy_astar();
     destroy_block_control();
     destroy_map();

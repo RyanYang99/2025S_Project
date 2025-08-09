@@ -4,6 +4,7 @@
 #include "input.h"
 #include "ItemDB.h"
 #include "main_menu.h"
+#include "Crafting_UI.h"
 #include "sound.h"
 
 static bool force_old_console(void) {
@@ -60,6 +61,7 @@ int main(void)
         return 0;
 
     call_database(false);
+    initialize_crafting_UI();
     initialize_console(true, false);
     Sound_init();
     Sound_playMenuBGM("BGM/song18_1.wav");

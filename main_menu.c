@@ -42,7 +42,7 @@ const main_menu_state_t main_menu(void) {
                    "#     #  #  #   # #       #  ",
                    " #### #   # #   # #       #  "
                },
-       * const pControls = "W, S: Select, Space: Enter",
+       * const pControls = "[W / S]: Select, [Space]: Enter",
        * const pNew_game = "Create a New World...",
        * const pLoad_game = "Load save",
        * const pQuit = "Quit";
@@ -125,12 +125,12 @@ bool load_menu(void) {
     while (true) {
         int y = console.size.Y / 2 - half;
 
-        print_center("Load Save", y++, BACKGROUND_T_BLACK, FOREGROUND_T_DARKBLUE);
-        print_center("Space: Load, ESC: Back", y++, BACKGROUND_T_BLACK, FOREGROUND_T_DARKBLUE);
+        print_center("Load Save", y++, BACKGROUND_T_BLACK, FOREGROUND_T_CYAN);
+        print_center("[Space]: Load, [ESC]: Back", y++, BACKGROUND_T_BLACK, FOREGROUND_T_CYAN);
 
         for (int i = 0; i < MAX_SAVE_SPOTS; ++i) {
             char * const pString = format_string("Save Slot %d: %s", i, pUsed[i] ? "Used" : "Empty");
-            PRINT_SELECTION(pString, y, i, BACKGROUND_T_BLACK, FOREGROUND_T_DARKBLUE);
+            PRINT_SELECTION(pString, y, i, BACKGROUND_T_BLACK, FOREGROUND_T_CYAN);
             free(pString);
         }
 
