@@ -117,5 +117,6 @@ void game_destroy(void) {
     astar_destroy();
     inventory_destroy();
     block_control_destroy();
+    player_destroy();
     map_destroy();
 }

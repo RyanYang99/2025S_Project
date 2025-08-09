@@ -23,44 +23,44 @@ static void handle_mouse_click(const bool left) {
     if (inventory.pHotbar[inventory.selected_hotbar_index].pPlayer_Item) {
         pEquipped = &inventory.item[inventory.pHotbar[inventory.selected_hotbar_index].index_in_inventory];
         pItem_information = database_find_item_by_index(pEquipped->item_DB_index);
+    }
 
-        if (left) {
-            //2. 현재 블록 정보 확인
-            const block_info_t target_block = map_get_block_info(block_control_selected_x, block_control_selected_y);
+    if (left) {
+        //2. 현재 블록 정보 확인
+        const block_info_t target_block = map_get_block_info(block_control_selected_x, block_control_selected_y);
 
-            //3. 도구가 해당 블록을 부술 수 있는지 확인
-            if (!tool_can_break_block(pItem_information, target_block.type))
-                return;
+        //3. 도구가 해당 블록을 부술 수 있는지 확인
+        if (!tool_can_break_block(pItem_information, target_block.type))
+            return;
 
-            //4. 도구의 데미지 계산
-            const int damage = tool_get_damage_to_block(pItem_information, target_block.type);
+        //4. 도구의 데미지 계산
+        const int damage = tool_get_damage_to_block(pItem_information, target_block.type);
 
-            //5. 데미지를 주고 파괴 여부 확인
-            if (map_damage_block(block_control_selected_x, block_control_selected_y, damage)) {
-                const int drop = tool_get_drop_from_block(target_block.type);
+        //5. 데미지를 주고 파괴 여부 확인
+        if (map_damage_block(block_control_selected_x, block_control_selected_y, damage)) {
+            const int drop = tool_get_drop_from_block(target_block.type);
 
-                if (drop != -1)
-                    inventory_add_item(drop, 1);
-            }
-        } else {
-            if (!pItem_information ||
-                !pItem_information->is_placeable ||
-                pEquipped->quantity <= 0 ||
-                !tool_can_place_block(block_control_selected_x, block_control_selected_y))
-                return;
+            if (drop != -1)
+                inventory_add_item(drop, 1);
+        }
+    } else {
+        if (!pItem_information ||
+            !pItem_information->is_placeable ||
+            pEquipped->quantity <= 0 ||
+            !tool_can_place_block(block_control_selected_x, block_control_selected_y))
+            return;
 
-            if (pEquipped->item_DB_index == BLOCK_SEED_OF_MALAKH &&
-                !boss_spawned &&
-                map_set_block(block_control_selected_x, block_control_selected_y, pItem_information->index)) {
-                    boss_initialize(block_control_selected_x, block_control_selected_y - BOSS_SPRITE_HEIGHT, 100, 10);
-                    boss_spawned = true;
+        if (pEquipped->item_DB_index == BLOCK_SEED_OF_MALAKH &&
+            !boss_spawned &&
+            map_set_block(block_control_selected_x, block_control_selected_y, pItem_information->index)) {
+                boss_initialize(block_control_selected_x, block_control_selected_y - BOSS_SPRITE_HEIGHT, 100, 10);
+                boss_spawned = true;
 
-                    inventory_decrement_item(pEquipped);
-            } else if (pItem_information->is_placeable &&
-                       tool_can_place_block(block_control_selected_x, block_control_selected_y) &&
-                map_set_block(block_control_selected_x, block_control_selected_y, pItem_information->index)) {
                 inventory_decrement_item(pEquipped);
-            }
+        } else if (pItem_information->is_placeable &&
+                   tool_can_place_block(block_control_selected_x, block_control_selected_y) &&
+            map_set_block(block_control_selected_x, block_control_selected_y, pItem_information->index)) {
+            inventory_decrement_item(pEquipped);
         }
     }
 }

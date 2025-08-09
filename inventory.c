@@ -199,29 +199,21 @@ static void render_hotbar(void) {
             .character = ' ',
             .background = border_background,
         };
-        const COORD slot_position = {
-            .X = (SHORT)(position.X + i * slot_width),
-            .Y = position.Y
-        };
-        COORD slot_position_updated = { 0 };
+        const int slot_start_x = position.X + i * slot_width, slot_start_y = position.Y;
 
+        /*
+            1. 테두리 영역 출력
+            위, 아래 가로줄 (빈칸 문자 + 테두리 배경색)
+        */
         for (int tx = 0; tx < slot_width; ++tx) {
-            slot_position_updated.X = (SHORT)(slot_position.X + tx);
-            console_print_color_character(character, slot_position_updated);
-
-            slot_position_updated.Y = (SHORT)(slot_position.Y + slot_height - 1);
-            console_print_color_character(character, slot_position_updated);
+            console_print_color_character(character, (COORD){ (SHORT)(slot_start_x + tx), (SHORT)slot_start_y });
+            console_print_color_character(character, (COORD){ (SHORT)(slot_start_x + tx), (SHORT)(slot_start_y + slot_height - 1) });
         }
 
         //좌, 우 세로줄
         for (int ty = 1; ty < slot_height - 1; ++ty) {
-            slot_position_updated.X = slot_position.X;
-            slot_position_updated.Y = (SHORT)(slot_position.Y + ty);
-            console_print_color_character(character, slot_position_updated);
-
-            slot_position_updated.X = (SHORT)(slot_position.X + slot_width - 1);
-            slot_position_updated.Y = (SHORT)(slot_position.Y + ty);
-            console_print_color_character(character, slot_position_updated);
+            console_print_color_character(character, (COORD){ (SHORT)(slot_start_x), (SHORT)(slot_start_y + ty) });
+            console_print_color_character(character, (COORD){ (SHORT)(slot_start_x + slot_width - 1), (SHORT)(slot_start_y + ty) });
         }
 
         //2. 슬롯 내부 텍스처 출력 (기존 방식과 동일)
@@ -249,15 +241,13 @@ static void render_hotbar(void) {
                         texture_character = item_get_texture(item_index, texture_x, texture_y);
                 }
 
-                slot_position_updated.X = (SHORT)(slot_position.X + tx);
-                slot_position_updated.Y = (SHORT)(slot_position.Y + ty);
-                console_print_color_character(texture_character, slot_position_updated);
+                console_print_color_character(texture_character, (COORD){ (SHORT)(slot_start_x + tx), (SHORT)(slot_start_y + ty) });
             }
     }
 }
 
 void inventory_render(void) {
-	render_hotbar();
+    render_hotbar();
 
     static float blink_time = 0.0f;
     static bool blink = false;

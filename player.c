@@ -144,30 +144,31 @@ void player_initialize(void) {
 
         player.max_HP = 1000;
         player.HP = 1000; //초기 체력
-        player.attack_power = 10;
-
-        // 물리 변수 초기화
-        player.precise_y = (float)player.y;
-        player.velocity_y = 0.0f;
-        player.is_on_ground = false; //시작 시 공중에서 떨어지도록
-
-        // 애니메이션 변수 초기화
-        player.is_moving = 0;
-        player.current_frame = 0;
-        player.animation_timer = 0.0f;
-        player.is_swinging = false; //스윙 상태 초기화
-        player.swing_timer = 0.0f;  //스윙 타이머 초기화
-
-        //이동 쿨다운 타이머 초기화
-        player.move_cool_down_timer = 0.0f;
-
-        //초기 방향: 오른쪽
-        player.facing_direction = 1;
-
-        //마우스 클릭
-        input_subscribe_mouse_click(handle_player_actions);
-        map_subscribe_offset_change(update_player_offset);
     }
+
+    player.attack_power = 10;
+
+    // 물리 변수 초기화
+    player.precise_y = (float)player.y;
+    player.velocity_y = 0.0f;
+    player.is_on_ground = false; //시작 시 공중에서 떨어지도록
+
+    // 애니메이션 변수 초기화
+    player.is_moving = 0;
+    player.current_frame = 0;
+    player.animation_timer = 0.0f;
+    player.is_swinging = false; //스윙 상태 초기화
+    player.swing_timer = 0.0f;  //스윙 타이머 초기화
+
+    //이동 쿨다운 타이머 초기화
+    player.move_cool_down_timer = 0.0f;
+
+    //초기 방향: 오른쪽
+    player.facing_direction = 1;
+
+    //마우스 클릭
+    input_subscribe_mouse_click(handle_player_actions);
+    map_subscribe_offset_change(update_player_offset);
 }
 
 //충돌 감지 함수 구현
@@ -453,6 +454,11 @@ void player_render(void) {
     position.X += 2;
 
     console_fprint_string("HP: %d / %d", position, BACKGROUND_T_BLACK, FOREGROUND_T_YELLOW, current_HP, max_HP);
+}
+
+void player_destroy(void) {
+    input_unsubscribe_mouse_click(handle_player_actions);
+    map_unsubscribe_offset_change(update_player_offset);
 }
 
 //특정 x좌표에서 가장 높은 지상 의 Y좌표를 찾아 반환

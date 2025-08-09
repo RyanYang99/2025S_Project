@@ -35,6 +35,7 @@ void player_initialize(void);
 void player_update(void);
 //플레이어 렌더링
 void player_render(void);
+void player_destroy(void);
 
 const int player_find_ground_position(const int x);
 
