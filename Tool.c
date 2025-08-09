@@ -110,7 +110,7 @@ pWooden_sword_swing[TEXTURE_SIZE][TEXTURE_SIZE] = {
 
 const bool tool_can_break_block(const item_information_t * const pTool, const block_t block) {
     int tool = TOOL_KIND_NONE, material = MATERIAL_TIER_NONE;
-    
+
     if (pTool) {
         tool = pTool->tool_kind;
         material = pTool->material_tier;
@@ -157,12 +157,12 @@ const int tool_get_damage_to_block(const item_information_t * const tool, const 
     //도구가 없거나 해당 블록을 부술 수 없으면 맨손 데미지
     if (!tool || !tool_can_break_block(tool, block))
         return base_damage;
-    
+
     const int bonus_per_tier = 6; //도구 티어 1단계당 추가 데미지
     return base_damage + (bonus_per_tier * tool->material_tier);
 }
 
-//블록파괴시 인벤토리에 알맞은 아이템 획득 
+//블록파괴시 인벤토리에 알맞은 아이템 획득
 const int tool_get_drop_from_block(const block_t block) {
     switch (block) {
         //물, 베드락, 공기 등은 드롭 없음
@@ -171,7 +171,7 @@ const int tool_get_drop_from_block(const block_t block) {
         case BLOCK_WATER:
         case BLOCK_STAR:
             return -1;
-        
+
         case BLOCK_LEAF:
             if (rand() % 100 >= 80) {
                 inventory_add_item(ITEM_APPLE, 1);

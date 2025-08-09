@@ -31,13 +31,13 @@ typedef struct {
           horizontal_laser_cool_time,
           vertical_laser_cool_time;
 
-    //레이저 패턴 
+    //레이저 패턴
     bool is_horizontal_laser_active,
          is_vertical_laser_active,
          horizontal_laser_from_right,
          is_vertical_laser_from_left;
     int vertical_laser_target_x, horizontal_laser_target_y,
-        current_horizontal_laser_y, current_vertical_laser_x; 
+        current_horizontal_laser_y, current_vertical_laser_x;
     float horizontal_laser_damage_cool_time, vertical_laser_damage_cool_time;
 
     color_character_t pSprite_data[BOSS_SPRITE_HEIGHT][BOSS_SPRITE_WIDTH];

@@ -26,7 +26,7 @@ const direction_t astar_find_next_direction(const int start_x,
 
     if (map.size.x != allocated_x) {
         allocated_x = map.size.x;
-        
+
         const int size = sizeof(node_t *) * allocated_x * map.size.y;
         pOpen_list = realloc(pOpen_list, size);
         pClosed_list = realloc(pClosed_list, size);

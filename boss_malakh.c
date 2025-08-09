@@ -69,15 +69,15 @@ static const color_character_t pBoss_malakh_sprite_data[BOSS_SPRITE_HEIGHT][BOSS
     { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //5
     { { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { L'█', FG_CYAN, FG_CYAN }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█',BG_BLACK,BG_BLACK }, { L'█', FG_RED, FG_RED }, { L'█',BG_BLACK,BG_BLACK }, { L'█',BG_BLACK,BG_BLACK }, { L'█', FG_RED, FG_RED }, { L'█',BG_BLACK,BG_BLACK }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { L'█', FG_CYAN, FG_CYAN }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 } },
-    //6	
+    //6
     { { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_BLACK, BG_BLACK }, { L'█',BG_BLACK,BG_BLACK }, { L'█',BG_BLACK,BG_BLACK }, { L'█',BG_BLACK,BG_BLACK }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 } },
-    //7	
+    //7
     { { L'█', FG_WHITE, FG_WHITE }, { L'█', FG_WHITE, FG_WHITE }, { L'█', FG_CYAN, FG_CYAN }, { L'█', FG_WHITE, FG_WHITE }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_BLACK, BG_BLACK }, { L'█', BG_BLACK, BG_BLACK }, { L'█',FG_YELLOW,FG_YELLOW }, { L'█',FG_YELLOW,FG_YELLOW }, { L'█',BG_BLACK,BG_BLACK }, { L'█',BG_BLACK,BG_BLACK }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { L'█', FG_WHITE, FG_WHITE }, { L'█', FG_CYAN, FG_CYAN }, { L'█', FG_WHITE, FG_WHITE }, { L'█', FG_WHITE, FG_WHITE } },
     //8
     { { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, BG_WHITE }, { L'█', FG_CYAN, FG_CYAN }, { L'█', BG_WHITE, BG_WHITE }, { L'█', BG_WHITE, BG_WHITE }, { ' ', 0, 0 }, { L'█', BG_BLACK, BG_BLACK }, { L'█', BG_BLACK, BG_BLACK }, { L'█',FG_RED,FG_RED }, { L'█',FG_RED,FG_RED }, { L'█',BG_BLACK,BG_BLACK }, { L'█',BG_BLACK,BG_BLACK }, { ' ', 0, 0 }, { L'█', BG_WHITE, BG_WHITE }, { L'█', FG_WHITE, FG_WHITE }, { L'█', FG_CYAN, FG_CYAN }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //9
     { { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_BLACK, BG_BLACK }, { L'█',BG_BLACK,BG_BLACK }, { L'█',BG_BLACK,BG_BLACK }, { L'█',BG_BLACK,BG_BLACK }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 } },
-    //10	
+    //10
     { { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█',BG_BLACK,BG_BLACK }, { L'█', FG_RED, FG_RED }, { L'█',BG_BLACK,BG_BLACK }, { L'█',BG_BLACK,BG_BLACK }, { L'█', FG_RED, FG_RED }, { L'█',BG_BLACK,BG_BLACK }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█',FG_WHITE,FG_WHITE } },
     //11
     { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
@@ -184,7 +184,7 @@ void boss_initialize(const int start_x, const int start_y, const int hp, const i
 
     for (int i = 0; i < MAX_BOSS_DAMAGE_TEXTS; ++i)
         pBoss_damage_texts[i].active = false;
-    
+
     input_subscribe_mouse_click(boss_handle_player_attack);
 }
 
@@ -254,7 +254,7 @@ static void boss_update_pattern(void) {
 
     //페이즈 3: 세로 레이저 패턴
     if (boss.state == E_BOSS_STATE_PHASE_3 && boss.vertical_laser_timer >= boss.vertical_laser_cool_time) {
-        boss_launch_new_vertical_laser(); 
+        boss_launch_new_vertical_laser();
         boss.vertical_laser_timer = 0.0f;
     }
 }
@@ -329,7 +329,7 @@ static bool boss_is_missile_movable(const int x, const int y) {
     return block.type != BLOCK_STONE && block.type != BLOCK_WATER;
 }
 
-//미사일 업데이트 함수 
+//미사일 업데이트 함수
 static void boss_update_missiles(void) {
     const float missile_speed = 5.0f; //초당 5타일 이동
 

@@ -100,7 +100,7 @@ void game_update(void) {
 
         if (boss_spawned)
             boss_update();
-        else 
+        else
             mob_update();
 
         inventory_input();

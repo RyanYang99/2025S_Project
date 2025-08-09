@@ -507,7 +507,7 @@ const color_character_t map_get_block_texture(const block_t block, const int x, 
 
         case BLOCK_WATER:
             return pWater[y][x];
-            
+
         case BLOCK_WORKBENCH:
             return pWorkbench[y][x];
 

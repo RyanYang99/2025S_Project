@@ -55,7 +55,7 @@ const static color_character_t pZombie_sprite_data[MOB_SPRITE_HEIGHT][MOB_SPRITE
 },
 //걷는 상태
 pZombie_sprite_walk[2][MOB_SPRITE_HEIGHT][MOB_SPRITE_WIDTH] = {
-    // 프레임 0: 
+    // 프레임 0:
     {
         { { ' ', 0, 0 }, { L'▀', BG_BLACK, FG_RED }, { L'▀', BG_BLACK, FG_RED }, { L'▀', BG_BLACK, FG_RED }, { ' ', 0, 0 } }, // 머리
         { { ' ', 0, 0 }, { 'o', BG_BLACK, FG_WHITE }, { ' ', 0, 0 }, { 'o', BG_BLACK, FG_WHITE }, { ' ', 0, 0 } }, // 팔과 눈
@@ -63,7 +63,7 @@ pZombie_sprite_walk[2][MOB_SPRITE_HEIGHT][MOB_SPRITE_WIDTH] = {
         { { ' ', 0, 0 }, { L'▓', BG_BLACK, FG_DARKYELLOW }, { L'▓', BG_BLACK, FG_DARKYELLOW }, { ' ', 0, 0 }, { ' ', 0, 0 } },
         { { ' ', 0, 0 }, { L'█', BG_BLACK, FG_GREEN }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } }
     },
-    // 프레임 1 
+    // 프레임 1
     {
         { { ' ', 0, 0 }, { L'▀', BG_BLACK, FG_RED }, { L'▀', BG_BLACK, FG_RED }, { L'▀', BG_BLACK, FG_RED }, { ' ', 0, 0 } }, // 머리
         { { ' ', 0, 0 }, { 'o', BG_BLACK, FG_WHITE }, { ' ', 0, 0 }, { 'o', BG_BLACK, FG_WHITE }, { ' ', 0, 0 } }, // 팔과 눈
@@ -190,7 +190,7 @@ static void mob_spawn(void) {
 }
 
 static void mob_spawn_manager(void) {
-    // 보스가 없을 때만 몬스터 생성 
+    // 보스가 없을 때만 몬스터 생성
     if (boss.state == E_BOSS_STATE_DEFEATED) {
         if (date_time_is_night()) {
             static float mob_spawn_timer = 0.0f;
@@ -371,7 +371,7 @@ void mob_update(void) {
         if (mobs[i].is_dead)
             mobs[i].dying_timer -= delta_time;
 
-        // 걷기 애니메이션 
+        // 걷기 애니메이션
         if (mobs[i].velocity_x != 0.0f && !mobs[i].is_dead) {
             mobs[i].animation_timer += delta_time;
             if (mobs[i].animation_timer >= 0.5f) {

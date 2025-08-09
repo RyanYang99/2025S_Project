@@ -95,7 +95,7 @@ static void database_add_item_from_user(void) {
         //FindItemByIndex 함수로 중복 검사
         if (database_find_item_by_index(index))
             printf("Error: Index %d is already in use.\n", index);
-        else 
+        else
             break; //중복되지 않은 유효한 인덱스이므로 루프 탈출
     }
     //=======================================================
@@ -180,7 +180,7 @@ static void select_mode(void) {
             case 2:
                 database_print();
                 break;
-        
+
             case 0:
                 printf("Exiting.\n");
                 //void 함수이므로 값 없이 return;

@@ -48,7 +48,7 @@ void date_time_render(void) {
         pBlink = " ";
     } else if (blink >= 1.0f)
         pBlink = ":";
-    
+
     char * const pDay = format_string("Day %d", date_time_elapsed_since_start.day),
          * const pTime = format_string("%02d%s%02d", date_time_elapsed_since_start.hour, pBlink, date_time_elapsed_since_start.minute);
 
@@ -68,7 +68,7 @@ void date_time_render(void) {
 const bool date_time_is_night(void) {
     const int current_hour = date_time_elapsed_since_start.hour;
 
-    //21시부터 6시까지 밤시간 
+    //21시부터 6시까지 밤시간
     return (current_hour >= 21 || current_hour <= 6);
 }
 

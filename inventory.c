@@ -89,7 +89,7 @@ void inventory_input(void) {
         is_number = true;
         number = 9;
     }
-    
+
     if (character == 'i')
         is_inventory_open = !is_inventory_open;
     else if (is_number && number <= max_hotbar_index) {
@@ -131,7 +131,7 @@ static void render_item(const int y,
     COORD position = {
         .Y = (SHORT)y
     };
-        
+
     FOREGROUND_color_t foreground = INVENTORY_FOREGROUND_DARK;
     if (selected && blink)
         foreground = INVENTORY_FOREGROUND_BLINK;
@@ -164,7 +164,7 @@ static void render_item(const int y,
 }
 
 static void render_hotbar(void) {
-    const int slot_width = TEXTURE_SIZE + 2,  //테두리 포함 가로 크기
+    const int slot_width = TEXTURE_SIZE + 2, //테두리 포함 가로 크기
               slot_height = TEXTURE_SIZE + 2; //테두리 포함 세로 크기
 
     COORD position = {
@@ -257,6 +257,8 @@ static void render_hotbar(void) {
 }
 
 void inventory_render(void) {
+	render_hotbar();
+
     static float blink_time = 0.0f;
     static bool blink = false;
 
@@ -301,8 +303,6 @@ void inventory_render(void) {
     }
 
     console_fprint_string("%s", position, INVENTORY_BACKGROUND, FOREGROUND_T_YELLOW, pDescription);
-
-    render_hotbar();
 }
 
 void inventory_destroy(void) {
@@ -408,7 +408,7 @@ void inventory_save(void) {
 
     for (int i = 0; i < INVENTORY_SIZE; ++i)
         pSave_current->pInventory[i] = inventory.item[i];
-    
+
     for (int i = 0; i < HOTBAR_COUNT; ++i)
         pSave_current->pHotbar_linked_index[i] = inventory.pHotbar[i].index_in_inventory;
 }

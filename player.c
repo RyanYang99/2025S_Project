@@ -78,7 +78,7 @@ pPlayer_sprite_stand_armed[PLAYER_SPRITE_HEIGHT][PLAYER_SPRITE_WIDTH] = {
     { { L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW }, {L'█', BACKGROUND_T_DARKYELLOW, FOREGROUND_T_WHITE}, {L'▀', BACKGROUND_T_WHITE, FOREGROUND_T_DARKYELLOW}, {L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_WHITE}, { L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW } },
     //허리, 바지
     { { L'█', FOREGROUND_T_DARKYELLOW, FOREGROUND_T_DARKYELLOW }, { L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE }, { L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE }, { L'█', BACKGROUND_T_BLACK, FOREGROUND_T_WHITE }, { ' ', 0, 0 } },
-    //다리 
+    //다리
     { { ' ', 0, 0 }, { L'▓', BACKGROUND_T_BLACK, FOREGROUND_T_GRAY }, { ' ', 0, 0 }, { L'▓', BACKGROUND_T_BLACK, FOREGROUND_T_GRAY }, { ' ', 0, 0 } },
     //신발
     { { ' ', 0, 0 }, { L'█', BACKGROUND_T_BLACK, FOREGROUND_T_BLACK }, { ' ', 0, 0 }, { L'█', BACKGROUND_T_BLACK, FOREGROUND_T_BLACK }, { ' ', 0, 0 } }
@@ -241,7 +241,7 @@ static void update_damage_texts(void) {
 
             //타이머 감소
             pDamage_texts[i].timer -= delta_time;
-            if (pDamage_texts[i].timer <= 0.0f) 
+            if (pDamage_texts[i].timer <= 0.0f)
                 pDamage_texts[i].active = false; //시간이 지나면 비활성화
         }
     }
