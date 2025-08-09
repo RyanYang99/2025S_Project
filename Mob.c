@@ -162,16 +162,17 @@ static void MobSpawn(void) {
 
 // 몬스터 피격 시 대미지 텍스트 생성 함수
 static void create_mob_damage_text(const int mob_index, const int damage_value) {
-    for (int i = 0; i < MAX_MOB_DAMAGE_TEXTS; ++i)
-        if (!mob_damage_texts[i].active) {
-            mob_damage_texts[i].active = true;
-            mob_damage_texts[i].damage_value = damage_value;
-            mob_damage_texts[i].mob_x = mobs[mob_index].x;
-            mob_damage_texts[i].mob_y = mobs[mob_index].y;
-            mob_damage_texts[i].precise_y = (float)mobs[mob_index].y;
-            mob_damage_texts[i].timer = 1.0f; // 1.0초 동안 화면에 표시
-            break;
-        }
+	Sound_playMonsterHurt();
+	for (int i = 0; i < MAX_MOB_DAMAGE_TEXTS; ++i)
+		if (!mob_damage_texts[i].active) {
+			mob_damage_texts[i].active = true;
+			mob_damage_texts[i].damage_value = damage_value;
+			mob_damage_texts[i].mob_x = mobs[mob_index].x;
+			mob_damage_texts[i].mob_y = mobs[mob_index].y;
+			mob_damage_texts[i].precise_y = (float)mobs[mob_index].y;
+			mob_damage_texts[i].timer = 1.0f; // 1.0초 동안 화면에 표시
+			break;
+		}
 }
 
 // 몬스터 대미지 텍스트 업데이트 함수 (매 프레임 호출)
@@ -398,7 +399,7 @@ static void handle_mob_click(const bool left_click) {
             //데미지 입히는 부분
             mobs[i].HP -= player.atk_power;
             create_mob_damage_text(i, player.atk_power);
-
+            Sound_playSwing();
             decrement_durability();
             return;
         }

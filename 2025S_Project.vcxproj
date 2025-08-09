@@ -43,6 +43,10 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LibraryPath>C:\Users\Administrator\source\repos\Project_codeblack_main\2025S_Project\libs\lib\msvc;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\Administrator\source\repos\Project_codeblack_main\2025S_Project\libs\include;C:\Users\Administrator\source\repos\Project_codeblack_main\2025S_Project\libs\lib\msvc;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
@@ -50,13 +54,21 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>csfml-audio.lib;csfml-window.lib;csfml-system.lib;openal32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)libs\lib\msvc</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>if not exist "$(TargetDir)csfml-audio-2.dll" (
+    xcopy /Y /F "$(SolutionDir)libs\bin\*.dll" "$(TargetDir)"
+)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -69,6 +81,7 @@
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
@@ -77,6 +90,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>csfml-audio.lib;csfml-window.lib;csfml-system.lib;openal32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)libs\lib\msvc</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -98,6 +113,7 @@
     <ClCompile Include="Mob.c" />
     <ClCompile Include="perlin.c" />
     <ClCompile Include="player.c" />
+    <ClCompile Include="sound.c" />
     <ClCompile Include="date_time.c" />
     <ClCompile Include="save.c" />
     <ClCompile Include="Tool.c" />
@@ -122,6 +138,13 @@
     <ClInclude Include="Mob.h" />
     <ClInclude Include="perlin.h" />
     <ClInclude Include="player.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="resource1.h" />
+    <ClInclude Include="resource2.h" />
+    <ClInclude Include="resource3.h" />
+    <ClInclude Include="resource4.h" />
+    <ClInclude Include="resource5.h" />
+    <ClInclude Include="sound.h" />
     <ClInclude Include="save.h" />
     <ClInclude Include="Tool.h" />
   </ItemGroup>
@@ -129,6 +152,10 @@
     <None Include="recipes.csv" />
     <None Include="items.csv" />
     <None Include="workbench_recipes.csv" />
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="SoundFile\BGM\Caketown-1_1.wav" />
+    <Media Include="SoundFile\BGM\fixed_roop1.wav" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
