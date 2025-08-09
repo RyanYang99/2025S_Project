@@ -17,10 +17,32 @@ static int block_x = 0, block_y = 0, draw_x = 0, draw_y = 0;
 int selected_block_x = -1, selected_block_y = -1;
 #endif
 
+static int cursor_flash_timer = 0;
+static FOREGROUND_color_t cursor_flash_color = FOREGROUND_T_WHITE;
+static bool cursor_out_of_range = false; // 범위 초과 여부
+
+// 범위 체크 함수
+static bool is_cursor_in_range(void) {
+    int dx = abs(block_x - player.x);
+    int dy = abs(block_y - player.y);
+    return (dx <= 5 && dy <= 5);
+}
+
+
 //마우스 클릭 시 상호작용 처리
 static void handle_mouse_click(const bool left) {
     if (block_x < 0 || block_x >= map.size.x || block_y < 0 || block_y >= map.size.y)
         return;
+
+    if (!is_cursor_in_range()) {
+        // 범위 밖 클릭 → 빨간색 경고 
+        cursor_flash_color = FOREGROUND_T_RED;
+        return;
+    }
+
+    cursor_flash_color = FOREGROUND_T_GREEN;
+    cursor_flash_timer = 50; // 5프레임 유지
+    
 
     //1. 현재 장착된 아이템 가져오기
     item_information_t *pItem_information = NULL;
@@ -102,22 +124,31 @@ void render_virtual_cursor(void) {
     if (!show)
         return;
 
+    cursor_out_of_range = !is_cursor_in_range();
+
+    FOREGROUND_color_t color = FOREGROUND_T_WHITE;
+
+    if (cursor_flash_timer > 0) {
+        color = cursor_flash_color;
+        cursor_flash_timer--;
+    }
+    else if (cursor_out_of_range) {
+        color = FOREGROUND_T_RED;
+    }
+
     color_tchar_t character = {
-        .character = L'┌',
-        .background = BACKGROUND_T_TRANSPARENT,
-        .foreground = FOREGROUND_T_WHITE
+        .character = L'■',
+        .background = BACKGROUND_T_BLACK,
+        .foreground = color
     };
 
     //각 모서리에 문자를 출력
     print_color_tchar(character, (COORD) { (SHORT)draw_x, (SHORT)draw_y });
 
-    character.character = L'┐';
     print_color_tchar(character, (COORD) { (SHORT)(draw_x + TEXTURE_SIZE - 1), (SHORT)draw_y });
 
-    character.character = L'└';
     print_color_tchar(character, (COORD) { (SHORT)draw_x, (SHORT)(draw_y + TEXTURE_SIZE - 1) });
 
-    character.character = L'┘';
     print_color_tchar(character, (COORD) { (SHORT)(draw_x + TEXTURE_SIZE - 1), (SHORT)(draw_y + TEXTURE_SIZE - 1) });
 }
 
