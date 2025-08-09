@@ -1,13 +1,33 @@
-#define _CRT_SECURE_NO_WARNINGS
-
+#include "leak.h"
 #include "sound.h"
+
 #include "stdio.h"
 #include "stdlib.h"
 #include "time.h"
 
 #include "SFML/Audio.h"
 
-static const char* footstepSounds[MAX_FOOTSTEP_SOUNDS] = {
+//한 번에 로드할 발소리 파일의 최대 개수
+#define MAX_FOOTSTEP_SOUNDS 10
+#define MAX_SWING_SOUNDS 3
+#define MAX_HURT_SOUNDS 5
+#define MAX_SFX_PLAYERS 10
+
+typedef struct {
+    sfMusic *pBGM;
+} sound_manager_t;
+
+typedef struct {
+    sfSoundBuffer *ppBuffers[MAX_FOOTSTEP_SOUNDS],
+                  *ppSwing_buffers[MAX_SWING_SOUNDS],
+                  *ppMonster_hurt_buffers[MAX_HURT_SOUNDS];
+    sfSound *ppSFX_players[MAX_SFX_PLAYERS],
+            *pSound;
+
+    int footstep_count, swing_count, monster_hurt_count;
+} SFX_manager_t;
+
+static const char * const pFootstep_sounds[MAX_FOOTSTEP_SOUNDS] = {
     "Footstep/Footstep_Dirt_00.wav",
     "Footstep/Footstep_Dirt_01.wav",
     "Footstep/Footstep_Dirt_02.wav",
@@ -18,15 +38,11 @@ static const char* footstepSounds[MAX_FOOTSTEP_SOUNDS] = {
     "Footstep/Footstep_Dirt_07.wav",
     "Footstep/Footstep_Dirt_08.wav",
     "Footstep/Footstep_Dirt_09.wav"
-};
-
-static const char* swingSounds[MAX_SWING_SOUNDS] = {
+}, * const pSwing_sounds[MAX_SWING_SOUNDS] = {
     "Swing/swing.wav",
     "Swing/swing2.wav",
     "Swing/swing3.wav"
-};
-
-static const char* monsterHurtSounds[MAX_HURT_SOUNDS] = {
+}, * const pMonster_hurt_sounds[MAX_HURT_SOUNDS] = {
     "Monster/Hurt/Hurt.wav",
     "Monster/Hurt/Hurt2.wav",
     "Monster/Hurt/Hurt3.wav",
@@ -34,189 +50,181 @@ static const char* monsterHurtSounds[MAX_HURT_SOUNDS] = {
     "Monster/Hurt/Hurt5.wav"
 };
 
-typedef struct {
-    sfMusic* bgm;
-} SoundManager;
+static SFX_manager_t *pSFX_manager = NULL;
+static sound_manager_t *pSound_manager = NULL;
 
-typedef struct {
-    sfSoundBuffer* buffers[MAX_FOOTSTEP_SOUNDS];
-    sfSoundBuffer* swingBuffers[MAX_SWING_SOUNDS];
-    sfSoundBuffer* monsterHurtBuffers[MAX_HURT_SOUNDS];
-    sfSound* sfxPlayers[MAX_SFX_PLAYERS];
-    sfSound* sound;
-    int footstepCount;
-    int swingCount;
-    int monsterHurtCount;
-} SFXManager;
+void sound_initialize(void) {
+    if (pSound_manager != NULL)
+        return;
 
+    pSound_manager = malloc(sizeof(sound_manager_t));
+    if (!pSound_manager)
+        return;
 
-static SFXManager* s_sfx = NULL;
-static SoundManager* s_manager = NULL;
+    pSound_manager->pBGM = NULL;
 
-static void play_sfx(sfSoundBuffer* buffer) {
-    if (!s_sfx || !buffer) return;
+    //효과음 매니저 초기화
+    pSFX_manager = malloc(sizeof(SFX_manager_t));
+    if (!pSFX_manager)
+        return;
 
-    // 비어있는 플레이어를 찾는다
-    for (int i = 0; i < MAX_SFX_PLAYERS; i++) {
-        if (sfSound_getStatus(s_sfx->sfxPlayers[i]) != sfPlaying) {
-            sfSound_setBuffer(s_sfx->sfxPlayers[i], buffer);
-            sfSound_play(s_sfx->sfxPlayers[i]);
-            return;
-        }
-    }
-}
+    for (int i = 0; i < MAX_SFX_PLAYERS; ++i)
+        pSFX_manager->ppSFX_players[i] = sfSound_create();
+    pSFX_manager->pSound = sfSound_create();
+    pSFX_manager->footstep_count = 0;
+    pSFX_manager->swing_count = 0;
+    pSFX_manager->monster_hurt_count = 0;
 
-void Sound_init() {
-    if (s_manager != NULL) return;
+    for (int i = 0; i < MAX_FOOTSTEP_SOUNDS; ++i) {
+        if (pFootstep_sounds[i] == NULL)
+            break;
 
-    s_manager = (SoundManager*)malloc(sizeof(SoundManager));
-    if (!s_manager) return;
+        char pFull_path[256] = { 0 };
+        snprintf(pFull_path, sizeof(pFull_path), "SoundFile/%s", pFootstep_sounds[i]);
 
-    s_manager->bgm = NULL;
-
-    // 효과음 매니저 초기화
-    s_sfx = (SFXManager*)malloc(sizeof(SFXManager));
-    if (!s_sfx) return;
-
-    for (int i = 0; i < MAX_SFX_PLAYERS; i++) {
-        s_sfx->sfxPlayers[i] = sfSound_create();
-    }
-    s_sfx->sound = sfSound_create();
-    s_sfx->footstepCount = 0;
-    s_sfx->swingCount = 0;
-    s_sfx->monsterHurtCount = 0;
-
-    for (int i = 0; i < MAX_FOOTSTEP_SOUNDS; i++) {
-        if (footstepSounds[i] == NULL) break;
-
-        char fullPath[256];
-        snprintf(fullPath, sizeof(fullPath), "SoundFile/%s", footstepSounds[i]);
-
-        s_sfx->buffers[i] = sfSoundBuffer_createFromFile(fullPath);
-        if (s_sfx->buffers[i]) {
-            s_sfx->footstepCount++;
-        }
+        pSFX_manager->ppBuffers[i] = sfSoundBuffer_createFromFile(pFull_path);
+        if (pSFX_manager->ppBuffers[i])
+            ++pSFX_manager->footstep_count;
     }
 
     for (int i = 0; i < MAX_SWING_SOUNDS; i++) {
-        char fullPath[256];
-        snprintf(fullPath, sizeof(fullPath), "SoundFile/%s", swingSounds[i]);
-        s_sfx->swingBuffers[i] = sfSoundBuffer_createFromFile(fullPath);
-        if (s_sfx->swingBuffers[i]) {
-            s_sfx->swingCount++;
-        }
+        char pFull_path[256] = { 0 };
+        snprintf(pFull_path, sizeof(pFull_path), "SoundFile/%s", pSwing_sounds[i]);
+
+        pSFX_manager->ppSwing_buffers[i] = sfSoundBuffer_createFromFile(pFull_path);
+        if (pSFX_manager->ppSwing_buffers[i])
+            ++pSFX_manager->swing_count;
     }
 
-    for (int i = 0; i < MAX_HURT_SOUNDS; i++) {
-        char fullPath[256];
-        snprintf(fullPath, sizeof(fullPath), "SoundFile/%s", monsterHurtSounds[i]);
-        s_sfx->monsterHurtBuffers[i] = sfSoundBuffer_createFromFile(fullPath);
-        if (s_sfx->monsterHurtBuffers[i]) {
-            s_sfx->monsterHurtCount++;
-        }
+    for (int i = 0; i < MAX_HURT_SOUNDS; ++i) {
+        char pFull_path[256] = { 0 };
+        snprintf(pFull_path, sizeof(pFull_path), "SoundFile/%s", pMonster_hurt_sounds[i]);
+
+        pSFX_manager->ppMonster_hurt_buffers[i] = sfSoundBuffer_createFromFile(pFull_path);
+        if (pSFX_manager->ppMonster_hurt_buffers[i])
+            ++pSFX_manager->monster_hurt_count;
     }
 
     srand((unsigned int)time(NULL));
 }
 
-void Sound_playBGM(const char* filename) {
-    if (!s_manager || !filename) return;
-
-    // 기존 BGM 정리
-    if (s_manager->bgm) {
-        sfMusic_stop(s_manager->bgm);
-        sfMusic_destroy(s_manager->bgm);
-        s_manager->bgm = NULL;
-    }
-
-    char path[256];
-    snprintf(path, sizeof(path), "SoundFile/%s", filename);
-
-    s_manager->bgm = sfMusic_createFromFile(path);
-    if (!s_manager->bgm) {
-        fprintf(stderr, "Failed to load BGM file: %s\n", path);
+void sound_destroy(void) {
+    if (!pSound_manager)
         return;
+
+    if (pSound_manager->pBGM) {
+        sfMusic_stop(pSound_manager->pBGM);
+        sfMusic_destroy(pSound_manager->pBGM);
+        pSound_manager->pBGM = NULL;
     }
 
-    sfMusic_setLoop(s_manager->bgm, sfTrue);
-    sfMusic_play(s_manager->bgm);
+    free(pSound_manager);
+    pSound_manager = NULL;
+
+    if (pSFX_manager) {
+        for (int i = 0; i < pSFX_manager->footstep_count; ++i)
+            if (pSFX_manager->ppBuffers[i])
+                sfSoundBuffer_destroy(pSFX_manager->ppBuffers[i]);
+
+        for (int i = 0; i < pSFX_manager->swing_count; ++i)
+            if (pSFX_manager->ppSwing_buffers[i])
+                sfSoundBuffer_destroy(pSFX_manager->ppSwing_buffers[i]);
+
+        for (int i = 0; i < pSFX_manager->monster_hurt_count; ++i)
+            if (pSFX_manager->ppMonster_hurt_buffers[i])
+                sfSoundBuffer_destroy(pSFX_manager->ppMonster_hurt_buffers[i]);
+
+        for (int i = 0; i < MAX_SFX_PLAYERS; ++i)
+            if (pSFX_manager->ppSFX_players[i])
+                sfSound_destroy(pSFX_manager->ppSFX_players[i]);
+
+        if (pSFX_manager->pSound)
+            sfSound_destroy(pSFX_manager->pSound);
+
+        free(pSFX_manager);
+        pSFX_manager = NULL;
+    }
 }
 
-void Sound_playMenuBGM(const char* filename) {
-    if (!s_manager || !filename) return;
-
-    // 다른 BGM이 재생 중이었다면 정지하고 정리
-    if (s_manager->bgm) {
-        sfMusic_stop(s_manager->bgm);
-        sfMusic_destroy(s_manager->bgm);
-        s_manager->bgm = NULL;
-    }
-
-    char path[256];
-    snprintf(path, sizeof(path), "SoundFile/%s", filename);
-
-    s_manager->bgm = sfMusic_createFromFile(path);
-    if (!s_manager->bgm) {
-        fprintf(stderr, "Failed to load Menu BGM file: %s\n", path);
+void sound_play_BGM(const char * const pFile_name) {
+    if (!pSound_manager || !pFile_name)
         return;
+
+    //기존 BGM 정리
+    if (pSound_manager->pBGM) {
+        sfMusic_stop(pSound_manager->pBGM);
+        sfMusic_destroy(pSound_manager->pBGM);
+        pSound_manager->pBGM = NULL;
     }
 
-    sfMusic_setLoop(s_manager->bgm, sfTrue);
-    sfMusic_play(s_manager->bgm);
+    char path[256] = { 0 };
+    snprintf(path, sizeof(path), "SoundFile/%s", pFile_name);
+
+    pSound_manager->pBGM = sfMusic_createFromFile(path);
+    if (!pSound_manager->pBGM)
+        return;
+
+    sfMusic_setLoop(pSound_manager->pBGM, sfTrue);
+    sfMusic_play(pSound_manager->pBGM);
 }
 
-void Sound_playFootstep() {
-    if (!s_sfx || s_sfx->footstepCount == 0) return;
+void sound_play_menu_BGM(const char * const pFile_name) {
+    if (!pSound_manager || !pFile_name)
+        return;
 
-    if (sfSound_getStatus(s_sfx->sound) == sfPlaying) return;
-
-    int index = rand() % s_sfx->footstepCount;
-
-    // 전용 플레이어에 소리를 설정하고 재생합니다.
-    sfSound_setBuffer(s_sfx->sound, s_sfx->buffers[index]);
-    sfSound_play(s_sfx->sound);
-}
-
-void Sound_playSwing() {
-    if (!s_sfx || s_sfx->swingCount == 0) return;
-    int index = rand() % s_sfx->swingCount;
-    play_sfx(s_sfx->swingBuffers[index]);
-}
-
-void Sound_playMonsterHurt() {
-    if (!s_sfx || s_sfx->monsterHurtCount == 0) return;
-    int index = rand() % s_sfx->monsterHurtCount;
-    play_sfx(s_sfx->monsterHurtBuffers[index]);
-}
-
-void Sound_shutdown() {
-    if (!s_manager) return;
-
-    if (s_manager->bgm) {
-        sfMusic_stop(s_manager->bgm);
-        sfMusic_destroy(s_manager->bgm);
-        s_manager->bgm = NULL;
+    //다른 BGM이 재생 중이었다면 정지하고 정리
+    if (pSound_manager->pBGM) {
+        sfMusic_stop(pSound_manager->pBGM);
+        sfMusic_destroy(pSound_manager->pBGM);
+        pSound_manager->pBGM = NULL;
     }
 
-    free(s_manager);
-    s_manager = NULL;
+    char path[256] = { 0 };
+    snprintf(path, sizeof(path), "SoundFile/%s", pFile_name);
 
-    if (s_sfx) {
-        for (int i = 0; i < s_sfx->footstepCount; i++) { if (s_sfx->buffers[i]) sfSoundBuffer_destroy(s_sfx->buffers[i]); }
-        for (int i = 0; i < s_sfx->swingCount; i++) { if (s_sfx->swingBuffers[i]) sfSoundBuffer_destroy(s_sfx->swingBuffers[i]); }
-        for (int i = 0; i < s_sfx->monsterHurtCount; i++) { if (s_sfx->monsterHurtBuffers[i]) sfSoundBuffer_destroy(s_sfx->monsterHurtBuffers[i]); }
+    pSound_manager->pBGM = sfMusic_createFromFile(path);
+    if (!pSound_manager->pBGM)
+        return;
 
+    sfMusic_setLoop(pSound_manager->pBGM, sfTrue);
+    sfMusic_play(pSound_manager->pBGM);
+}
 
-        for (int i = 0; i < MAX_SFX_PLAYERS; i++) {
-            if (s_sfx->sfxPlayers[i]) sfSound_destroy(s_sfx->sfxPlayers[i]);
+void sound_play_footstep(void) {
+    if (!pSFX_manager || !pSFX_manager->footstep_count)
+        return;
+
+    if (sfSound_getStatus(pSFX_manager->pSound) == sfPlaying)
+        return;
+
+    // 전용 플레이어에 소리를 설정하고 재생
+    sfSound_setBuffer(pSFX_manager->pSound, pSFX_manager->ppBuffers[rand() % pSFX_manager->footstep_count]);
+    sfSound_play(pSFX_manager->pSound);
+}
+
+static void play_SFX(sfSoundBuffer *pBuffer) {
+    if (!pSFX_manager || !pBuffer)
+        return;
+
+    //비어있는 플레이어를 찾는다
+    for (int i = 0; i < MAX_SFX_PLAYERS; ++i)
+        if (sfSound_getStatus(pSFX_manager->ppSFX_players[i]) != sfPlaying) {
+            sfSound_setBuffer(pSFX_manager->ppSFX_players[i], pBuffer);
+            sfSound_play(pSFX_manager->ppSFX_players[i]);
+            return;
         }
-
-        if (s_sfx->sound) {
-            sfSound_destroy(s_sfx->sound);
-        }
-
-        free(s_sfx);
-        s_sfx = NULL;
-    }
 }
 
+void sound_play_swing(void) {
+    if (!pSFX_manager || !pSFX_manager->swing_count)
+        return;
+
+    play_SFX(pSFX_manager->ppSwing_buffers[rand() % pSFX_manager->swing_count]);
+}
+
+void sound_play_monster_hurt(void) {
+    if (!pSFX_manager || pSFX_manager->monster_hurt_count == 0)
+        return;
+
+    play_SFX(pSFX_manager->ppMonster_hurt_buffers[rand() % pSFX_manager->monster_hurt_count]);
+}

@@ -4,10 +4,7 @@
     <ClCompile Include="astar.c">
       <Filter>Source File</Filter>
     </ClCompile>
-    <ClCompile Include="BlockCtrl.c">
-      <Filter>Source File</Filter>
-    </ClCompile>
-    <ClCompile Include="BossMalakh.c">
+    <ClCompile Include="block_control.c">
       <Filter>Source File</Filter>
     </ClCompile>
     <ClCompile Include="console.c">
@@ -37,7 +34,7 @@
     <ClCompile Include="item.c">
       <Filter>Source File</Filter>
     </ClCompile>
-    <ClCompile Include="ItemDB.c">
+    <ClCompile Include="item_database.c">
       <Filter>Source File</Filter>
     </ClCompile>
     <ClCompile Include="main.c">
@@ -49,7 +46,7 @@
     <ClCompile Include="map.c">
       <Filter>Source File</Filter>
     </ClCompile>
-    <ClCompile Include="Mob.c">
+    <ClCompile Include="mob.c">
       <Filter>Source File</Filter>
     </ClCompile>
     <ClCompile Include="perlin.c">
@@ -64,7 +61,10 @@
     <ClCompile Include="sound.c">
       <Filter>Source File</Filter>
     </ClCompile>
-    <ClCompile Include="Tool.c">
+    <ClCompile Include="tool.c">
+      <Filter>Source File</Filter>
+    </ClCompile>
+    <ClCompile Include="boss_malakh.c">
       <Filter>Source File</Filter>
     </ClCompile>
   </ItemGroup>
@@ -72,10 +72,7 @@
     <ClInclude Include="astar.h">
       <Filter>Header File</Filter>
     </ClInclude>
-    <ClInclude Include="BlockCtrl.h">
-      <Filter>Header File</Filter>
-    </ClInclude>
-    <ClInclude Include="BossMalakh.h">
+    <ClInclude Include="block_control.h">
       <Filter>Header File</Filter>
     </ClInclude>
     <ClInclude Include="console.h">
@@ -105,7 +102,7 @@
     <ClInclude Include="item.h">
       <Filter>Header File</Filter>
     </ClInclude>
-    <ClInclude Include="ItemDB.h">
+    <ClInclude Include="item_database.h">
       <Filter>Header File</Filter>
     </ClInclude>
     <ClInclude Include="leak.h">
@@ -117,7 +114,7 @@
     <ClInclude Include="map.h">
       <Filter>Header File</Filter>
     </ClInclude>
-    <ClInclude Include="Mob.h">
+    <ClInclude Include="mob.h">
       <Filter>Header File</Filter>
     </ClInclude>
     <ClInclude Include="perlin.h">
@@ -150,12 +147,14 @@
     <ClInclude Include="sound.h">
       <Filter>Header File</Filter>
     </ClInclude>
-    <ClInclude Include="Tool.h">
+    <ClInclude Include="tool.h">
+      <Filter>Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="boss_malakh.h">
       <Filter>Header File</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-<<<<<<< HEAD
     <Media Include="SoundFile\BGM\Caketown-1_1.wav">
       <Filter>Resource File</Filter>
     </Media>
@@ -164,21 +163,17 @@
     </Media>
   </ItemGroup>
   <ItemGroup>
-    <None Include="base_recipes.csv">
-      <Filter>Resource File</Filter>
-    </None>
     <None Include="items.csv">
       <Filter>Resource File</Filter>
     </None>
     <None Include="workbench_recipes.csv">
       <Filter>Resource File</Filter>
-=======
+    </None>
     <None Include="items.csv">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="recipes.csv">
-      <Filter>Resource Files</Filter>
->>>>>>> 281c344d209bda710c9624d81713eae195dad647
+      <Filter>Resource File</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

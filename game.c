@@ -2,22 +2,19 @@
 #include "game.h"
 
 #include "Mob.h"
-#include "BossMalakh.h"
+#include "boss_malakh.h"
 #include "map.h"
 #include "save.h"
 #include "astar.h"
 #include "input.h"
 #include "delta.h"
 #include "player.h"
-#include "BlockCtrl.h"
+#include "block_control.h"
 #include "inventory.h"
 #include "date_time.h"
 #include "Crafting_UI.h"
 
-
 bool game_exit = false;
-bool is_boss_spawned;
-
 
 #if _DEBUG
 static void render_debug_text(void) {
@@ -26,102 +23,99 @@ static void render_debug_text(void) {
 
     COORD position = {
         .X = 0,
-        .Y = console.size.Y - 5
+        .Y = console_size.Y - 4
     };
 
     int fps = -1;
     if (delta_time > 0.0f)
         fps = (int)(1.0f / delta_time);
-    fprint_string("FPS: %d", position, background, foreground, fps);
+    console_fprint_string("FPS: %d", position, background, foreground, fps);
     ++position.Y;
 
-    fprint_string("Player: (%d, %d)", position, background, foreground, player.x, player.y);
+    console_fprint_string("Player: (%d, %d)", position, background, foreground, player.x, player.y);
     ++position.Y;
 
-    fprint_string("Mouse: (%d, %d)", position, background, foreground, selected_block_x, selected_block_y);
+    console_fprint_string("Mouse: (%d, %d)", position, background, foreground, block_control_selected_x, block_control_selected_y);
     ++position.Y;
 
-    fprint_string("Boss Spawned: %s", position, background, foreground, is_boss_spawned ? "True" : "False");
-    ++position.Y;
+    console_fprint_string("Boss Spawned: %d", position, background, foreground, boss_spawned);
+}
 
-
+static void test(void) {
+    inventory_add_item(109, 1);
+    inventory_add_item(102, 1);
+    inventory_add_item(107, 1);
+    inventory_add_item(106, 1);
+    inventory_add_item(103, 1);
+    inventory_add_item(105, 1);
+    inventory_add_item(108, 1);
 }
 #endif
 
 static void render(void) {
-    render_map();
-    render_player();
-    render_virtual_cursor();
-    if (is_boss_spawned) { Boss_Render();}else{ Mob_render(); }
-    render_inventory();
-    render_hotbar();
-    render_time();
-    render_save_menu();
-    render_crafting_UI();
+    map_render();
+    player_render();
+    block_control_render();
+
+    if (boss_spawned)
+        boss_render();
+    else
+        mob_render();
+
+    inventory_render();
+    date_time_render();
+    save_render();
+    crafting_UI_render();
 
 #if _DEBUG
     render_debug_text();
 #endif
 }
 
-void test_create_Bossitem()
-{
-    add_item_to_inventory(109, 1);
-    add_item_to_inventory(102, 1);
-    add_item_to_inventory(107, 1);
-    add_item_to_inventory(106, 1);
-    add_item_to_inventory(103, 1);
-    add_item_to_inventory(105, 1);
-    add_item_to_inventory(108, 1);
+void game_initialize(void) {
+    game_exit = boss_spawned = false;
+
+    date_time_initialize();
+    map_create();
+    player_initialize();
+    mob_initialize();
+    block_control_initialize();
+    inventory_initialize();
+    save_initialize();
+    save_free();
+
+#if _DEBUG
+    test();
+#endif
 }
 
-void initialize_game(void) {
-    game_exit = false;
-    is_boss_spawned = false;
-    initialize_date_time();
-    create_map();
-    player_init();
-    mob_init();
-    initialize_block_control();
-    initialize_inventory();
-    initialize_save();
-    free_save();
-
-    test_create_Bossitem();
-}
-
-
-void run_game(void) {
-
+void game_update(void) {
     while (!game_exit) {
-        update_delta_time();
+        delta_time_update();
 
-        update_console();
-        update_input();
-        update_date_time();
-
+        console_update();
+        input_update();
+        date_time_update();
         player_update();
+
+        if (boss_spawned)
+            boss_update();
+        else 
+            mob_update();
+
         inventory_input();
         crafting_UI_input();
         save_input();
-
-        if (is_boss_spawned) {
-        Boss_update();
-        }
-        else
-        {
-        mob_spawn_manager();
-        mob_update();
-        }
 
         render();
     }
 }
 
-void destroy_game(void) {
-    destroy_mob();
-    destroy_Boss();
-    destroy_astar();
-    destroy_block_control();
-    destroy_map();
+void game_destroy(void) {
+    mob_destroy();
+    boss_destroy();
+    astar_destroy();
+    inventory_destroy();
+    block_control_destroy();
+    map_destroy();
 }

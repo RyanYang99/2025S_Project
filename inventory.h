@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "ItemDB.h"
+#include "item_database.h"
 
 #define ITEMS_PER_PAGE 10 //한 페이지에 보여줄 아이템 수
 #define MAX_PAGES 5 //최대 페이지 수
@@ -14,9 +14,9 @@
 
 #pragma pack(push, 1)
 typedef struct {
-    int item_db_index; //DB를 참조하는 index
-    int quantity; //현재 수량
-    int durability; //현재 내구도
+    int item_DB_index, //DB를 참조하는 index
+        quantity, //현재 수량
+        durability; //현재 내구도
 } player_item_t;
 #pragma pack(pop)
 
@@ -34,15 +34,14 @@ typedef struct {
 
 extern inventory_t inventory;
 
-void initialize_inventory(void);
-
-bool add_item_to_inventory(const int item_db_index, int quantity);
-void decrement_item_from_inventory(player_item_t * const pItem);
-void decrement_durability(void);
-int get_inventory_count(int item_db_index);
-
-void render_inventory(void);
-void render_hotbar(void);
+void inventory_initialize(void);
 void inventory_input(void);
+void inventory_render(void);
+void inventory_destroy(void);
 
-void save_inventory(void);
+const int inventory_get_count(const int item_DB_index);
+const bool inventory_add_item(const int item_DB_index, const int quantity);
+void inventory_decrement_item(player_item_t * const pItem);
+void inventory_decrement_durability(void);
+
+void inventory_save(void);

@@ -2,13 +2,13 @@
 #include "save.h"
 #include "game.h"
 #include "input.h"
-#include "ItemDB.h"
+#include "item_database.h"
 #include "main_menu.h"
 #include "Crafting_UI.h"
 #include "sound.h"
 
 static bool force_old_console(void) {
-    if (is_new_console()) {
+    if (console_is_new_windows_terminal()) {
         printf_s("Attempting to launch in conhost.exe.\n");
 
         int argc = 0;
@@ -60,34 +60,33 @@ int main(void)
     if (force_old_console())
         return 0;
 
-    call_database(false);
-    initialize_crafting_UI();
-    initialize_console(true, false);
-    Sound_init();
-    Sound_playMenuBGM("BGM/song18_1.wav");
-
+	database_initialize(false);
+    crafting_UI_initialize();
+    console_initialize(true, false);
+    sound_initialize();
+    sound_play_menu_BGM("BGM/song18_1.wav");
 
     while (true) {
         const main_menu_state_t main_menu_state = main_menu();
         if (main_menu_state == MAIN_MENU_STATE_QUIT)
             break;
         else if (main_menu_state == MAIN_MENU_STATE_LOAD_GAME) {
-            if (!load_menu())
+            if (!main_menu_load_menu())
                 continue;
         }
         else
-            free_save();
+            save_free();
 
-        Sound_playBGM("BGM/fixed_roop1.wav");
-        initialize_input_handler();
-        initialize_game();
-        run_game();
-        destroy_game();
-        destroy_input_handler();
+        sound_play_BGM("BGM/fixed_roop1.wav");
+        input_initialize();
+        game_initialize();
+        game_update();
+        game_destroy();
+        input_destroy();
     }
 
-    destroy_database();
-    Sound_shutdown();
-    destroy_console();
+    database_destroy();
+    sound_destroy();
+    console_destroy();
     return EXIT_SUCCESS;
 }

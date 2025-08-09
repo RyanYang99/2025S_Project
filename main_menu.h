@@ -9,4 +9,4 @@ typedef enum {
 } main_menu_state_t;
 
 const main_menu_state_t main_menu(void);
-bool load_menu(void);
+const bool main_menu_load_menu(void);

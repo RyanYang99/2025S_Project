@@ -1,14 +1,15 @@
 ﻿#include "leak.h"
-#include "Tool.h"
+#include "tool.h"
 
 #include <stdbool.h>
 #include "map.h"
-#include "ItemDB.h"
+#include "item.h"
+#include "item_database.h"
 #include "player.h"
-#include "blockctrl.h"
+#include "block_control.h"
 #include "inventory.h"
 
-const color_tchar_t pWooden_sword[TEXTURE_SIZE][TEXTURE_SIZE] = {
+static const color_character_t pWooden_sword[TEXTURE_SIZE][TEXTURE_SIZE] = {
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_YELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_YELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } }
@@ -56,65 +57,62 @@ const color_tchar_t pWooden_sword[TEXTURE_SIZE][TEXTURE_SIZE] = {
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKGRAY }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } }
-};
-
+},
 //도구 스윙
-const color_tchar_t pWooden_sword_Swing[TEXTURE_SIZE][TEXTURE_SIZE] = {
+pWooden_sword_swing[TEXTURE_SIZE][TEXTURE_SIZE] = {
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
     { { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_YELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_YELLOW } },
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT } }
-}, pStone_sword_Swing[TEXTURE_SIZE][TEXTURE_SIZE] = {
+}, pStone_sword_swing[TEXTURE_SIZE][TEXTURE_SIZE] = {
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
     { { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GRAY } },
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT } }
-}, pIron_sword_Swing[TEXTURE_SIZE][TEXTURE_SIZE] = {
+}, pIron_sword_swing[TEXTURE_SIZE][TEXTURE_SIZE] = {
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
     { { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKGRAY }, { ' ',FOREGROUND_T_BLACK, BACKGROUND_T_DARKGRAY } },
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT } }
-}, pWooden_pickaxe_Swing[TEXTURE_SIZE][TEXTURE_SIZE] = {
+}, pWooden_pickaxe_swing[TEXTURE_SIZE][TEXTURE_SIZE] = {
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_YELLOW } },
     { { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_YELLOW } },
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_YELLOW } }
-}, pStone_pickaxe_Swing[TEXTURE_SIZE][TEXTURE_SIZE] = {
+}, pStone_pickaxe_swing[TEXTURE_SIZE][TEXTURE_SIZE] = {
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GRAY } },
     { { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GRAY } },
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GRAY } }
-}, pIron_pickaxe_Swing[TEXTURE_SIZE][TEXTURE_SIZE] = {
+}, pIron_pickaxe_swing[TEXTURE_SIZE][TEXTURE_SIZE] = {
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKGRAY } },
     { { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKGRAY } },
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKGRAY } }
-}, pWooden_axe_Swing[TEXTURE_SIZE][TEXTURE_SIZE] = {
+}, pWooden_axe_swing[TEXTURE_SIZE][TEXTURE_SIZE] = {
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
     { { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_YELLOW } },
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_YELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_YELLOW } }
-}, pStone_axe_Swing[TEXTURE_SIZE][TEXTURE_SIZE] = {
+}, pStone_axe_swing[TEXTURE_SIZE][TEXTURE_SIZE] = {
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
     { { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GRAY } },
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GRAY }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GRAY } }
-}, pIron_axe_Swing[TEXTURE_SIZE][TEXTURE_SIZE] = {
+}, pIron_axe_swing[TEXTURE_SIZE][TEXTURE_SIZE] = {
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
     { { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKGRAY } },
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKGRAY }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKGRAY } }
-}, pWooden_shovel_Swing[TEXTURE_SIZE][TEXTURE_SIZE] = {
+}, pWooden_shovel_swing[TEXTURE_SIZE][TEXTURE_SIZE] = {
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
     { { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_YELLOW } },
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT } }
-}, pStone_shovel_Swing[TEXTURE_SIZE][TEXTURE_SIZE] = {
+}, pStone_shovel_swing[TEXTURE_SIZE][TEXTURE_SIZE] = {
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
     { { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_GRAY } },
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT } }
-}, pIron_shovel_Swing[TEXTURE_SIZE][TEXTURE_SIZE] = {
+}, pIron_shovel_swing[TEXTURE_SIZE][TEXTURE_SIZE] = {
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
     { { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKYELLOW }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_DARKGRAY } },
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', 0, BACKGROUND_T_TRANSPARENT } }
 };
 
-
-const bool can_tool_break_block(const item_information_t * const pTool, const block_t block) {
+const bool tool_can_break_block(const item_information_t * const pTool, const block_t block) {
     int tool = TOOL_KIND_NONE, material = MATERIAL_TIER_NONE;
     
-    if (pTool)
-    {
+    if (pTool) {
         tool = pTool->tool_kind;
         material = pTool->material_tier;
     }
@@ -154,11 +152,11 @@ const bool can_tool_break_block(const item_information_t * const pTool, const bl
 }
 
 //도구가 해당 블록에 주는 데미지를 계산하는 함수
-const int get_tool_damage_to_block(const item_information_t * const tool, const block_t block) {
+const int tool_get_damage_to_block(const item_information_t * const tool, const block_t block) {
     const int base_damage = 3; //맨손 기본 데미지
 
     //도구가 없거나 해당 블록을 부술 수 없으면 맨손 데미지
-    if (!tool || !can_tool_break_block(tool, block))
+    if (!tool || !tool_can_break_block(tool, block))
         return base_damage;
     
     const int bonus_per_tier = 6; //도구 티어 1단계당 추가 데미지
@@ -166,9 +164,9 @@ const int get_tool_damage_to_block(const item_information_t * const tool, const 
 }
 
 //블록파괴시 인벤토리에 알맞은 아이템 획득 
-const int get_drop_from_block(const block_t block) {
+const int tool_get_drop_from_block(const block_t block) {
     switch (block) {
-        // 물, 베드락, 공기 등은 드롭 없음
+        //물, 베드락, 공기 등은 드롭 없음
         case BLOCK_AIR:
         case BLOCK_BEDROCK:
         case BLOCK_WATER:
@@ -176,12 +174,10 @@ const int get_drop_from_block(const block_t block) {
             return -1;
         
         case BLOCK_LEAF:
-            if (rand() % 100 >= 80)
-            {
-                add_item_to_inventory(401, 1);
+            if (rand() % 100 >= 80) {
+                inventory_add_item(ITEM_APPLE, 1);
                 return -1;
-            }
-            else
+            } else
                 return block;
 
     }
@@ -189,16 +185,16 @@ const int get_drop_from_block(const block_t block) {
     return block;
 }
 
-const bool can_place_block(const int x, const int y) {
+const bool tool_can_place_block(const int x, const int y) {
     //1. 플레이어 위치에는 설치 불가
     if (x == player.x && y == player.y)
         return false;
 
     //2. 해당 위치의 블록 정보 가져오기
-    const block_info_t target = get_block_info_at(x, y);
+    const block_info_t target = map_get_block_info(x, y);
 
     //3. 이미 블록이 존재하면 설치 불가
-    if (!is_air_or_star(target.type))
+    if (!map_is_air_or_star(target.type))
         return false;
 
     /*
@@ -209,22 +205,22 @@ const bool can_place_block(const int x, const int y) {
     return true;
 }
 
-const color_tchar_t get_tool_texture(const tool_t tool, const int x, const int y) {
+const color_character_t tool_get_texture(const tool_t tool, const int x, const int y) {
     switch (tool) {
         case TOOL_WOODEN_SWORD:
             return pWooden_sword[y][x];
 
         case TOOL_STONE_SWORD:
-            return pStone_sword[y][x]; //
+            return pStone_sword[y][x];
 
         case TOOL_IRON_SWORD:
-            return pIron_sword[y][x];//
+            return pIron_sword[y][x];
 
         case TOOL_WOODEN_PICKAXE:
             return pWooden_pickaxe[y][x];
 
         case TOOL_STONE_PICKAXE:
-            return pStone_pickaxe[y][x]; //
+            return pStone_pickaxe[y][x];
 
         case TOOL_IRON_PICKAXE:
             return pIron_pickaxe[y][x];
@@ -246,27 +242,50 @@ const color_tchar_t get_tool_texture(const tool_t tool, const int x, const int y
 
         case TOOL_IRON_SHOVEL:
             return pIron_shovel[y][x];
-
     }
 
-    return (color_tchar_t){ 0 };
+    return (color_character_t){ 0 };
 }
 
-// 스윙 텍스처 반환
-const color_tchar_t get_tool_swing_texture(const tool_t tool, const int x, const int y) {
+//스윙 텍스처 반환
+const color_character_t tool_get_swing_texture(const tool_t tool, const int x, const int y) {
     switch (tool) {
-        case TOOL_WOODEN_SWORD:     return pWooden_sword_Swing[y][x];
-        case TOOL_STONE_SWORD:      return pStone_sword_Swing[y][x];
-        case TOOL_IRON_SWORD:       return pIron_sword_Swing[y][x];
-        case TOOL_WOODEN_PICKAXE:   return pWooden_pickaxe_Swing[y][x];
-        case TOOL_STONE_PICKAXE:    return pStone_pickaxe_Swing[y][x];
-        case TOOL_IRON_PICKAXE:     return pIron_pickaxe_Swing[y][x];
-        case TOOL_WOODEN_AXE:       return pWooden_axe_Swing[y][x];
-        case TOOL_STONE_AXE:        return pStone_axe_Swing[y][x];
-        case TOOL_IRON_AXE:         return pIron_axe_Swing[y][x];
-        case TOOL_WOODEN_SHOVEL:    return pWooden_shovel_Swing[y][x];
-        case TOOL_STONE_SHOVEL:     return pStone_shovel_Swing[y][x];
-        case TOOL_IRON_SHOVEL:      return pIron_shovel_Swing[y][x];
+        case TOOL_WOODEN_SWORD:
+            return pWooden_sword_swing[y][x];
+
+        case TOOL_STONE_SWORD:
+            return pStone_sword_swing[y][x];
+
+        case TOOL_IRON_SWORD:
+            return pIron_sword_swing[y][x];
+
+        case TOOL_WOODEN_PICKAXE:
+            return pWooden_pickaxe_swing[y][x];
+
+        case TOOL_STONE_PICKAXE:
+            return pStone_pickaxe_swing[y][x];
+
+        case TOOL_IRON_PICKAXE:
+            return pIron_pickaxe_swing[y][x];
+
+        case TOOL_WOODEN_AXE:
+            return pWooden_axe_swing[y][x];
+
+        case TOOL_STONE_AXE:
+            return pStone_axe_swing[y][x];
+
+        case TOOL_IRON_AXE:
+            return pIron_axe_swing[y][x];
+
+        case TOOL_WOODEN_SHOVEL:
+            return pWooden_shovel_swing[y][x];
+
+        case TOOL_STONE_SHOVEL:
+            return pStone_shovel_swing[y][x];
+
+        case TOOL_IRON_SHOVEL:
+            return pIron_shovel_swing[y][x];
     }
-    return (color_tchar_t) { 0 };
+
+    return (color_character_t) { 0 };
 }
