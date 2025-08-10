@@ -65,7 +65,7 @@
       <AdditionalLibraryDirectories>$(SolutionDir)libs\CSFML\lib\msvc</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy $(ProjectDir)\libs\CSFML\dll\*.dll $(TargetDir) /Y /D</Command>
+      <Command>xcopy "$(ProjectDir)libs\CSFML\dll\*.dll" "$(TargetDir)" /Y /D</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -92,7 +92,7 @@
       <AdditionalLibraryDirectories>$(SolutionDir)libs\CSFML\lib\msvc</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy $(ProjectDir)\libs\CSFML\dll\*.dll $(TargetDir) /Y /D</Command>
+      <Command>xcopy "$(ProjectDir)libs\CSFML\dll\*.dll" "$(TargetDir)" /Y /D</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
