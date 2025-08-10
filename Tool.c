@@ -215,16 +215,16 @@ const color_tchar_t get_tool_texture(const tool_t tool, const int x, const int y
             return pWooden_sword[y][x];
 
         case TOOL_STONE_SWORD:
-            return pStone_sword[y][x]; //
+            return pStone_sword[y][x]; 
 
         case TOOL_IRON_SWORD:
-            return pIron_sword[y][x];//
+            return pIron_sword[y][x];
 
         case TOOL_WOODEN_PICKAXE:
             return pWooden_pickaxe[y][x];
 
         case TOOL_STONE_PICKAXE:
-            return pStone_pickaxe[y][x]; //
+            return pStone_pickaxe[y][x];
 
         case TOOL_IRON_PICKAXE:
             return pIron_pickaxe[y][x];
