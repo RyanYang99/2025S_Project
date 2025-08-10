@@ -35,7 +35,6 @@ static void handle_mouse_click(const bool left) {
 
     cursor_flash_color = FOREGROUND_T_GREEN;
     cursor_flash_timer = 50;
-    
 
     //1. 현재 장착된 아이템 가져오기
     item_information_t *pItem_information = NULL;
@@ -43,51 +42,53 @@ static void handle_mouse_click(const bool left) {
     if (inventory.pHotbar[inventory.selected_hotbar_index].pPlayer_Item) {
         pEquipped = &inventory.item[inventory.pHotbar[inventory.selected_hotbar_index].index_in_inventory];
         pItem_information = database_find_item_by_index(pEquipped->item_DB_index);
-
+    }
 
     if (left) {
         //2. 현재 블록 정보 확인
         const block_info_t target_block = map_get_block_info(block_control_selected_x, block_control_selected_y);
 
-            //3. 도구가 해당 블록을 부술 수 있는지 확인
-            if (!tool_can_break_block(pItem_information, target_block.type))
-                return;
+        //3. 도구가 해당 블록을 부술 수 있는지 확인
+        if (!tool_can_break_block(pItem_information, target_block.type))
+            return;
 
-            //4. 도구의 데미지 계산
-            const int damage = tool_get_damage_to_block(pItem_information, target_block.type);
+        //4. 도구의 데미지 계산
+        const int damage = tool_get_damage_to_block(pItem_information, target_block.type);
 
         //5. 데미지를 주고 파괴 여부 확인
-        if (map_damage_block(&map, block_control_selected_x, block_control_selected_y, damage)) {
+        if (map_damage_block(block_control_selected_x, block_control_selected_y, damage)) {
             const int drop = tool_get_drop_from_block(target_block.type);
 
-                if (drop != -1)
-                    inventory_add_item(drop, 1);
+            if (drop != -1) {
+                inventory_add_item(drop, 1);
             }
-        } else {
-            if (!pItem_information ||
-                !pItem_information->is_placeable ||
-                pEquipped->quantity <= 0 ||
-                !tool_can_place_block(block_control_selected_x, block_control_selected_y))
-                return;
-
-            if (pEquipped->item_DB_index == BLOCK_SEED_OF_MALAKH) {
-                if (!boss_spawned) {
-                    if (map_set_block(block_control_selected_x, block_control_selected_y, pItem_information->index)) {
-
-                        const int boss_spawn_y = block_control_selected_y - BOSS_SPRITE_HEIGHT;
-                        const int boss_spawn_x = block_control_selected_x;
-                        boss_initialize(boss_spawn_x, boss_spawn_y, 100, 10);
-                        boss_spawned = true;
-
-                        inventory_decrement_item(pEquipped);
-                    }
-                }
-            } else if (pItem_information->is_placeable &&
-                       tool_can_place_block(block_control_selected_x, block_control_selected_y) &&
-                       map_set_block(block_control_selected_x, block_control_selected_y, pItem_information->index))
-                inventory_decrement_item(pEquipped);
         }
+
+        return;
     }
+
+    if (!pItem_information ||
+        !pItem_information->is_placeable ||
+        pEquipped->quantity <= 0 ||
+        !tool_can_place_block(block_control_selected_x, block_control_selected_y))
+        return;
+
+    if (pEquipped->item_DB_index == BLOCK_SEED_OF_MALAKH) {
+        if (!boss_spawned) {
+            if (map_set_block(block_control_selected_x, block_control_selected_y, pItem_information->index)) {
+
+                const int boss_spawn_y = block_control_selected_y - BOSS_SPRITE_HEIGHT;
+                const int boss_spawn_x = block_control_selected_x;
+                boss_initialize(boss_spawn_x, boss_spawn_y, 100, 10);
+                boss_spawned = true;
+
+                inventory_decrement_item(pEquipped);
+            }
+        }
+    } else if (pItem_information->is_placeable &&
+        tool_can_place_block(block_control_selected_x, block_control_selected_y) &&
+        map_set_block(block_control_selected_x, block_control_selected_y, pItem_information->index))
+        inventory_decrement_item(pEquipped);
 }
 
 //마우스 이동 시 최신 위치 갱신
@@ -115,7 +116,7 @@ void block_control_initialize(void) {
 }
 
 //가상 커서 렌더링 (모서리 스타일)
-void render_virtual_cursor(void) {
+void block_control_render(void) {
     if (!show)
         return;
 
