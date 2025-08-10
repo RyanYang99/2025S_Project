@@ -27,9 +27,6 @@ static bool force_old_console(void) {
         wcscat_s(pArgument, path_size, L"-- ");
         wcscat_s(pArgument, path_size, pArgv[0]);
 
-        WCHAR pWorking[MAX_PATH] = { 0 };
-        GetCurrentDirectory(MAX_PATH, pWorking);
-
         const BOOL success = CreateProcess(TEXT("C:\\Windows\\System32\\conhost.exe"),
                                            pArgument,
                                            NULL,
@@ -37,7 +34,7 @@ static bool force_old_console(void) {
                                            false,
                                            0,
                                            NULL,
-                                           pWorking,
+                                           NULL,
                                            &startup_info,
                                            &process_information);
 
