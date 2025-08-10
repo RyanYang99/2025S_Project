@@ -65,8 +65,7 @@
       <AdditionalLibraryDirectories>$(SolutionDir)libs\CSFML\lib\msvc</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>xcopy $(ProjectDir)\libs\CSFML\dll\*.dll $(TargetDir) /Y /D</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -92,6 +91,9 @@
       <AdditionalDependencies>csfml-audio.lib;openal32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)libs\CSFML\lib\msvc</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy $(ProjectDir)\libs\CSFML\dll\*.dll $(TargetDir) /Y /D</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="astar.c" />
