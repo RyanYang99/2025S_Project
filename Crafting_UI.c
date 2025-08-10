@@ -171,6 +171,7 @@ void crafting_UI_render(void) {
     ++position.Y;
 
     const BACKGROUND_color_t background = BACKGROUND_T_BLACK;
+
     for (int i = 0; i < recipe_count; ++i) {
         const crafting_recipe_t * const pRecipe = &pRecipes[i];
         if (pRecipe->requires_workbench && !is_workbench_nearby())

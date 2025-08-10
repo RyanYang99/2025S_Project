@@ -336,18 +336,18 @@ static void generate_trees(const int start, const int end) {
 }
 
 static void allocate_map(void) {
-	if (!map.ppBlocks) {
-		const int y_size = sizeof(block_info_t*) * map.size.y;
-		map.ppBlocks = malloc(y_size);
-		memset(map.ppBlocks, 0, y_size);
-	}
+    if (!map.ppBlocks) {
+        const int y_size = sizeof(block_info_t*) * map.size.y;
+        map.ppBlocks = malloc(y_size);
+        memset(map.ppBlocks, 0, y_size);
+    }
 
-	const int x_size = sizeof(block_info_t) * map.size.x;
-	for (int y = 0; y < map.size.y; ++y)
-		if (!map.ppBlocks[y])
-			map.ppBlocks[y] = malloc(x_size);
-		else
-			map.ppBlocks[y] = realloc(map.ppBlocks[y], x_size);
+    const int x_size = sizeof(block_info_t) * map.size.x;
+    for (int y = 0; y < map.size.y; ++y)
+        if (!map.ppBlocks[y])
+            map.ppBlocks[y] = malloc(x_size);
+        else
+            map.ppBlocks[y] = realloc(map.ppBlocks[y], x_size);
 }
 
 //width가 음수일 경우 맵을 왼쪽으로 늘림, 양수일 경우 오른쪽

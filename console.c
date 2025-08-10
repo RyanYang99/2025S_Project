@@ -61,8 +61,8 @@ static const COORD console_get_size(const HANDLE size_handle) {
     GetConsoleScreenBufferInfo(size_handle, &csbi);
 
     COORD console_size_new = { 0 };
-	console_size_new.X = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-	console_size_new.Y = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+    console_size_new.X = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+    console_size_new.Y = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
     return console_size_new;
 }
 

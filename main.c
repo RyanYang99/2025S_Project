@@ -62,7 +62,7 @@ int main(void)
     if (force_old_console())
         return 0;
 
-	database_initialize(false);
+    database_initialize(false);
     crafting_UI_initialize();
     console_initialize(true, false);
     sound_initialize();
