@@ -12,12 +12,21 @@
 #include "BlockCtrl.h"
 #include "inventory.h"
 #include "date_time.h"
+#include "sound.h"
 #include "Crafting_UI.h"
+
+typedef enum {
+    AMBIENT_BGM_NONE,  // BGM이 없거나, 보스전 등 다른 BGM이 재생 중인 상태
+    AMBIENT_BGM_DAY,   // 낮 BGM 재생 중
+    AMBIENT_BGM_NIGHT  // 밤 BGM 재생 중
+} ambient_bgm_state_t;
+
 
 
 bool game_exit = false;
 bool is_boss_spawned;
 
+static ambient_bgm_state_t current_bgm_state = AMBIENT_BGM_DAY;
 
 #if _DEBUG
 static void render_debug_text(void) {
@@ -47,6 +56,27 @@ static void render_debug_text(void) {
 
 }
 #endif
+
+static void update_ambient_bgm() {
+    if (is_boss_spawned) {
+        current_bgm_state = AMBIENT_BGM_NONE;
+        return;
+    }
+
+    if (is_night_time()) { // 밤일때
+        if (current_bgm_state != AMBIENT_BGM_NIGHT) {
+            Sound_playBGM("BGM/Night/NightBGM.wav");
+            current_bgm_state = AMBIENT_BGM_NIGHT;
+        }
+    }
+    else { // 낮일때
+        if (current_bgm_state != AMBIENT_BGM_DAY) {
+            Sound_playBGM("BGM/Day/fixed_roop1.wav");
+            current_bgm_state = AMBIENT_BGM_DAY;
+        }
+    }
+}
+
 
 static void render(void) {
     render_map();
@@ -88,6 +118,8 @@ void initialize_game(void) {
     free_save();
 
     test_create_Bossitem();
+
+    add_item_to_inventory(110, 1);
 }
 
 
@@ -99,6 +131,8 @@ void run_game(void) {
         update_console();
         update_input();
         update_date_time();
+
+        update_ambient_bgm();
 
         player_update();
         inventory_input();
