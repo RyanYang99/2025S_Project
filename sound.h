@@ -1,11 +1,13 @@
 #pragma once
 
-// 한 번에 로드할 발소리 파일의 최대 개수
-#define MAX_FOOTSTEP_SOUNDS 10
-#define MAX_SWING_SOUNDS 3
-#define MAX_HURT_SOUNDS 5
-#define MAX_SFX_PLAYERS 10
+typedef enum {
+    BOSS_SOUND_SPAWN,
+    BOSS_SOUND_HURT,
+    BOSS_SOUND_HOWLING,
+    BOSS_SOUND_MISSILE,
+    BOSS_SOUND_LAZER
 
+} boss_sound_type_t;
 
 void Sound_init();
 void Sound_playBGM(const char* filename);
@@ -13,6 +15,11 @@ void Sound_shutdown();
 void Sound_playFootstep();
 void Sound_playSwing();
 void Sound_playMenuBGM(const char* filename);
+void Sound_playMosterAttack();
+void Sound_playPlayerHurt();
+void Sound_PushBGM(const char* new_bgm_filename);
+void Sound_PopBGM();
+void Sound_playBossSound(boss_sound_type_t type);
 
 
 

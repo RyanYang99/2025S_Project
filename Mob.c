@@ -8,6 +8,7 @@
 #include "astar.h"
 #include "delta.h"
 #include "BlockCtrl.h"
+#include "sound.h"
 
 #include "BossMalakh.h"
 
@@ -143,22 +144,22 @@ static void MobSpawn(void) {
 }
 
 
- void mob_spawn_manager(void) 
- {
-	 // 보스가 없을 때만 몬스터 생성 
-	 if (boss.state == E_BOSS_STATE_DEFEATED) {
-		 if (is_night_time()) {
-			 static float mob_spawn_timer = 0.0f;
-			 const float Mob_Spawn_Cooltime = 2.0f;
+void mob_spawn_manager(void)
+{
+    // 보스가 없을 때만 몬스터 생성 
+    if (boss.state == E_BOSS_STATE_DEFEATED || !is_boss_spawned) {
+        if (is_night_time()) {
+            static float mob_spawn_timer = 0.0f;
+            const float Mob_Spawn_Cooltime = 2.0f;
 
-			 mob_spawn_timer += delta_time;
-			 if (mob_spawn_timer >= Mob_Spawn_Cooltime) {
-				 MobSpawn();
-				 mob_spawn_timer = 0.0f;
-			 }
-		 }
-	 }
- }
+            mob_spawn_timer += delta_time;
+            if (mob_spawn_timer >= Mob_Spawn_Cooltime) {
+                MobSpawn();
+                mob_spawn_timer = 0.0f;
+            }
+        }
+    }
+}
 
 // 몬스터 피격 시 대미지 텍스트 생성 함수
 static void create_mob_damage_text(const int mob_index, const int damage_value) {
@@ -419,6 +420,7 @@ static void check_mob_player_collision(void) {
 
             // 쿨타임이 지났는지 확인
             if (mobs[i].atk_cooltime_timer >= MOB_ATK_COOLTIME) {
+                Sound_playMosterAttack();
                 player_take_damage(mobs[i].atk);
                 mobs[i].atk_cooltime_timer = 0.0f; // 공격 후 타이머 리셋
             }

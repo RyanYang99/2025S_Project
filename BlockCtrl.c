@@ -7,6 +7,7 @@
 #include "player.h"
 #include "ItemDB.h"
 #include "inventory.h"
+#include "sound.h"
 
 int selected_block_x = 0, selected_block_y = 0;
 
@@ -74,6 +75,9 @@ static void handle_mouse_click(const bool left) {
                         const int boss_spawn_x = selected_block_x;
                         Boss_Init(boss_spawn_x, boss_spawn_y, 100, 10);
                         is_boss_spawned = true;
+
+                        Sound_PushBGM("BGM/Boss/BossTheme.wav");
+                        Sound_playBossSound(BOSS_SOUND_SPAWN);
 
                         decrement_item_from_inventory(pEquipped);
                     }

@@ -64,7 +64,7 @@ int main(void)
     initialize_crafting_UI();
     initialize_console(true, false);
     Sound_init();
-    Sound_playMenuBGM("BGM/song18_1.wav");
+    Sound_playMenuBGM("BGM/MainMenu/song18_1.wav");
 
 
     while (true) {
@@ -77,8 +77,7 @@ int main(void)
         }
         else
             free_save();
-
-        Sound_playBGM("BGM/fixed_roop1.wav");
+        Sound_playBGM("BGM/Day/fixed_roop1.wav");
         initialize_input_handler();
         initialize_game();
         run_game();

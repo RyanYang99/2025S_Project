@@ -545,6 +545,7 @@ void save_player(void) {
 
 void player_take_damage(int damage)
 {
+    Sound_playPlayerHurt();
     player.hp -= damage;
     if (player.hp < 0) {
         player.hp = 0;
