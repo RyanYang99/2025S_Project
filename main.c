@@ -15,7 +15,7 @@ static bool force_old_console(void) {
 
         int argc = 0;
 
-        LPWSTR* pArgv = CommandLineToArgvW(GetCommandLine(), &argc);
+        LPWSTR *pArgv = CommandLineToArgvW(GetCommandLine(), &argc);
 
         STARTUPINFO startup_info = {
             .cb = sizeof(startup_info)
@@ -27,17 +27,19 @@ static bool force_old_console(void) {
         wcscat_s(pArgument, path_size, L"-- ");
         wcscat_s(pArgument, path_size, pArgv[0]);
 
-        const BOOL success = CreateProcess(TEXT("C:\\Windows\\System32\\conhost.exe"),
+        WCHAR pWorking[MAX_PATH] = { 0 };
+        GetCurrentDirectory(MAX_PATH, pWorking);
 
-            pArgument,
-            NULL,
-            NULL,
-            false,
-            0,
-            NULL,
-            NULL,
-            &startup_info,
-            &process_information);
+        const BOOL success = CreateProcess(TEXT("C:\\Windows\\System32\\conhost.exe"),
+                                           pArgument,
+                                           NULL,
+                                           NULL,
+                                           false,
+                                           0,
+                                           NULL,
+                                           pWorking,
+                                           &startup_info,
+                                           &process_information);
 
         LocalFree(pArgv);
         free(pArgument);
