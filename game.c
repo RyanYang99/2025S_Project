@@ -82,7 +82,8 @@ static void render(void) {
     render_map();
     render_player();
     render_virtual_cursor();
-    if (is_boss_spawned) { Boss_Render();}else{ Mob_render(); }
+    if (is_boss_spawned) { Boss_Render(); }
+    else { Mob_render(); }
     render_inventory();
     render_hotbar();
     render_time();
@@ -97,12 +98,9 @@ static void render(void) {
 void test_create_Bossitem()
 {
     add_item_to_inventory(109, 1);
-    add_item_to_inventory(102, 1);
-    add_item_to_inventory(107, 1);
-    add_item_to_inventory(106, 1);
-    add_item_to_inventory(103, 1);
-    add_item_to_inventory(105, 1);
-    add_item_to_inventory(108, 1);
+    add_item_to_inventory(110, 1);
+    add_item_to_inventory(203, 1);
+    add_item_to_inventory(206, 1);
 }
 
 void initialize_game(void) {
@@ -140,12 +138,12 @@ void run_game(void) {
         save_input();
 
         if (is_boss_spawned) {
-        Boss_update();
+            Boss_update();
         }
         else
         {
-        mob_spawn_manager();
-        mob_update();
+            mob_spawn_manager();
+            mob_update();
         }
 
         render();

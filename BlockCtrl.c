@@ -49,9 +49,9 @@ static void handle_mouse_click(const bool left) {
 
     cursor_flash_color = FOREGROUND_T_GREEN;
     cursor_flash_timer = 50;
-    
 
-    //1. 현재 장착된 아이템 가져오기
+
+    // 1. 현재 장착된 아이템 가져오기
     item_information_t* pItem_information = NULL;
     player_item_t* pEquipped = NULL;
     if (inventory.pHotbar[inventory.selected_hotbar_index].pPlayer_Item)
@@ -59,55 +59,67 @@ static void handle_mouse_click(const bool left) {
         pEquipped = &inventory.item[inventory.pHotbar[inventory.selected_hotbar_index].index_in_inventory];
         pItem_information = find_item_by_index(pEquipped->item_db_index);
 
+    }
 
-    if (left) {
-        //2. 현재 블록 정보 확인
+    if (left) { // 좌클릭 (블록 파괴)
+
         const block_info_t target_block = get_block_info_at(selected_block_x, selected_block_y);
 
+        if (pEquipped == NULL) {
+            const int bare_hand_damage = 3;
+            if (damage_block_at(&map, selected_block_x, selected_block_y, bare_hand_damage)) {
+                const int drop = get_drop_from_block(target_block.type);
+                if (drop != -1) {
+                    add_item_to_inventory(drop, 1);
+                }
+            }
+        }
+        else {
             //3. 도구가 해당 블록을 부술 수 있는지 확인
-            if (!can_tool_break_block(pItem_information, target_block.type))
+            if (!can_tool_break_block(pItem_information, target_block.type)) {
                 return;
+            }
 
             //4. 도구의 데미지 계산
             const int damage = get_tool_damage_to_block(pItem_information, target_block.type);
 
-        //5. 데미지를 주고 파괴 여부 확인
-        if (damage_block_at(&map, selected_block_x, selected_block_y, damage)) {
-            const int drop = get_drop_from_block(target_block.type);
-
-                if (drop != -1)
+            //5. 데미지를 주고 파괴 여부 확인
+            if (damage_block_at(&map, selected_block_x, selected_block_y, damage)) {
+                const int drop = get_drop_from_block(target_block.type);
+                if (drop != -1) {
                     add_item_to_inventory(drop, 1);
+                }
             }
         }
-        else {
+    }
+    else {
 
-            if (!pItem_information ||
-                !pItem_information->is_placeable ||
-                pEquipped->quantity <= 0 ||
-                !can_place_block(selected_block_x, selected_block_y))
-                return;
+        if (!pItem_information ||
+            !pItem_information->is_placeable ||
+            pEquipped->quantity <= 0 ||
+            !can_place_block(selected_block_x, selected_block_y))
+            return;
 
-            if (pEquipped->item_db_index == BLOCK_SEED_OF_MALAKH) {
-                if (!is_boss_spawned) {
-                    if (set_block_at(selected_block_x, selected_block_y, pItem_information->index)) {
-
-                        const int boss_spawn_y = selected_block_y - BOSS_SPRITE_HEIGHT;
-                        const int boss_spawn_x = selected_block_x;
-                        Boss_Init(boss_spawn_x, boss_spawn_y, 100, 10);
-                        is_boss_spawned = true;
-
-                        Sound_PushBGM("BGM/Boss/BossTheme.wav");
-                        Sound_playBossSound(BOSS_SOUND_SPAWN);
-
-                        decrement_item_from_inventory(pEquipped);
-                    }
-                }
-            }
-
-            else if (pItem_information->is_placeable && can_place_block(selected_block_x, selected_block_y)) {
+        if (pEquipped->item_db_index == BLOCK_SEED_OF_MALAKH) {
+            if (!is_boss_spawned) {
                 if (set_block_at(selected_block_x, selected_block_y, pItem_information->index)) {
+
+                    const int boss_spawn_y = selected_block_y - BOSS_SPRITE_HEIGHT;
+                    const int boss_spawn_x = selected_block_x;
+                    Boss_Init(boss_spawn_x, boss_spawn_y, 100, 10);
+                    is_boss_spawned = true;
+
+                    Sound_PushBGM("BGM/Boss/BossTheme.wav");
+                    Sound_playBossSound(BOSS_SOUND_SPAWN);
+
                     decrement_item_from_inventory(pEquipped);
                 }
+            }
+        }
+
+        else if (pItem_information->is_placeable && can_place_block(selected_block_x, selected_block_y)) {
+            if (set_block_at(selected_block_x, selected_block_y, pItem_information->index)) {
+                decrement_item_from_inventory(pEquipped);
             }
         }
     }

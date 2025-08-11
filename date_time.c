@@ -22,7 +22,7 @@ void initialize_date_time(void) {
 void update_date_time(void) {
     //date_time_elapsed_since_start.second += delta_time * (86400.0f / 1200.0f); //1일당 게임 초 / 1일당 실제 초
     //test
-    date_time_elapsed_since_start.second += delta_time * (86400.0f / 45.0f); //1일당 게임 초 / 1일당 실제 초
+    date_time_elapsed_since_start.second += delta_time * (86400.0f / 60.0f); //1일당 게임 초 / 1일당 실제 초
 
     if (date_time_elapsed_since_start.second >= 60.0f) {
         const int minutes = (int)(date_time_elapsed_since_start.second / 60.0f);
@@ -44,16 +44,17 @@ void update_date_time(void) {
 
 void render_time(void) {
     static float blink = 0.0f;
-    static char *pBlink = " ";
+    static char* pBlink = " ";
     blink += delta_time;
     if (blink >= 2.0f) {
         blink = 0.0f;
         pBlink = " ";
-    } else if (blink >= 1.0f)
+    }
+    else if (blink >= 1.0f)
         pBlink = ":";
-    
-    char * const pDay = format_string("Day %d", date_time_elapsed_since_start.day),
-         * const pTime = format_string("%02d%s%02d", date_time_elapsed_since_start.hour, pBlink, date_time_elapsed_since_start.minute);
+
+    char* const pDay = format_string("Day %d", date_time_elapsed_since_start.day),
+        * const pTime = format_string("%02d%s%02d", date_time_elapsed_since_start.hour, pBlink, date_time_elapsed_since_start.minute);
 
     COORD position = {
         .X = (SHORT)(console.size.X - strlen(pDay))
@@ -83,7 +84,7 @@ int get_current_hour()
 bool is_night_time()
 {
     int current_hour = get_current_hour();
-    
+
     //21시부터 6시까지 밤시간 
     return (current_hour >= 21 || current_hour <= 6);
 }

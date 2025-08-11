@@ -120,22 +120,22 @@ static void MobSpawn(void) {
             break;
         }
 
-	if (mob_count >= MAX_MOB) {
-		return;
-	}
+    if (mob_count >= MAX_MOB) {
+        return;
+    }
 
-	mobs[mob_count].x = mob_x;
-	mobs[mob_count].y = mob_y - 1;
-	mobs[mob_count].HP = mob_level * 10;
-	mobs[mob_count].atk = mob_level * 2;
-	mobs[mob_count].precise_x = (float)mobs[mob_count].x;
-	mobs[mob_count].precise_y = (float)mobs[mob_count].y;
-	mobs[mob_count].velocity_y = 0;
-	mobs[mob_count].is_on_ground = true;
-	mobs[mob_count].is_dead = false; 
-	mobs[mob_count].dying_timer = 0.0f; 
-	mobs[mob_count].animation_timer = 0.0f; 
-	mobs[mob_count].current_frame = 0;     
+    mobs[mob_count].x = mob_x;
+    mobs[mob_count].y = mob_y - 1;
+    mobs[mob_count].HP = mob_level * 10;
+    mobs[mob_count].atk = mob_level * 2;
+    mobs[mob_count].precise_x = (float)mobs[mob_count].x;
+    mobs[mob_count].precise_y = (float)mobs[mob_count].y;
+    mobs[mob_count].velocity_y = 0;
+    mobs[mob_count].is_on_ground = true;
+    mobs[mob_count].is_dead = false;
+    mobs[mob_count].dying_timer = 0.0f;
+    mobs[mob_count].animation_timer = 0.0f;
+    mobs[mob_count].current_frame = 0;
 
     mobs[mob_count].ai_timer = 0.0f;
     mobs[mob_count].despawn_timer = 0.0f;
@@ -163,17 +163,16 @@ void mob_spawn_manager(void)
 
 // 몬스터 피격 시 대미지 텍스트 생성 함수
 static void create_mob_damage_text(const int mob_index, const int damage_value) {
-	Sound_playMonsterHurt();
-	for (int i = 0; i < MAX_MOB_DAMAGE_TEXTS; ++i)
-		if (!mob_damage_texts[i].active) {
-			mob_damage_texts[i].active = true;
-			mob_damage_texts[i].damage_value = damage_value;
-			mob_damage_texts[i].mob_x = mobs[mob_index].x;
-			mob_damage_texts[i].mob_y = mobs[mob_index].y;
-			mob_damage_texts[i].precise_y = (float)mobs[mob_index].y;
-			mob_damage_texts[i].timer = 1.0f; // 1.0초 동안 화면에 표시
-			break;
-		}
+    for (int i = 0; i < MAX_MOB_DAMAGE_TEXTS; ++i)
+        if (!mob_damage_texts[i].active) {
+            mob_damage_texts[i].active = true;
+            mob_damage_texts[i].damage_value = damage_value;
+            mob_damage_texts[i].mob_x = mobs[mob_index].x;
+            mob_damage_texts[i].mob_y = mobs[mob_index].y;
+            mob_damage_texts[i].precise_y = (float)mobs[mob_index].y;
+            mob_damage_texts[i].timer = 1.0f; // 1.0초 동안 화면에 표시
+            break;
+        }
 }
 
 // 몬스터 대미지 텍스트 업데이트 함수 (매 프레임 호출)
@@ -290,7 +289,7 @@ static void Mob_deadcheck(void) {
 
         if (mobs[i].HP <= 0 && !mobs[i].is_dead) {
             mobs[i].is_dead = true;
-            mobs[i].dying_timer = 1.0f; 
+            mobs[i].dying_timer = 1.0f;
         }
         if (mobs[i].is_dead && mobs[i].dying_timer <= 0.0f) {
             for (int j = i; j < mob_count - 1; j++)
@@ -321,7 +320,7 @@ void save_mob(void) {
 
 static void Mob_physics(void) {
     for (int i = 0; i < mob_count; ++i) {
-        
+
         if (mobs[i].is_dead) {
             mobs[i].velocity_x = 0.0f;
             mobs[i].velocity_y += GRAVITY * delta_time;
@@ -370,7 +369,7 @@ static bool is_mob_movable(const int x, const int y) {
 
 static void update_mob_ai(void) {
     for (int i = 0; i < mob_count; ++i)
-        
+
         if (!mobs[i].is_dead) {
             if (mobs[i].ai_timer >= MOB_SPD) {
                 mobs[i].ai_timer = 0.0f;
@@ -400,7 +399,7 @@ static void handle_mob_click(const bool left_click) {
             //데미지 입히는 부분
             mobs[i].HP -= player.atk_power;
             create_mob_damage_text(i, player.atk_power);
-            Sound_playSwing();
+            Sound_playMonsterHurt();
             decrement_durability();
             return;
         }
@@ -449,14 +448,14 @@ void mob_init() {
 
 // 몬스터 업데이트
 void mob_update() {
-	update_mob_damage_texts();
-	
-	static float levelUpTimer = 0.0f;
-	levelUpTimer += delta_time;
-	if (levelUpTimer >= 100.0f && mob_level < 10) {
-		++mob_level;
-		levelUpTimer = 0.0f;
-	}
+    update_mob_damage_texts();
+
+    static float levelUpTimer = 0.0f;
+    levelUpTimer += delta_time;
+    if (levelUpTimer >= 100.0f && mob_level < 10) {
+        ++mob_level;
+        levelUpTimer = 0.0f;
+    }
 
     update_mob_ai();
     Mob_physics();
@@ -471,7 +470,7 @@ void mob_update() {
         // 걷기 애니메이션 
         if (mobs[i].velocity_x != 0.0f && !mobs[i].is_dead) {
             mobs[i].animation_timer += delta_time;
-            if (mobs[i].animation_timer >= 0.5f) { 
+            if (mobs[i].animation_timer >= 0.5f) {
                 mobs[i].animation_timer = 0.0f;
                 mobs[i].current_frame = (mobs[i].current_frame + 1) % 2;
             }
@@ -482,8 +481,8 @@ void mob_update() {
         }
     }
 
-	Mob_deadcheck();
-	DespawnMob();
+    Mob_deadcheck();
+    DespawnMob();
 }
 
 

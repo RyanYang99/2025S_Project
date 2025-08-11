@@ -121,7 +121,7 @@ void create_damage_text(int damage_value) {
     }
 }
 
-static void update_damage_texts() 
+static void update_damage_texts()
 {
     for (int i = 0; i < MAX_DAMAGE_TEXTS; ++i) {
         if (damage_texts[i].active) {
@@ -137,7 +137,7 @@ static void update_damage_texts()
     }
 }
 
-static void render_damage_texts() 
+static void render_damage_texts()
 {
     COORD center_pos = { console.size.X / 2, console.size.Y / 2 };
 
@@ -221,6 +221,7 @@ static void movement(void) {
 // 좌 클릭을 했는지
 static void handle_player_actions(const bool is_left_click) {
     if (is_left_click) {
+        Sound_playSwing();
         player_swing_tool();
     }
 }
@@ -240,134 +241,134 @@ void player_swing_tool(void) {
     }
 }
 
-        static void update_player_offset(void) 
-        {
-            player.x += map.offset_x;
+static void update_player_offset(void)
+{
+    player.x += map.offset_x;
+}
+
+
+
+void player_update(void)
+{
+
+    // 입력 처리
+    movement();
+
+    //데미지 출력 업데이트
+    update_damage_texts();
+
+    // 스윙 타이머 업데이트
+    if (player.is_swinging) {
+        player.swing_timer -= delta_time;
+        if (player.swing_timer <= 0.0f) {
+            player.is_swinging = false;
         }
+    }
 
-
-        
-        void player_update(void)
-        {
-
-            // 입력 처리
-            movement();
-
-            //데미지 출력 업데이트
-            update_damage_texts();
-
-            // 스윙 타이머 업데이트
-            if (player.is_swinging) {
-                player.swing_timer -= delta_time;
-                if (player.swing_timer <= 0.0f) {
-                    player.is_swinging = false;
-                }
-            }
-
-            // 물리 업데이트
-            // 땅에 있는지 확인
-            // 플레이어 바로 아래 블록이 걸을 수 없는 블록인지 확인
-            if (!is_walkable(player.x, player.y + 1)) {
-                player.is_on_ground = true;
-                // 땅에 있다면 수직 속도 초기화
-                if (player.velocity_y > 0) {
-                    player.velocity_y = 0;
-                }
-            }
-            else {
-                player.is_on_ground = false;
-            }
-
-            // 중력 적용 (공중에 있을 때만)
-            if (!player.is_on_ground) {
-                player.velocity_y += GRAVITY * delta_time;
-            }
-
-            // 속도에 따라 정밀 y좌표 업데이트
-            player.precise_y += player.velocity_y * delta_time;
-
-            // 정밀 y좌표를 정수 y좌표로 변환하여 충돌 처리
-            int new_y = (int)player.precise_y;
-
-            // 수직 이동에 대한 충돌 처리
-            if (new_y > player.y) { // 아래로 이동 시
-                while (!is_walkable(player.x, new_y)) {
-                    new_y--;
-                    player.velocity_y = 0;
-                    player.precise_y = (float)new_y;
-                    player.is_on_ground = true;
-                }
-            }
-            else if (new_y < player.y) { // 위로 이동 시
-                while (!is_walkable(player.x, new_y)) {
-                    new_y++;
-                    player.velocity_y = 0;
-                    player.precise_y = (float)new_y;
-                }
-            }
-            player.y = new_y;
-
-
-            // 3. 애니메이션 업데이트
-            if (player.is_moving) {
-                player.animation_timer += delta_time;
-                if (player.animation_timer >= 1.0f / ANIMATION_SPEED) {
-                    player.animation_timer = 0.0f;
-                    player.current_frame = (player.current_frame + 1) % 2;
-                }
-            }
-            else {
-                player.current_frame = 0;
-                player.animation_timer = 0.0f;
-            }
+    // 물리 업데이트
+    // 땅에 있는지 확인
+    // 플레이어 바로 아래 블록이 걸을 수 없는 블록인지 확인
+    if (!is_walkable(player.x, player.y + 1)) {
+        player.is_on_ground = true;
+        // 땅에 있다면 수직 속도 초기화
+        if (player.velocity_y > 0) {
+            player.velocity_y = 0;
         }
+    }
+    else {
+        player.is_on_ground = false;
+    }
 
-    
+    // 중력 적용 (공중에 있을 때만)
+    if (!player.is_on_ground) {
+        player.velocity_y += GRAVITY * delta_time;
+    }
 
+    // 속도에 따라 정밀 y좌표 업데이트
+    player.precise_y += player.velocity_y * delta_time;
 
-        void player_init(void) 
-        {
-            if (pCurrent_save) {
-                player.x = pCurrent_save->x;
-                player.y = pCurrent_save->y;
-                player.hp = pCurrent_save->hp;
-            }
-            else {
-                player.x = map.size.x / 2;
-                player.y = find_ground_pos(player.x);
-                if (player.y - 1 >= 0)
-                    --player.y; // 가능할 시 찾은 블록 위로 설정
+    // 정밀 y좌표를 정수 y좌표로 변환하여 충돌 처리
+    int new_y = (int)player.precise_y;
 
-
-                player.max_hp = 1000;
-                player.hp = 1000; // 초기 체력
-                player.atk_power = 10;
-
-                // 물리 변수 초기화
-                player.precise_y = (float)player.y;
-                player.velocity_y = 0.0f;
-                player.is_on_ground = false; // 시작 시 공중에서 떨어지도록
-
-                // 애니메이션 변수 초기화
-                player.is_moving = 0;
-                player.current_frame = 0;
-                player.animation_timer = 0.0f;
-                player.is_swinging = false; // 스윙 상태 초기화
-                player.swing_timer = 0.0f;  // 스윙 타이머 초기화
-
-                // 이동 쿨다운 타이머 초기화
-                player.move_cooldown_timer = 0.0f;
-
-                // 초기 방향: 오른쪽
-                player.facing_direction = 1;
-
-                // 마우스 클릭
-                subscribe_mouse_click(handle_player_actions);
-                // subscribe_keyhit(movement);
-                subscribe_offset_change(update_player_offset);
-            }
+    // 수직 이동에 대한 충돌 처리
+    if (new_y > player.y) { // 아래로 이동 시
+        while (!is_walkable(player.x, new_y)) {
+            new_y--;
+            player.velocity_y = 0;
+            player.precise_y = (float)new_y;
+            player.is_on_ground = true;
         }
-    
+    }
+    else if (new_y < player.y) { // 위로 이동 시
+        while (!is_walkable(player.x, new_y)) {
+            new_y++;
+            player.velocity_y = 0;
+            player.precise_y = (float)new_y;
+        }
+    }
+    player.y = new_y;
+
+
+    // 3. 애니메이션 업데이트
+    if (player.is_moving) {
+        player.animation_timer += delta_time;
+        if (player.animation_timer >= 1.0f / ANIMATION_SPEED) {
+            player.animation_timer = 0.0f;
+            player.current_frame = (player.current_frame + 1) % 2;
+        }
+    }
+    else {
+        player.current_frame = 0;
+        player.animation_timer = 0.0f;
+    }
+}
+
+
+
+
+void player_init(void)
+{
+    if (pCurrent_save) {
+        player.x = pCurrent_save->x;
+        player.y = pCurrent_save->y;
+        player.hp = pCurrent_save->hp;
+    }
+    else {
+        player.x = map.size.x / 2;
+        player.y = find_ground_pos(player.x);
+        if (player.y - 1 >= 0)
+            --player.y; // 가능할 시 찾은 블록 위로 설정
+
+
+        player.max_hp = 1000;
+        player.hp = 1000; // 초기 체력
+        player.atk_power = 10;
+
+        // 물리 변수 초기화
+        player.precise_y = (float)player.y;
+        player.velocity_y = 0.0f;
+        player.is_on_ground = false; // 시작 시 공중에서 떨어지도록
+
+        // 애니메이션 변수 초기화
+        player.is_moving = 0;
+        player.current_frame = 0;
+        player.animation_timer = 0.0f;
+        player.is_swinging = false; // 스윙 상태 초기화
+        player.swing_timer = 0.0f;  // 스윙 타이머 초기화
+
+        // 이동 쿨다운 타이머 초기화
+        player.move_cooldown_timer = 0.0f;
+
+        // 초기 방향: 오른쪽
+        player.facing_direction = 1;
+
+        // 마우스 클릭
+        subscribe_mouse_click(handle_player_actions);
+        // subscribe_keyhit(movement);
+        subscribe_offset_change(update_player_offset);
+    }
+}
+
 
 
 // 충돌 감지 함수 구현
@@ -383,12 +384,12 @@ bool is_walkable(int x, int y) {
     // 블록 타입에 따른 이동 가능 여부 판단
     switch (block.type) {
 
-        case BLOCK_AIR:
-        case BLOCK_LOG:
-        case BLOCK_LEAF:
-        case BLOCK_WATER:
-        case BLOCK_STAR:
-            return true;
+    case BLOCK_AIR:
+    case BLOCK_LOG:
+    case BLOCK_LEAF:
+    case BLOCK_WATER:
+    case BLOCK_STAR:
+        return true;
     }
 
     return false;
