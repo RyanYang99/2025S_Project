@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 typedef enum {
     PLAYER_SOUND_FOOTSTEP,
