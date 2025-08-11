@@ -16,15 +16,21 @@
 */
 
 #include <stdbool.h>
+
 #include <Windows.h>
+
+#define INPUT_UP 72
+#define INPUT_RIGHT 77
+#define INPUT_DOWN 80
+#define INPUT_LEFT 75
 
 //left: true 일때 왼쪽 마우스 버튼, false 일때 오른쪽 마우스 버튼
 typedef void (* input_mouse_click_t)(const bool left);
 typedef void (* input_mouse_position_t)(const COORD position);
 typedef void (* input_mouse_in_console_t)(const bool in_console);
 
-extern bool input_keyboard_pressed;
-extern char input_character;
+extern bool keyboard_pressed;
+extern char input_character, input_special_character;
 
 void input_initialize(void);
 void input_update(void);

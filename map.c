@@ -4,6 +4,7 @@
 #include <time.h>
 #include <math.h>
 #include <stdbool.h>
+
 #include "save.h"
 #include "perlin.h"
 #include "player.h"
@@ -104,11 +105,11 @@ static COORD render_block(const POINT map_position, const COORD console_position
         map_position.y < 0 || map_position.y >= map.size.y)
         return size; //또는 적절한 예외 처리
 
-    for (int ty = 0; ty < TEXTURE_SIZE; ++ty)
-    {
-        for (int tx = 0; tx < TEXTURE_SIZE; ++tx)
-        {
-            const COORD position = { console_position.X + (SHORT)(ltr ? tx : -tx), console_position.Y + (SHORT)(utd ? ty : -ty) };
+    for (int ty = 0; ty < TEXTURE_SIZE; ++ty) {
+        for (int tx = 0; tx < TEXTURE_SIZE; ++tx) {
+            const COORD position = {
+                .X = console_position.X + (SHORT)(ltr ? tx : -tx),
+                .Y = console_position.Y + (SHORT)(utd ? ty : -ty) };
 
             exit = (position.X < 0 || position.X >= console_size.X) && (position.Y < 0 || position.Y >= console_size.Y);
             if (position.X < 0 || position.X >= console_size.X || position.Y < 0 || position.Y >= console_size.Y)

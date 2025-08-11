@@ -92,12 +92,12 @@ static void update_ambient_bgm(void) {
 
     if (date_time_is_night()) { //밤일때
         if (current_bgm_state != AMBIENT_BGM_NIGHT) {
-            sound_play_BGM("night.wav");
+            sound_play_BGM("night");
             current_bgm_state = AMBIENT_BGM_NIGHT;
         }
     } else { //낮일때
         if (current_bgm_state != AMBIENT_BGM_DAY) {
-			sound_play_BGM("day.wav");
+            sound_play_BGM("day");
             current_bgm_state = AMBIENT_BGM_DAY;
         }
     }

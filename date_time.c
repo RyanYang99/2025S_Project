@@ -20,6 +20,7 @@ void date_time_initialize(void) {
 
 void date_time_update(void) {
     date_time_elapsed_since_start.second += delta_time * (86400.0f / 1200.0f); //1일당 게임 초 / 1일당 실제 초
+    //date_time_elapsed_since_start.second += delta_time * (86400.0f / 60.0f);
 
     if (date_time_elapsed_since_start.second >= 60.0f) {
         const int minutes = (int)(date_time_elapsed_since_start.second / 60.0f);

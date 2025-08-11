@@ -2,6 +2,7 @@
 #include "console.h"
 
 #include <stdio.h>
+
 #include "formatter.h"
 
 COORD console_size = { 0 };

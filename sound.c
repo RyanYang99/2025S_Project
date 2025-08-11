@@ -6,37 +6,39 @@
 #include <Windows.h>
 #include <SFML/Audio.h>
 
-#define MAX_FOOTSTEP_SOUNDS 10
-#define MAX_SWING_SOUNDS 3
+#define MAX_PLAYER_FOOTSTEP_SOUNDS 10
+#define MAX_PLAYER_SWING_SOUNDS 3
 #define MAX_PLAYER_HURT_SOUNDS 3
 #define MAX_MONSTER_HURT_SOUNDS 5
 #define MAX_BOSS_HURT_SOUNDS  2
-#define MAX_BOSS_LAZER_SOUNDS 2
+#define MAX_BOSS_LASER_SOUNDS 2
 #define MAX_BOSS_MISSILE_SOUNDS 2
+#define BUFFER_COUNT (MAX_PLAYER_FOOTSTEP_SOUNDS + MAX_PLAYER_SWING_SOUNDS + MAX_PLAYER_HURT_SOUNDS + MAX_MONSTER_HURT_SOUNDS + MAX_BOSS_HURT_SOUNDS + MAX_BOSS_LASER_SOUNDS + MAX_BOSS_MISSILE_SOUNDS + 4)
 
 #define MAX_SFX_PLAYERS 10
 
-#define ADD_TO_BUFFER(i) \
-SFX_manager.pBuffers[i] = sfSoundBuffer_createFromFile(pPath); \
-++count
+#define ADD_TO_BUFFER(path, i, count) SFX_manager.pBuffers[i + count] = sfSoundBuffer_createFromFile(path)
 
 #define CONCAT_WAV(MAX) \
 for (int i = 0; i < MAX; ++i) { \
     char pName[MAX_PATH] = { 0 }; \
     snprintf(pName, MAX_PATH, "%d.wav", i); \
-    strcpy_s(pPath, MAX_PATH, pName); \
-    ADD_TO_BUFFER(i); \
-}
+    strcpy_s(pFinal, MAX_PATH, pPath); \
+    strcat_s(pFinal, MAX_PATH, pName); \
+    ADD_TO_BUFFER(pFinal, i, count); \
+} \
+count += MAX
 
 typedef struct {
     sfMusic *pBGM;
 
-    sfSoundBuffer *pBuffers[MAX_FOOTSTEP_SOUNDS + MAX_SWING_SOUNDS + MAX_PLAYER_HURT_SOUNDS + MAX_MONSTER_HURT_SOUNDS +
-                            MAX_SFX_PLAYERS + MAX_BOSS_HURT_SOUNDS + MAX_BOSS_LAZER_SOUNDS + MAX_BOSS_MISSILE_SOUNDS + 3];
+    sfSoundBuffer *pBuffers[BUFFER_COUNT];
 
     sfSound *pSFX_players[MAX_SFX_PLAYERS], *pSound;
 
-    int footstep, swing, player_hurt, monster_hurt, monster_attack, boss_summon, boss_howl, boss_hurt, boss_lazer, boss_missile;
+    int player_footstep, player_swing, player_hurt,
+        monster_attack, monster_hurt, monster_death,
+        boss_summon, boss_howl, boss_hurt, boss_laser, boss_missile;
 } SFX_manager_t;
 
 static SFX_manager_t SFX_manager = { 0 };
@@ -47,49 +49,53 @@ void sound_initialize(void) {
         SFX_manager.pSFX_players[i] = sfSound_create();
     SFX_manager.pSound = sfSound_create();
 
-    const char * const pFolder = "sounds", * const pPlayer = "player", * const pMonster = "monster", * const pBoss = "boss";
-    char pPath[MAX_PATH] = { 0 };
+    const char * const pFolder = "./sounds", * const pPlayer = "player", * const pMonster = "monster", * const pBoss = "boss";
+    char pPath[MAX_PATH] = { 0 }, pFinal[MAX_PATH] = { 0 };
     strcpy_s(pPath, MAX_PATH, pFolder);
 
     int count = 0;
-    snprintf(pPath, MAX_PATH, "%s\\%s\\footstep\\", pFolder, pPlayer);
-    CONCAT_WAV(MAX_FOOTSTEP_SOUNDS)
+    snprintf(pPath, MAX_PATH, "%s/%s/footstep/", pFolder, pPlayer);
+    CONCAT_WAV(MAX_PLAYER_FOOTSTEP_SOUNDS);
 
-    SFX_manager.swing = count;
-    snprintf(pPath, MAX_PATH, "%s\\%s\\swing\\", pFolder, pPlayer);
-    CONCAT_WAV(MAX_SWING_SOUNDS)
+    SFX_manager.player_swing = count;
+    snprintf(pPath, MAX_PATH, "%s/%s/swing/", pFolder, pPlayer);
+    CONCAT_WAV(MAX_PLAYER_SWING_SOUNDS);
 
     SFX_manager.player_hurt = count;
-    snprintf(pPath, MAX_PATH, "%s\\%s\\hurt\\", pFolder, pPlayer);
-    CONCAT_WAV(MAX_PLAYER_HURT_SOUNDS)
-
-    SFX_manager.monster_hurt = count;
-    snprintf(pPath, MAX_PATH, "%s\\%s\\hurt\\", pFolder, pMonster);
-    CONCAT_WAV(MAX_MONSTER_HURT_SOUNDS)
+    snprintf(pPath, MAX_PATH, "%s/%s/hurt/", pFolder, pPlayer);
+    CONCAT_WAV(MAX_PLAYER_HURT_SOUNDS);
 
     SFX_manager.monster_attack = count;
-    snprintf(pPath, MAX_PATH, "%s\\%s\\attack.wav", pFolder, pMonster);
-    ADD_TO_BUFFER(count++);
+    snprintf(pPath, MAX_PATH, "%s/%s/attack.wav", pFolder, pMonster);
+    ADD_TO_BUFFER(pPath, count++, 0);
+
+    SFX_manager.monster_hurt = count;
+    snprintf(pPath, MAX_PATH, "%s/%s/hurt/", pFolder, pMonster);
+    CONCAT_WAV(MAX_MONSTER_HURT_SOUNDS);
+
+    SFX_manager.monster_death = count;
+    snprintf(pPath, MAX_PATH, "%s/%s/death.wav", pFolder, pMonster);
+    ADD_TO_BUFFER(pPath, count++, 0);
 
     SFX_manager.boss_summon = count;
-    snprintf(pPath, MAX_PATH, "%s\\%s\\summon.wav", pFolder, pBoss);
-    ADD_TO_BUFFER(count++);
+    snprintf(pPath, MAX_PATH, "%s/%s/summon.wav", pFolder, pBoss);
+    ADD_TO_BUFFER(pPath, count++, 0);
 
     SFX_manager.boss_howl = count;
-    snprintf(pPath, MAX_PATH, "%s\\%s\\howl.wav", pFolder, pBoss);
-    ADD_TO_BUFFER(count++);
+    snprintf(pPath, MAX_PATH, "%s/%s/howl.wav", pFolder, pBoss);
+    ADD_TO_BUFFER(pPath, count++, 0);
 
     SFX_manager.boss_hurt = count;
-    snprintf(pPath, MAX_PATH, "%s\\%s\\hurt\\", pFolder, pBoss);
-    CONCAT_WAV(MAX_BOSS_HURT_SOUNDS)
+    snprintf(pPath, MAX_PATH, "%s/%s/hurt/", pFolder, pBoss);
+    CONCAT_WAV(MAX_BOSS_HURT_SOUNDS);
 
-    SFX_manager.boss_lazer = count;
-    snprintf(pPath, MAX_PATH, "%s\\%s\\lazer\\", pFolder, pBoss);
-    CONCAT_WAV(MAX_BOSS_LAZER_SOUNDS)
+    SFX_manager.boss_laser = count;
+    snprintf(pPath, MAX_PATH, "%s/%s/laser/", pFolder, pBoss);
+    CONCAT_WAV(MAX_BOSS_LASER_SOUNDS);
 
     SFX_manager.boss_missile = count;
-    snprintf(pPath, MAX_PATH, "%s\\%s\\lazer\\", pFolder, pBoss);
-    CONCAT_WAV(MAX_BOSS_MISSILE_SOUNDS)
+    snprintf(pPath, MAX_PATH, "%s/%s/missile/", pFolder, pBoss);
+    CONCAT_WAV(MAX_BOSS_MISSILE_SOUNDS);
 }
 
 static void stop_BGM(void) {
@@ -103,7 +109,7 @@ static void stop_BGM(void) {
 void sound_destroy(void) {
     stop_BGM();
 
-    for (int i = 0; i < sizeof(SFX_manager.pBuffers); ++i)
+    for (int i = 0; i < BUFFER_COUNT; ++i)
         if (SFX_manager.pBuffers[i])
             sfSoundBuffer_destroy(SFX_manager.pBuffers[i]);
 
@@ -111,7 +117,7 @@ void sound_destroy(void) {
         if (SFX_manager.pSFX_players[i])
             sfSound_destroy(SFX_manager.pSFX_players[i]);
 
-    if (SFX_manager.pSound) 
+    if (SFX_manager.pSound)
         sfSound_destroy(SFX_manager.pSound);
 }
 
@@ -119,7 +125,7 @@ void sound_play_BGM(const char * const pFile_name) {
     stop_BGM();
 
     char path[MAX_PATH] = { 0 };
-    snprintf(path, MAX_PATH, "sounds\\BGM\\%s.wav", pFile_name);
+    snprintf(path, MAX_PATH, "./sounds/BGM/%s.wav", pFile_name);
 
     SFX_manager.pBGM = sfMusic_createFromFile(path);
     sfMusic_setLoop(SFX_manager.pBGM, sfTrue);
@@ -137,31 +143,32 @@ static void play_sfx(const int index) {
     }
 }
 
-void sound_play_footstep(void) {
-    if (sfSound_getStatus(SFX_manager.pSound) == sfPlaying)
-        return;
+void sound_play_sound_effect(const sound_effect_t sound_effect) {
+    switch (sound_effect) {
+        case PLAYER_SOUND_FOOTSTEP:
+            play_sfx(SFX_manager.player_footstep + (rand() % MAX_PLAYER_FOOTSTEP_SOUNDS));
+            break;
 
-    play_sfx(SFX_manager.footstep + (rand() % MAX_FOOTSTEP_SOUNDS));
-}
+        case PLAYER_SOUND_SWING:
+            play_sfx(SFX_manager.player_swing + (rand() % MAX_PLAYER_SWING_SOUNDS));
+            break;
 
-void sound_play_swing(void) {
-    play_sfx(SFX_manager.swing + (rand() % MAX_SWING_SOUNDS));
-}
+        case PLAYER_SOUND_HURT:
+            play_sfx(SFX_manager.player_hurt + (rand() % MAX_PLAYER_HURT_SOUNDS));
+            break;
 
-void sound_play_monster_hurt(void) {
-    play_sfx(SFX_manager.monster_hurt + (rand() % MAX_MONSTER_HURT_SOUNDS));
-}
+        case MONSTER_SOUND_ATTACK:
+            play_sfx(SFX_manager.monster_attack);
+            break;
 
-void sound_play_monster_attack(void) {
-    play_sfx(SFX_manager.monster_attack);
-}
+        case MONSTER_SOUND_HURT:
+            play_sfx(SFX_manager.monster_hurt + (rand() % MAX_MONSTER_HURT_SOUNDS));
+            break;
 
-void sound_play_player_hurt(void) {
-    play_sfx(SFX_manager.player_hurt + (rand() % MAX_PLAYER_HURT_SOUNDS));
-}
+        case MONSTER_SOUND_DEATH:
+            play_sfx(SFX_manager.monster_death);
+            break;
 
-void sound_play_boss_sound(const boss_sound_type_t type) {
-    switch (type) {
         case BOSS_SOUND_SPAWN:
             play_sfx(SFX_manager.boss_summon);
             break;
@@ -174,8 +181,8 @@ void sound_play_boss_sound(const boss_sound_type_t type) {
             play_sfx(SFX_manager.boss_howl);
             break;
 
-        case BOSS_SOUND_LAZER:
-            play_sfx(SFX_manager.boss_lazer + (rand() % MAX_BOSS_LAZER_SOUNDS));
+        case BOSS_SOUND_LASER:
+            play_sfx(SFX_manager.boss_laser + (rand() % MAX_BOSS_LASER_SOUNDS));
             break;
 
         case BOSS_SOUND_MISSILE:

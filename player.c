@@ -213,7 +213,7 @@ static void movement(void) {
         if (is_a_down && !is_d_down) {
             int new_x = player.x - 1;
             if (is_walkable(new_x, player.y)) {
-                sound_play_footstep();
+                sound_play_sound_effect(PLAYER_SOUND_FOOTSTEP);
                 player.x = new_x;
                 moved_horizontally = true;
                 player.facing_direction = -1; //왼쪽 보기
@@ -221,7 +221,7 @@ static void movement(void) {
         } else if (is_d_down && !is_a_down) { //오른쪽 이동 (A키와 동시에 눌리면 무시)
             int new_x = player.x + 1;
             if (is_walkable(new_x, player.y)) {
-                sound_play_footstep();
+                sound_play_sound_effect(PLAYER_SOUND_FOOTSTEP);
                 player.x = new_x;
                 moved_horizontally = true;
                 player.facing_direction = 1; //오른쪽 보기
@@ -489,7 +489,7 @@ void player_take_damage(const int damage) {
     }
 
     create_damage_text(damage);
-    sound_play_player_hurt();
+    sound_play_sound_effect(PLAYER_SOUND_HURT);
 }
 
 void player_add_health(const int additional_health) {

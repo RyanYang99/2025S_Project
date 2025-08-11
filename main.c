@@ -1,6 +1,7 @@
 ﻿#include "leak.h"
 
 #include <stdio.h>
+
 #include "save.h"
 #include "game.h"
 #include "input.h"
@@ -51,8 +52,7 @@ static bool force_old_console(void) {
     return false;
 }
 
-int main(void)
-{
+int main(void) {
 #if _DEBUG
     //메모리 누수 체크
     _CrtSetDbgFlag(_CRTDBG_CHECK_ALWAYS_DF | _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);

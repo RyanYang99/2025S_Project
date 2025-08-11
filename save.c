@@ -3,14 +3,14 @@
 
 #include <stdio.h>
 #include <string.h>
+
 #include <ShlObj_core.h>
 #include "game.h"
 #include "input.h"
 #include "delta.h"
 #include "player.h"
 
-static bool should_render_save_menu = false;
-static bool pUsed[MAX_SAVE_SPOTS] = { 0 };
+static bool should_render_save_menu = false, pUsed[MAX_SAVE_SPOTS] = { 0 };
 static char *pMessage = "";
 
 save_t *pSave_current = NULL;
@@ -58,7 +58,7 @@ static void write_save(LPCWSTR const pPath) {
 }
 
 void save_input(void) {
-    if (!input_keyboard_pressed)
+    if (!keyboard_pressed)
         return;
 
     if (input_character == VK_ESCAPE) {
@@ -72,7 +72,8 @@ void save_input(void) {
             game_exit = true;
         else {
             const int number = input_character - '0';
-            if (number >= 1 && number <= 3) {
+
+            if (number >= 1 && number <= MAX_SAVE_SPOTS) {
                 date_time_save();
                 player_save();
                 inventory_save();

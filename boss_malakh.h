@@ -4,18 +4,18 @@
 
 #include "console.h"
 
-//보스 상태
-typedef enum {
-    E_BOSS_STATE_PHASE_1,
-    E_BOSS_STATE_PHASE_2,
-    E_BOSS_STATE_PHASE_3,
-    E_BOSS_STATE_DAMAGED,
-    E_BOSS_STATE_DEFEATED
-} boss_state_t;
-
 #define BOSS_SPRITE_WIDTH 20
 #define BOSS_SPRITE_HEIGHT 20
 #define BOSS_DRAW_SCALE 3 //렌더링 스케일
+
+//보스 상태
+typedef enum {
+    E_BOSS_STATE_DEFEATED,
+    E_BOSS_STATE_PHASE_1,
+    E_BOSS_STATE_PHASE_2,
+    E_BOSS_STATE_PHASE_3,
+    E_BOSS_STATE_DAMAGED
+} boss_state_t;
 
 //보스 구조체
 typedef struct {

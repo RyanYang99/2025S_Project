@@ -3,6 +3,7 @@
 
 #include <conio.h>
 #include <Windows.h>
+
 #include "console.h"
 
 #define CALLBACK_CALLBACKS_NAME(type) p##type##_callbacks
@@ -29,8 +30,8 @@ static int CALLBACK_COUNT_NAME(type)
     CALLBACK_CALLBACKS_NAME(type) = NULL; \
     CALLBACK_COUNT_NAME(type) = 0
 
-bool input_keyboard_pressed = false;
-char input_character = 0;
+bool keyboard_pressed = false;
+char input_character = 0, input_special_character = 0;
 
 static HANDLE input_handle = NULL;
 static DWORD original_mode = 0;
@@ -89,9 +90,16 @@ void input_update(void) {
         DispatchMessage(&msg);
     }
 
-    input_keyboard_pressed = _kbhit();
-    if (input_keyboard_pressed)
-        input_character = (char)_getch();
+    keyboard_pressed = _kbhit();
+    if (keyboard_pressed) {
+        const int key = _getch();
+
+        input_character = (char)key;
+        if (!key || key == 0xE0)
+            input_special_character = (char)_getch();
+        else
+            input_special_character = 0;
+    }
 }
 
 void input_destroy(void) {
@@ -109,7 +117,7 @@ void input_destroy(void) {
     0x8000 비트가 설정되어 있으면 키가 현재 눌려있다는 의미
 */
 const bool is_key_down(const int virtual_key_code) {
-    return (GetAsyncKeyState(virtual_key_code) & 0x8000) != 0;
+    return GetAsyncKeyState(virtual_key_code) & 0x8000;
 }
 
 void input_subscribe_mouse_click(const input_mouse_click_t callback) {

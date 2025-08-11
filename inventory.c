@@ -75,39 +75,35 @@ void inventory_initialize(void) {
 
 //I키 입력시 인벤토리 호출
 void inventory_input(void) {
-    if (!input_keyboard_pressed)
+    if (!keyboard_pressed)
         return;
 
-    const char character = (char)tolower(input_character);
-
-    bool is_number = false;
-    int number = character - '0';
-    if (number > 0 && number < 10) {
-        is_number = true;
+    int number = input_character - '0';
+    const bool is_number = number >= 0 && number <= 9;
+    if (number == 0)
+        number = max_hotbar_index;
+    else
         --number;
-    } else if (number == 0) {
-        is_number = true;
-        number = 9;
-    }
 
-    if (character == 'i')
-        is_inventory_open = !is_inventory_open;
-    else if (is_number && number <= max_hotbar_index) {
+    if (is_number && !is_inventory_open) {
         inventory.selected_hotbar_index = number;
         should_render_name = true;
         name_render_timer = 0.0f;
     }
 
+    if (tolower(input_character) == 'i')
+        is_inventory_open = !is_inventory_open;
+
     if (!is_inventory_open)
         return;
 
-    if (character == 'w' && current_selection_index > 0)
+    if (input_special_character == INPUT_UP && current_selection_index > 0)
         --current_selection_index;
-    else if (character == 's' && current_selection_index < max_selection_index)
+    else if (input_special_character == INPUT_DOWN && current_selection_index < max_selection_index)
         ++current_selection_index;
-    else if (character == 'a' && current_page_index > 0)
+    else if (input_special_character == INPUT_LEFT && current_page_index > 0)
         --current_page_index;
-    else if (character == 'd' && current_page_index < max_page_index)
+    else if (input_special_character == INPUT_RIGHT && current_page_index < max_page_index)
         ++current_page_index;
     else if (is_number && number <= max_hotbar_index) {
         const int index = current_page_index * ITEMS_PER_PAGE + current_selection_index;
@@ -271,7 +267,7 @@ void inventory_render(void) {
         render_item(++position.Y, start_index + i, i == current_selection_index, blink);
 
     ++position.Y;
-    console_fprint_string("=== [W / S]: Select, [A / D]: Page, [0 ~ 9]: Hotbar, [I]: Close ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
+    console_fprint_string("=== [Up / Down]: Select, [Left / Right]: Page, [0 ~ 9]: Hotbar, [I]: Close ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
 
     const player_item_t * const pItem = &inventory.item[start_index + current_selection_index];
     if (!pItem->item_DB_index)

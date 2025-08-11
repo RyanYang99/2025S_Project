@@ -2,6 +2,7 @@
 #include "block_control.h"
 
 #include <math.h>
+
 #include "tool.h"
 #include "input.h"
 #include "player.h"
@@ -28,7 +29,7 @@ static void handle_mouse_click(const bool left) {
         return;
 
     if (!is_cursor_in_range()) {
-        //범위 밖 클릭 → 빨간색 경고 
+        //범위 밖 클릭 → 빨간색 경고
         cursor_flash_color = FOREGROUND_T_RED;
         return;
     }
@@ -59,9 +60,10 @@ static void handle_mouse_click(const bool left) {
         if (map_damage_block(block_control_selected_x, block_control_selected_y, damage)) {
             const int drop = tool_get_drop_from_block(target_block.type);
 
-            if (drop != -1) {
+            if (drop != -1)
                 inventory_add_item(drop, 1);
-            }
+
+            inventory_decrement_durability();
         }
 
         return;
