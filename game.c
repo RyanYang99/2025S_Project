@@ -4,9 +4,10 @@
 #include "mob.h"
 #include "map.h"
 #include "save.h"
-#include "astar.h"
-#include "input.h"
 #include "delta.h"
+#include "astar.h"
+#include "sound.h"
+#include "input.h"
 #include "player.h"
 #include "inventory.h"
 #include "date_time.h"
@@ -14,7 +15,15 @@
 #include "boss_malakh.h"
 #include "block_control.h"
 
+typedef enum {
+    AMBIENT_BGM_NONE, //BGM이 없거나, 보스전 등 다른 BGM이 재생 중인 상태
+    AMBIENT_BGM_DAY, //낮 BGM 재생 중
+    AMBIENT_BGM_NIGHT //밤 BGM 재생 중
+} ambient_BGM_state_t;
+
 bool game_exit = false;
+
+static ambient_BGM_state_t current_bgm_state = AMBIENT_BGM_DAY;
 
 #if _DEBUG
 static void render_debug_text(void) {
@@ -39,16 +48,6 @@ static void render_debug_text(void) {
     ++position.Y;
 
     console_fprint_string("Boss Spawned: %d", position, background, foreground, boss_spawned);
-}
-
-static void test(void) {
-    inventory_add_item(109, 1);
-    inventory_add_item(102, 1);
-    inventory_add_item(107, 1);
-    inventory_add_item(106, 1);
-    inventory_add_item(103, 1);
-    inventory_add_item(105, 1);
-    inventory_add_item(108, 1);
 }
 #endif
 
@@ -83,10 +82,25 @@ void game_initialize(void) {
     inventory_initialize();
     save_initialize();
     save_free();
+}
 
-#if _DEBUG
-    test();
-#endif
+static void update_ambient_bgm(void) {
+    if (boss_spawned) {
+        current_bgm_state = AMBIENT_BGM_NONE;
+        return;
+    }
+
+    if (date_time_is_night()) { //밤일때
+        if (current_bgm_state != AMBIENT_BGM_NIGHT) {
+            sound_play_BGM("night.wav");
+            current_bgm_state = AMBIENT_BGM_NIGHT;
+        }
+    } else { //낮일때
+        if (current_bgm_state != AMBIENT_BGM_DAY) {
+			sound_play_BGM("day.wav");
+            current_bgm_state = AMBIENT_BGM_DAY;
+        }
+    }
 }
 
 void game_update(void) {
@@ -96,6 +110,8 @@ void game_update(void) {
         console_update();
         input_update();
         date_time_update();
+        update_ambient_bgm();
+
         player_update();
 
         if (boss_spawned)

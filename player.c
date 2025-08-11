@@ -489,6 +489,7 @@ void player_take_damage(const int damage) {
     }
 
     create_damage_text(damage);
+    sound_play_player_hurt();
 }
 
 void player_add_health(const int additional_health) {

@@ -65,20 +65,19 @@ int main(void)
     crafting_UI_initialize();
     console_initialize(true, false);
     sound_initialize();
-    sound_play_menu_BGM("BGM/song18_1.wav");
+    sound_play_BGM("main_menu");
 
     while (true) {
         const main_menu_state_t main_menu_state = main_menu();
         if (main_menu_state == MAIN_MENU_STATE_QUIT)
             break;
-        else if (main_menu_state == MAIN_MENU_STATE_LOAD_GAME) {
+        else if (main_menu_state == MAIN_MENU_STATE_LOAD_GAME)
             if (!main_menu_load_menu())
                 continue;
-        }
         else
             save_free();
 
-        sound_play_BGM("BGM/fixed_roop1.wav");
+        sound_play_BGM("day");
         input_initialize();
         game_initialize();
         game_update();

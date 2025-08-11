@@ -127,7 +127,8 @@ void mob_initialize(void) {
         mob_level = pSave_current->mob_level;
         for (int i = 0; i < mob_count; ++i)
             mobs[i] = pSave_current->pMobs[i];
-    } else
+    }
+    else
         mob_count = 0;
 
     input_subscribe_mouse_click(handle_mob_click);
@@ -136,12 +137,12 @@ void mob_initialize(void) {
 
 static const bool is_walkable_block(const block_t block) {
     switch (block) {
-        case BLOCK_AIR:
-        case BLOCK_STAR:
-        case BLOCK_WATER:
-        case BLOCK_LOG:
-        case BLOCK_LEAF:
-            return false;
+    case BLOCK_AIR:
+    case BLOCK_STAR:
+    case BLOCK_WATER:
+    case BLOCK_LOG:
+    case BLOCK_LEAF:
+        return false;
     }
 
     return true;
@@ -302,6 +303,7 @@ static void check_mob_player_collision(void) {
 
             //쿨타임이 지났는지 확인
             if (mobs[i].attack_cool_time_timer >= MOB_ATK_COOLTIME) {
+                sound_play_monster_attack();
                 player_take_damage(mobs[i].attack);
                 mobs[i].attack_cool_time_timer = 0.0f; //공격 후 타이머 리셋
             }
@@ -343,7 +345,8 @@ static void despawn_mob(void) {
                 mob_count--;
                 continue;
             }
-        } else
+        }
+        else
             mobs[i].despawn_timer = 0.0f;
 
         ++i;
@@ -378,7 +381,8 @@ void mob_update(void) {
                 mobs[i].animation_timer = 0.0f;
                 mobs[i].current_frame = (mobs[i].current_frame + 1) % 2;
             }
-        } else {
+        }
+        else {
             mobs[i].animation_timer = 0.0f;
             mobs[i].current_frame = 0;
         }
@@ -430,7 +434,7 @@ void mob_render(void) {
         }
 
         // 몬스터 상태에 따라 스프라이트 선택
-        const color_character_t(* sprite_to_render)[MOB_SPRITE_WIDTH];
+        const color_character_t(*sprite_to_render)[MOB_SPRITE_WIDTH];
 
         if (mobs[i].is_dead)
             sprite_to_render = pDead_zombie_sprite_data;

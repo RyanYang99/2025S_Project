@@ -41,12 +41,13 @@ void date_time_update(void) {
 
 void date_time_render(void) {
     static float blink = 0.0f;
-    static char *pBlink = " ";
+    static char* pBlink = " ";
     blink += delta_time;
     if (blink >= 2.0f) {
         blink = 0.0f;
         pBlink = " ";
-    } else if (blink >= 1.0f)
+    }
+    else if (blink >= 1.0f)
         pBlink = ":";
 
     char * const pDay = format_string("Day %d", date_time_elapsed_since_start.day),

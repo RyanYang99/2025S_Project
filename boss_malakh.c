@@ -6,6 +6,7 @@
 #include "delta.h"
 #include "astar.h"
 #include "input.h"
+#include "sound.h"
 #include "player.h"
 #include "console.h"
 #include "formatter.h"
@@ -120,6 +121,9 @@ static void boss_damage(const int damage) {
     boss.hp -= damage;
     boss_create_damage_text(damage);
 
+    sound_play_swing();
+    sound_play_boss_sound(BOSS_SOUND_HURT);
+
     if (boss.hp <= 0) {
         boss.hp = 0;
         boss.state = E_BOSS_STATE_DEFEATED;
@@ -192,6 +196,7 @@ void boss_initialize(const int start_x, const int start_y, const int hp, const i
 static void boss_launch_missile(const int count) {
     int launched_count = 0;
 
+    sound_play_boss_sound(BOSS_SOUND_MISSILE);
     for (int i = 0; i < MAX_MISSILES && launched_count < count; ++i)
         if (!pBoss_missiles[i].is_active) {
             pBoss_missiles[i].x = boss.x;
@@ -202,6 +207,7 @@ static void boss_launch_missile(const int count) {
 }
 
 static void boss_launch_new_horizontal_laser(void) {
+    sound_play_boss_sound(BOSS_SOUND_LAZER);
     boss.is_horizontal_laser_active = true;
     boss.action_timer = 0.0f;
     //보스 머리 위부터 시작
@@ -210,11 +216,11 @@ static void boss_launch_new_horizontal_laser(void) {
 
 //세로 레이저 패턴 시작 함수
 static void boss_launch_new_vertical_laser(void) {
+    sound_play_boss_sound(BOSS_SOUND_LAZER);
     boss.is_vertical_laser_active = true;
     boss.action_timer = 0.0f;
     //방향을 랜덤으로 결정
     boss.is_vertical_laser_from_left = (rand() % 2 == 0);
-
     //시작 위치 설정
     if (boss.is_vertical_laser_from_left)
         boss.current_vertical_laser_x = 0; //왼쪽에서 시작
@@ -232,6 +238,8 @@ static void boss_update_pattern(void) {
     boss.horizontal_laser_timer += delta_time;
     boss.vertical_laser_timer += delta_time;
 
+    sound_play_boss_sound(BOSS_SOUND_HOWLING);
+
     //미사일 패턴 (모든 페이즈)
     if (boss.missile_timer >= boss.missile_attack_cool_time) {
         int missile_count_to_launch = 1;
@@ -242,18 +250,21 @@ static void boss_update_pattern(void) {
         else if (boss.state == E_BOSS_STATE_PHASE_3)
             missile_count_to_launch = 10;
 
+        sound_play_boss_sound(BOSS_SOUND_HOWLING);
         boss_launch_missile(missile_count_to_launch);
         boss.missile_timer = 0.0f; //타이머 리셋
     }
 
     //페이즈 2: 가로 레이저 패턴
     if (boss.state == E_BOSS_STATE_PHASE_2 && boss.horizontal_laser_timer >= boss.horizontal_laser_cool_time) {
+        sound_play_boss_sound(BOSS_SOUND_HOWLING);
         boss_launch_new_horizontal_laser();
         boss.horizontal_laser_timer = 0.0f;
     }
 
     //페이즈 3: 세로 레이저 패턴
     if (boss.state == E_BOSS_STATE_PHASE_3 && boss.vertical_laser_timer >= boss.vertical_laser_cool_time) {
+        sound_play_boss_sound(BOSS_SOUND_HOWLING);
         boss_launch_new_vertical_laser();
         boss.vertical_laser_timer = 0.0f;
     }
@@ -550,17 +561,3 @@ void boss_render(void) {
 void boss_destroy(void) {
     input_unsubscribe_mouse_click(boss_handle_player_attack);
 }
-
-/*
-//가로 레이저 발사 함수
-static void boss_launch_horizontal_laser(void) {
-    boss.is_horizontal_laser_active = true;
-    boss.action_timer = 0.0f;
-}
-
-//하늘 레이저 발사 함수
-static void boss_launch_vertical_laser(void) {
-    boss.is_vertical_laser_active = true;
-    boss.action_timer = 0.0f;
-}
-*/
