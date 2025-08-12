@@ -12,7 +12,7 @@
 typedef struct {
     date_time_t game_time;
 
-    int x, y, HP;
+    int x, y, HP, max_HP;
 
     player_item_t pInventory[INVENTORY_SIZE];
     int pHotbar_linked_index[HOTBAR_COUNT];

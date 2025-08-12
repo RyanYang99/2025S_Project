@@ -44,6 +44,7 @@ static void write_save(LPCWSTR const pPath) {
     fwrite(&pSave_current->x, sizeof(pSave_current->x), 1, pFile);
     fwrite(&pSave_current->y, sizeof(pSave_current->y), 1, pFile);
     fwrite(&pSave_current->HP, sizeof(pSave_current->HP), 1, pFile);
+    fwrite(&pSave_current->max_HP, sizeof(pSave_current->max_HP), 1, pFile);
     fwrite(pSave_current->pInventory, sizeof(player_item_t), INVENTORY_SIZE, pFile);
     fwrite(pSave_current->pHotbar_linked_index, sizeof(int), HOTBAR_COUNT, pFile);
     fwrite(pSave_current->pPermuation_table, sizeof(int), PERLIN_SIZE, pFile);
@@ -155,6 +156,7 @@ static save_t *load_save(LPCWSTR const pPath) {
     fread(&pSave->x, sizeof(pSave->x), 1, pFile);
     fread(&pSave->y, sizeof(pSave->y), 1, pFile);
     fread(&pSave->HP, sizeof(pSave->HP), 1, pFile);
+    fread(&pSave->max_HP, sizeof(pSave->max_HP), 1, pFile);
     fread(pSave->pInventory, sizeof(player_item_t), INVENTORY_SIZE, pFile);
     fread(pSave->pHotbar_linked_index, sizeof(int), HOTBAR_COUNT, pFile);
     fread(pSave->pPermuation_table, sizeof(int), PERLIN_SIZE, pFile);

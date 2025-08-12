@@ -152,15 +152,15 @@ const bool tool_can_break_block(const item_information_t * const pTool, const bl
 }
 
 //도구가 해당 블록에 주는 데미지를 계산하는 함수
-const int tool_get_damage_to_block(const item_information_t * const tool, const block_t block) {
+const int tool_get_damage_to_block(const item_information_t * const pTool, const block_t block) {
     const int base_damage = 3; //맨손 기본 데미지
 
     //도구가 없거나 해당 블록을 부술 수 없으면 맨손 데미지
-    if (!tool || !tool_can_break_block(tool, block))
+    if (!pTool || !tool_can_break_block(pTool, block))
         return base_damage;
 
     const int bonus_per_tier = 6; //도구 티어 1단계당 추가 데미지
-    return base_damage + (bonus_per_tier * tool->material_tier);
+    return base_damage + (bonus_per_tier * pTool->material_tier);
 }
 
 //블록파괴시 인벤토리에 알맞은 아이템 획득
@@ -203,6 +203,30 @@ const bool tool_can_place_block(const int x, const int y) {
         필요 시 주변 블록까지 검사 가능
     */
     return true;
+}
+
+const int tool_get_damage_to_mob(const tool_t tool) {
+    switch (tool) {
+        case TOOL_WOODEN_SWORD:
+            return 10;
+
+        case TOOL_WOODEN_AXE:
+            return 7;
+
+        case TOOL_STONE_SWORD:
+            return 20;
+
+        case TOOL_STONE_AXE:
+            return 15;
+
+        case TOOL_IRON_SWORD:
+            return 40;
+
+        case TOOL_IRON_AXE:
+            return 30;
+    }
+
+    return 0;
 }
 
 const color_character_t tool_get_texture(const tool_t tool, const int x, const int y) {

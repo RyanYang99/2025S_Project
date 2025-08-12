@@ -6,6 +6,7 @@
 
 #include "map.h"
 #include "save.h"
+#include "sound.h"
 #include "date_time.h"
 #include "formatter.h"
 
@@ -49,6 +50,7 @@ const main_menu_state_t main_menu(void) {
        * const pQuit = "Quit";
 
     console_clear();
+    sound_play_BGM("main_menu");
 
     int selection = 0;
     while (true) {

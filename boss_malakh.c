@@ -4,14 +4,17 @@
 #include <stdlib.h>
 
 #include "map.h"
+#include "tool.h"
 #include "delta.h"
 #include "astar.h"
 #include "input.h"
 #include "sound.h"
 #include "player.h"
 #include "console.h"
+#include "inventory.h"
 #include "formatter.h"
 #include "block_control.h"
+#include "item_database.h"
 
 //가독성을 위한 매크로
 #define FG_WHITE FOREGROUND_T_WHITE
@@ -34,7 +37,7 @@
 #define MAX_BOSS_DAMAGE_TEXTS 10
 #define BOSS_DAMAGE_TEXT_DURATION 1.0f
 
-#define MAX_MISSILES 10
+#define MAX_MISSILES 5
 
 //미사일 구조체
 typedef struct {
@@ -122,7 +125,6 @@ static void boss_damage(const int damage) {
     boss.hp -= damage;
     boss_create_damage_text(damage);
 
-    sound_play_sound_effect(PLAYER_SOUND_SWING);
     sound_play_sound_effect(BOSS_SOUND_HURT);
 
     if (boss.hp <= 0) {
@@ -142,7 +144,12 @@ static void boss_handle_player_attack(const bool left_click) {
         return;
 
     if (map_get_block_info(block_control_selected_x, block_control_selected_y).type == BLOCK_SEED_OF_MALAKH) {
-        boss_damage(player.attack_power);
+        const player_item_t * const pItem = inventory.pHotbar[inventory.selected_hotbar_index].pPlayer_Item;
+        int extra = 0;
+        if (pItem)
+            extra = tool_get_damage_to_mob(pItem->item_DB_index);
+
+        boss_damage(player.attack_power + extra);
         return;
     }
 
@@ -153,6 +160,14 @@ static void boss_handle_player_attack(const bool left_click) {
             pBoss_missiles[i].is_active = false;
             return;
         }
+}
+
+static void boss_handle_offset(void) {
+    boss.x += map.offset_x;
+    
+    for (int i = 0; i < MAX_MISSILES; ++i)
+        if (pBoss_missiles[i].is_active)
+            pBoss_missiles[i].x += map.offset_x;
 }
 
 //보스 초기화
@@ -191,6 +206,7 @@ void boss_initialize(const int start_x, const int start_y, const int hp, const i
         pBoss_damage_texts[i].active = false;
 
     input_subscribe_mouse_click(boss_handle_player_attack);
+    map_subscribe_offset_change(boss_handle_offset);
 }
 
 //미사일 발사 함수
@@ -238,8 +254,6 @@ static void boss_update_pattern(void) {
     boss.missile_timer += delta_time;
     boss.horizontal_laser_timer += delta_time;
     boss.vertical_laser_timer += delta_time;
-
-    sound_play_sound_effect(BOSS_SOUND_HOWLING);
 
     //미사일 패턴 (모든 페이즈)
     if (boss.missile_timer >= boss.missile_attack_cool_time) {
@@ -325,8 +339,8 @@ static void boss_update_main(void) {
                     boss.state = E_BOSS_STATE_PHASE_2;
                 else
                     boss.state = E_BOSS_STATE_PHASE_3;
+            }
             break;
-        }
 
         case E_BOSS_STATE_DEFEATED:
             if (boss_spawned)
@@ -545,7 +559,7 @@ void boss_render(void) {
                 }
 
     //보스 체력 바 렌더링
-    char * const pText = format_string("HP: % d / % d", boss.hp, boss.max_hp);
+    char * const pText = format_string("HP: %d / %d", boss.hp, boss.max_hp);
     COORD hp_position = {
         .X = (SHORT)(boss_screen_base_x + (BOSS_SPRITE_WIDTH * BOSS_DRAW_SCALE / 2.0f) - (int)(strlen(pText) / 2.0f)),
         .Y = (SHORT)(boss_screen_base_y - 1)
@@ -564,4 +578,5 @@ void boss_render(void) {
 
 void boss_destroy(void) {
     input_unsubscribe_mouse_click(boss_handle_player_attack);
+    map_unsubscribe_offset_change(boss_handle_offset);
 }

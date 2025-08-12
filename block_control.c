@@ -6,6 +6,7 @@
 #include "tool.h"
 #include "input.h"
 #include "player.h"
+#include "inventory.h"
 #include "boss_malakh.h"
 
 int block_control_selected_x = 0, block_control_selected_y = 0;

@@ -5,6 +5,7 @@
 
 #include "save.h"
 #include "map.h"
+#include "tool.h"
 #include "sound.h"
 #include "input.h"
 #include "astar.h"
@@ -108,8 +109,14 @@ static void handle_mob_click(const bool left_click) {
         if (!mobs[i].is_dead && block_control_selected_x >= mobs[i].x && block_control_selected_x < mobs[i].x + MOB_SPRITE_WIDTH &&
             block_control_selected_y >= mobs[i].y && block_control_selected_y < mobs[i].y + MOB_SPRITE_HEIGHT) {
             //데미지 입히는 부분
-            mobs[i].HP -= player.attack_power;
-            create_mob_damage_text(i, player.attack_power);
+            int extra = 0;
+            const player_item_t * const pItem = inventory.pHotbar[inventory.selected_hotbar_index].pPlayer_Item;
+            if (pItem)
+                extra = tool_get_damage_to_mob(pItem->item_DB_index);
+
+            const int total_attack = player.attack_power + extra;
+            mobs[i].HP -= total_attack;
+            create_mob_damage_text(i, total_attack);
             sound_play_sound_effect(PLAYER_SOUND_SWING);
 
             if (mobs[i].HP > 0)

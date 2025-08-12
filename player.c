@@ -136,14 +136,14 @@ void player_initialize(void) {
         player.x = pSave_current->x;
         player.y = pSave_current->y;
         player.HP = pSave_current->HP;
+        player.max_HP = pSave_current->max_HP;
     } else {
         player.x = map.size.x / 2;
         player.y = player_find_ground_position(player.x);
         if (player.y - 1 >= 0)
             --player.y; //가능할 시 찾은 블록 위로 설정
 
-        player.max_HP = 1000;
-        player.HP = 1000; //초기 체력
+        player.HP = player.max_HP = 1000;
     }
 
     player.attack_power = 10;
@@ -506,4 +506,5 @@ void player_save(void) {
     pSave_current->x = player.x;
     pSave_current->y = player.y;
     pSave_current->HP = player.HP;
+    pSave_current->max_HP = player.max_HP;
 }

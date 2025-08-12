@@ -16,14 +16,15 @@
 #include "block_control.h"
 
 typedef enum {
-    AMBIENT_BGM_NONE, //BGM이 없거나, 보스전 등 다른 BGM이 재생 중인 상태
+    AMBIENT_BGM_NONE,
     AMBIENT_BGM_DAY, //낮 BGM 재생 중
-    AMBIENT_BGM_NIGHT //밤 BGM 재생 중
+    AMBIENT_BGM_NIGHT, //밤 BGM 재생 중
+    AMBIENT_BGM_BOSS
 } ambient_BGM_state_t;
 
 bool game_exit = false;
 
-static ambient_BGM_state_t current_bgm_state = AMBIENT_BGM_DAY;
+static ambient_BGM_state_t current_BGM_state = AMBIENT_BGM_NONE;
 
 #if _DEBUG
 static void render_debug_text(void) {
@@ -53,14 +54,13 @@ static void render_debug_text(void) {
 
 static void render(void) {
     map_render();
-    player_render();
-    block_control_render();
-
     if (boss_spawned)
         boss_render();
     else
         mob_render();
+    player_render();
 
+    block_control_render();
     inventory_render();
     date_time_render();
     save_render();
@@ -73,6 +73,7 @@ static void render(void) {
 
 void game_initialize(void) {
     game_exit = boss_spawned = false;
+    current_BGM_state = AMBIENT_BGM_NONE;
 
     date_time_initialize();
     map_create();
@@ -84,22 +85,23 @@ void game_initialize(void) {
     save_free();
 }
 
-static void update_ambient_bgm(void) {
+static void update_BGM(void) {
     if (boss_spawned) {
-        current_bgm_state = AMBIENT_BGM_NONE;
-        return;
-    }
-
+        if (current_BGM_state != AMBIENT_BGM_BOSS) {
+            sound_play_BGM("boss");
+            current_BGM_state = AMBIENT_BGM_BOSS;
+        }
+    } else if (current_BGM_state == AMBIENT_BGM_BOSS)
+        current_BGM_state = AMBIENT_BGM_NONE;
+    
     if (date_time_is_night()) { //밤일때
-        if (current_bgm_state != AMBIENT_BGM_NIGHT) {
+        if (current_BGM_state != AMBIENT_BGM_NIGHT) {
             sound_play_BGM("night");
-            current_bgm_state = AMBIENT_BGM_NIGHT;
+            current_BGM_state = AMBIENT_BGM_NIGHT;
         }
-    } else { //낮일때
-        if (current_bgm_state != AMBIENT_BGM_DAY) {
-            sound_play_BGM("day");
-            current_bgm_state = AMBIENT_BGM_DAY;
-        }
+    } else if (current_BGM_state != AMBIENT_BGM_DAY) { //낮일때
+        sound_play_BGM("day");
+        current_BGM_state = AMBIENT_BGM_DAY;
     }
 }
 
@@ -110,7 +112,7 @@ void game_update(void) {
         console_update();
         input_update();
         date_time_update();
-        update_ambient_bgm();
+        update_BGM();
 
         player_update();
 

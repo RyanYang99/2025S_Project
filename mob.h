@@ -2,7 +2,7 @@
 
 #include <stdbool.h>
 
-#define MAX_MOB 50
+#define MAX_MOB 5
 #define MAX_MOB_DEBUG_MESSAGE_LEN 100
 #define MAX_MOB_DAMAGE_TEXTS 20
 

@@ -11,6 +11,8 @@
 #include "date_time.h"
 #include "item_database.h"
 
+#include "input.h"
+
 typedef enum {
     BIOME_PLAINS,
     BIOME_SNOWY_MOUNTAINS,
