@@ -1,35 +1,24 @@
-#pragma once
+﻿#pragma once
 
 typedef enum {
+    PLAYER_SOUND_FOOTSTEP,
+    PLAYER_SOUND_SWING,
+    PLAYER_SOUND_HURT,
+
+    MONSTER_SOUND_ATTACK,
+    MONSTER_SOUND_HURT,
+    MONSTER_SOUND_DEATH,
+
     BOSS_SOUND_SPAWN,
     BOSS_SOUND_HURT,
     BOSS_SOUND_HOWLING,
     BOSS_SOUND_MISSILE,
-    BOSS_SOUND_LAZER
+    BOSS_SOUND_LASER
+} sound_effect_t;
 
-} boss_sound_type_t;
+void sound_initialize(void);
+void sound_destroy(void);
 
-void Sound_init();
-void Sound_playBGM(const char* filename);
-void Sound_shutdown();
-void Sound_playFootstep();
-void Sound_playSwing();
-void Sound_playMenuBGM(const char* filename);
-void Sound_playMosterAttack();
-void Sound_playPlayerHurt();
-void Sound_PushBGM(const char* new_bgm_filename);
-void Sound_PopBGM();
-void Sound_playBossSound(boss_sound_type_t type);
+void sound_play_BGM(const char * const pFile_name);
 
-
-
-
-
-
-//#ifndef SOUND_H
-//#define SOUND_H
-//
-//PlayBGM();
-//PlayStartMenuBGM();
-//
-//#endif
+void sound_play_sound_effect(const sound_effect_t sound_effect);

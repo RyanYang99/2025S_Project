@@ -3,6 +3,7 @@
 
 #include <conio.h>
 #include <Windows.h>
+
 #include "console.h"
 
 #define CALLBACK_CALLBACKS_NAME(type) p##type##_callbacks
@@ -29,53 +30,52 @@ static int CALLBACK_COUNT_NAME(type)
     CALLBACK_CALLBACKS_NAME(type) = NULL; \
     CALLBACK_COUNT_NAME(type) = 0
 
-    bool keyboard_pressed = false;
-char input_character = 0;
+bool keyboard_pressed = false;
+char input_character = 0, input_special_character = 0;
 
 static HANDLE input_handle = NULL;
 static DWORD original_mode = 0;
 static HHOOK hook = NULL;
 
-CALLBACK_VARIABLES(mouse_click_t);
-CALLBACK_VARIABLES(mouse_position_t);
-CALLBACK_VARIABLES(mouse_in_console_t);
-//CALLBACK_VARIABLES(mouse_click_with_pos_t);
+CALLBACK_VARIABLES(input_mouse_click_t);
+CALLBACK_VARIABLES(input_mouse_position_t);
+CALLBACK_VARIABLES(input_mouse_in_console_t);
 
 static void mouse_click_callback(const bool left) {
-    for (int i = 0; i < CALLBACK_COUNT_NAME(mouse_click_t); ++i)
-        if (CALLBACK_CALLBACKS_NAME(mouse_click_t)[i])
-            CALLBACK_CALLBACKS_NAME(mouse_click_t)[i](left);
+    for (int i = 0; i < CALLBACK_COUNT_NAME(input_mouse_click_t); ++i)
+        if (CALLBACK_CALLBACKS_NAME(input_mouse_click_t)[i])
+            CALLBACK_CALLBACKS_NAME(input_mouse_click_t)[i](left);
 }
 
 static void mouse_position_callback(const COORD position) {
-    for (int i = 0; i < CALLBACK_COUNT_NAME(mouse_position_t); ++i)
-        if (CALLBACK_CALLBACKS_NAME(mouse_position_t)[i])
-            CALLBACK_CALLBACKS_NAME(mouse_position_t)[i](position);
+    for (int i = 0; i < CALLBACK_COUNT_NAME(input_mouse_position_t); ++i)
+        if (CALLBACK_CALLBACKS_NAME(input_mouse_position_t)[i])
+            CALLBACK_CALLBACKS_NAME(input_mouse_position_t)[i](position);
 }
 
 static void mouse_in_console_callback(const bool in_console) {
-    for (int i = 0; i < CALLBACK_COUNT_NAME(mouse_in_console_t); ++i)
-        if (CALLBACK_CALLBACKS_NAME(mouse_in_console_t)[i])
-            CALLBACK_CALLBACKS_NAME(mouse_in_console_t)[i](in_console);
+    for (int i = 0; i < CALLBACK_COUNT_NAME(input_mouse_in_console_t); ++i)
+        if (CALLBACK_CALLBACKS_NAME(input_mouse_in_console_t)[i])
+            CALLBACK_CALLBACKS_NAME(input_mouse_in_console_t)[i](in_console);
 }
 
 static LRESULT CALLBACK LowLevelMouseProc(const int nCode, const WPARAM wParam, const LPARAM lParam) {
     if (nCode == HC_ACTION) {
         const POINT point = ((MSLLHOOKSTRUCT *)lParam)->pt;
-        mouse_position_callback(convert_monitor_to_console(point));
+        mouse_position_callback(console_convert_from_monitor(point));
 
         if (wParam == WM_LBUTTONUP)
             mouse_click_callback(true);
         else if (wParam == WM_RBUTTONUP)
             mouse_click_callback(false);
 
-        mouse_in_console_callback(is_cursor_inside_console(point));
+        mouse_in_console_callback(console_is_cursor_inside(point));
     }
 
     return CallNextHookEx(NULL, nCode, wParam, lParam);
 }
 
-void initialize_input_handler(void) {
+void input_initialize(void) {
     input_handle = GetStdHandle(STD_INPUT_HANDLE);
     GetConsoleMode(input_handle, &original_mode);
     SetConsoleMode(input_handle, ENABLE_EXTENDED_FLAGS | ENABLE_MOUSE_INPUT);
@@ -83,75 +83,73 @@ void initialize_input_handler(void) {
     hook = SetWindowsHookEx(WH_MOUSE_LL, LowLevelMouseProc, NULL, 0);
 }
 
-void handle_windows_messages(void) {
+void input_update(void) {
     MSG msg = { 0 };
     while (PeekMessage(&msg, NULL, WM_MOUSEFIRST, WM_MOUSELAST, PM_REMOVE)) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
-}
-
-void update_input(void) {
-    handle_windows_messages();
 
     keyboard_pressed = _kbhit();
-    if (keyboard_pressed)
-        input_character = (char)_getch();
+    if (keyboard_pressed) {
+        const int key = _getch();
+
+        input_character = (char)key;
+        if (!key || key == 0xE0)
+            input_special_character = (char)_getch();
+        else
+            input_special_character = 0;
+    }
 }
 
-
-
-
-// GetAsyncKeyState를 사용하여 키의 현재 상태를 반환
-// 0x8000 비트가 설정되어 있으면 키가 현재 눌려있다는 의미
-bool is_key_down(int virtual_key_code)
-{
-    return (GetAsyncKeyState(virtual_key_code) & 0x8000) != 0;
-}
-
-void destroy_input_handler(void)
-{
+void input_destroy(void) {
     SetConsoleMode(input_handle, original_mode);
 
-    CALLBACK_DESTROY(mouse_click_t);
-    CALLBACK_DESTROY(mouse_position_t);
-    CALLBACK_DESTROY(mouse_in_console_t);
-
+    CALLBACK_DESTROY(input_mouse_click_t);
+    CALLBACK_DESTROY(input_mouse_position_t);
+    CALLBACK_DESTROY(input_mouse_in_console_t);
 
     UnhookWindowsHookEx(hook);
 }
 
-void subscribe_mouse_click(const mouse_click_t callback) {
-    CALLBACK_SUBSCRIBE_IMPLEMENTATION(mouse_click_t);
+/*
+    GetAsyncKeyState를 사용하여 키의 현재 상태를 반환
+    0x8000 비트가 설정되어 있으면 키가 현재 눌려있다는 의미
+*/
+const bool is_key_down(const int virtual_key_code) {
+    return GetAsyncKeyState(virtual_key_code) & 0x8000;
 }
 
-void unsubscribe_mouse_click(const mouse_click_t callback) {
-    CALLBACK_UNSUBSCRIBE_IMPLEMENTATION(mouse_click_t);
+void input_subscribe_mouse_click(const input_mouse_click_t callback) {
+    CALLBACK_SUBSCRIBE_IMPLEMENTATION(input_mouse_click_t);
 }
 
-void subscribe_mouse_position(const mouse_position_t callback) {
-    CALLBACK_SUBSCRIBE_IMPLEMENTATION(mouse_position_t);
+void input_unsubscribe_mouse_click(const input_mouse_click_t callback) {
+    CALLBACK_UNSUBSCRIBE_IMPLEMENTATION(input_mouse_click_t);
 }
 
-void unsubscribe_mouse_position(const mouse_position_t callback) {
-    CALLBACK_UNSUBSCRIBE_IMPLEMENTATION(mouse_position_t);
+void input_subscribe_mouse_position(const input_mouse_position_t callback) {
+    CALLBACK_SUBSCRIBE_IMPLEMENTATION(input_mouse_position_t);
 }
 
-void subscribe_mouse_in_console(const mouse_in_console_t callback) {
-    CALLBACK_SUBSCRIBE_IMPLEMENTATION(mouse_in_console_t);
+void input_unsubscribe_mouse_position(const input_mouse_position_t callback) {
+    CALLBACK_UNSUBSCRIBE_IMPLEMENTATION(input_mouse_position_t);
 }
 
-void unsubscribe_mouse_in_console(const mouse_in_console_t callback) {
-    CALLBACK_UNSUBSCRIBE_IMPLEMENTATION(mouse_in_console_t);
+void input_subscribe_mouse_in_console(const input_mouse_in_console_t callback) {
+    CALLBACK_SUBSCRIBE_IMPLEMENTATION(input_mouse_in_console_t);
 }
 
+void input_unsubscribe_mouse_in_console(const input_mouse_in_console_t callback) {
+    CALLBACK_UNSUBSCRIBE_IMPLEMENTATION(input_mouse_in_console_t);
+}
 
 #if _DEBUG
-void pause_hook(void) {
+void input_pause_hook(void) {
     UnhookWindowsHookEx(hook);
 }
 
-void resume_hook(void) {
+void input_resume_hook(void) {
     hook = SetWindowsHookEx(WH_MOUSE_LL, LowLevelMouseProc, NULL, 0);
 }
 #endif

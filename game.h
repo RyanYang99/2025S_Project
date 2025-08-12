@@ -3,10 +3,7 @@
 #include <stdbool.h>
 
 extern bool game_exit;
-extern bool is_boss_spawned;
-extern int selected_item_type;
 
-
-void initialize_game(void);
-void run_game(void);
-void destroy_game(void);
+void game_initialize(void);
+void game_update(void);
+void game_destroy(void);

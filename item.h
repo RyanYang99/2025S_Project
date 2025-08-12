@@ -8,5 +8,5 @@ typedef enum {
     ITEM_HEALTH_POTION = 402
 } item_t;
 
-const bool use_item(const item_t item);
-const color_tchar_t get_item_texture(const item_t item, const int x, const int y);
+const bool item_use(const item_t item);
+const color_character_t item_get_texture(const item_t item, const int x, const int y);

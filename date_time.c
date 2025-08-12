@@ -1,7 +1,6 @@
 ﻿#include "leak.h"
 #include "date_time.h"
 
-#include <math.h>
 #include "save.h"
 #include "delta.h"
 #include "console.h"
@@ -9,9 +8,9 @@
 
 date_time_t date_time_elapsed_since_start = { 0 };
 
-void initialize_date_time(void) {
-    if (pCurrent_save)
-        date_time_elapsed_since_start = pCurrent_save->game_time;
+void date_time_initialize(void) {
+    if (pSave_current)
+        date_time_elapsed_since_start = pSave_current->game_time;
     else {
         date_time_elapsed_since_start.second = 0.0f;
         date_time_elapsed_since_start.minute = date_time_elapsed_since_start.day = 0;
@@ -19,10 +18,9 @@ void initialize_date_time(void) {
     }
 }
 
-void update_date_time(void) {
-    //date_time_elapsed_since_start.second += delta_time * (86400.0f / 1200.0f); //1일당 게임 초 / 1일당 실제 초
-    //test
-    date_time_elapsed_since_start.second += delta_time * (86400.0f / 60.0f); //1일당 게임 초 / 1일당 실제 초
+void date_time_update(void) {
+    date_time_elapsed_since_start.second += delta_time * (86400.0f / 1200.0f); //1일당 게임 초 / 1일당 실제 초
+    //date_time_elapsed_since_start.second += delta_time * (86400.0f / 60.0f);
 
     if (date_time_elapsed_since_start.second >= 60.0f) {
         const int minutes = (int)(date_time_elapsed_since_start.second / 60.0f);
@@ -42,7 +40,7 @@ void update_date_time(void) {
     }
 }
 
-void render_time(void) {
+void date_time_render(void) {
     static float blink = 0.0f;
     static char* pBlink = " ";
     blink += delta_time;
@@ -53,38 +51,32 @@ void render_time(void) {
     else if (blink >= 1.0f)
         pBlink = ":";
 
-    char* const pDay = format_string("Day %d", date_time_elapsed_since_start.day),
-        * const pTime = format_string("%02d%s%02d", date_time_elapsed_since_start.hour, pBlink, date_time_elapsed_since_start.minute);
+    char * const pDay = format_string("Day %d", date_time_elapsed_since_start.day),
+         * const pTime = format_string("%02d%s%02d", date_time_elapsed_since_start.hour, pBlink, date_time_elapsed_since_start.minute);
 
     COORD position = {
-        .X = (SHORT)(console.size.X - strlen(pDay))
+        .X = (SHORT)(console_size.X - strlen(pDay))
     };
-    fprint_string(pDay, position, BACKGROUND_T_BLACK, FOREGROUND_T_WHITE);
+    console_fprint_string(pDay, position, BACKGROUND_T_BLACK, FOREGROUND_T_WHITE);
 
-    position.X = (SHORT)(console.size.X - strlen(pTime));
+    position.X = (SHORT)(console_size.X - strlen(pTime));
     ++position.Y;
-    fprint_string(pTime, position, BACKGROUND_T_BLACK, FOREGROUND_T_WHITE);
+    console_fprint_string(pTime, position, BACKGROUND_T_BLACK, FOREGROUND_T_WHITE);
 
     free(pDay);
     free(pTime);
 }
 
-void save_date_time(void) {
-    if (!pCurrent_save)
-        instantiate_save();
+const bool date_time_is_night(void) {
+    const int current_hour = date_time_elapsed_since_start.hour;
 
-    pCurrent_save->game_time = date_time_elapsed_since_start;
-}
-
-int get_current_hour()
-{
-    return date_time_elapsed_since_start.hour;
-}
-
-bool is_night_time()
-{
-    int current_hour = get_current_hour();
-
-    //21시부터 6시까지 밤시간 
+    //21시부터 6시까지 밤시간
     return (current_hour >= 21 || current_hour <= 6);
+}
+
+void date_time_save(void) {
+    if (!pSave_current)
+        save_instantiate();
+
+    pSave_current->game_time = date_time_elapsed_since_start;
 }
