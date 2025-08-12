@@ -24,7 +24,7 @@ const direction_t astar_find_next_direction(const int start_x,
     if (start_x == target_x && start_y == target_y)
         return DIRECTION_NONE;
 
-    if (map.size.x != allocated_x) {
+    if (map.size.x != allocated_x || !ppOpen_list || !ppClosed_list) {
         allocated_x = map.size.x;
 
         const int size = sizeof(node_t *) * allocated_x * map.size.y;
@@ -139,5 +139,8 @@ const direction_t astar_find_next_direction(const int start_x,
 
 void astar_destroy(void) {
     free(ppOpen_list);
+    ppOpen_list = NULL;
+
     free(ppClosed_list);
+    ppClosed_list = NULL;
 }
