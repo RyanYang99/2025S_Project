@@ -43,6 +43,10 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LibraryPath>C:\Users\Administrator\source\repos\Project_codeblack_main\2025S_Project\libs\lib\msvc;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\Administrator\source\repos\Project_codeblack_main\2025S_Project\libs\include;C:\Users\Administrator\source\repos\Project_codeblack_main\2025S_Project\libs\lib\msvc;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
@@ -50,11 +54,19 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\CSFML\include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>csfml-audio.lib;openal32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)libs\CSFML\lib\msvc</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(ProjectDir)libs\CSFML\dll\*.dll" "$(TargetDir)" /Y /D</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -67,43 +79,52 @@
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(SolutionDir)libs\CSFML\include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>csfml-audio.lib;openal32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)libs\CSFML\lib\msvc</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy "$(ProjectDir)libs\CSFML\dll\*.dll" "$(TargetDir)" /Y /D</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="astar.c" />
-    <ClCompile Include="BlockCtrl.c" />
-    <ClCompile Include="BossMalakh.c" />
+    <ClCompile Include="block_control.c" />
+    <ClCompile Include="boss_malakh.c" />
     <ClCompile Include="console.c" />
-    <ClCompile Include="Crafting_UI.c" />
+    <ClCompile Include="crafting_UI.c" />
     <ClCompile Include="delta.c" />
     <ClCompile Include="formatter.c" />
     <ClCompile Include="game.c" />
     <ClCompile Include="input.c" />
     <ClCompile Include="inventory.c" />
     <ClCompile Include="item.c" />
-    <ClCompile Include="ItemDB.c" />
+    <ClCompile Include="item_database.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="main_menu.c" />
     <ClCompile Include="map.c" />
-    <ClCompile Include="Mob.c" />
+    <ClCompile Include="mob.c" />
     <ClCompile Include="perlin.c" />
     <ClCompile Include="player.c" />
+    <ClCompile Include="sound.c" />
     <ClCompile Include="date_time.c" />
     <ClCompile Include="save.c" />
-    <ClCompile Include="Tool.c" />
+    <ClCompile Include="tool.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="astar.h" />
-    <ClInclude Include="BlockCtrl.h" />
-    <ClInclude Include="BossMalakh.h" />
+    <ClInclude Include="block_control.h" />
+    <ClInclude Include="boss_malakh.h" />
     <ClInclude Include="console.h" />
-    <ClInclude Include="Crafting_UI.h" />
+    <ClInclude Include="crafting_UI.h" />
     <ClInclude Include="date_time.h" />
     <ClInclude Include="delta.h" />
     <ClInclude Include="formatter.h" />
@@ -111,20 +132,20 @@
     <ClInclude Include="input.h" />
     <ClInclude Include="inventory.h" />
     <ClInclude Include="item.h" />
-    <ClInclude Include="ItemDB.h" />
+    <ClInclude Include="item_database.h" />
     <ClInclude Include="leak.h" />
     <ClInclude Include="main_menu.h" />
     <ClInclude Include="map.h" />
-    <ClInclude Include="Mob.h" />
+    <ClInclude Include="mob.h" />
     <ClInclude Include="perlin.h" />
     <ClInclude Include="player.h" />
+    <ClInclude Include="sound.h" />
     <ClInclude Include="save.h" />
-    <ClInclude Include="Tool.h" />
+    <ClInclude Include="tool.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="base_recipes.csv" />
+    <None Include="recipes.csv" />
     <None Include="items.csv" />
-    <None Include="workbench_recipes.csv" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

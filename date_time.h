@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <stdbool.h>
+
 typedef struct {
     int day, hour, minute;
     float second;
@@ -7,9 +9,9 @@ typedef struct {
 
 extern date_time_t date_time_elapsed_since_start;
 
-void initialize_date_time(void);
+void date_time_initialize(void);
+void date_time_update(void);
+void date_time_render(void);
 
-void update_date_time(void);
-void render_time(void);
-
-void save_date_time(void);
+const bool date_time_is_night(void);
+void date_time_save(void);

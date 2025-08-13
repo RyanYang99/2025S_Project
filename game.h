@@ -4,6 +4,6 @@
 
 extern bool game_exit;
 
-void initialize_game(void);
-void run_game(void);
-void destroy_game(void);
+void game_initialize(void);
+void game_update(void);
+void game_destroy(void);

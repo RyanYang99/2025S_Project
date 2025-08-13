@@ -1,8 +1,7 @@
 ﻿#pragma once
 
-#include "Mob.h"
+#include "mob.h"
 #include "map.h"
-#include "player.h"
 #include "perlin.h"
 #include "inventory.h"
 #include "date_time.h"
@@ -13,7 +12,7 @@
 typedef struct {
     date_time_t game_time;
 
-    int x, y, hp;
+    int x, y, HP, max_HP;
 
     player_item_t pInventory[INVENTORY_SIZE];
     int pHotbar_linked_index[HOTBAR_COUNT];
@@ -22,22 +21,19 @@ typedef struct {
     block_info_t *pBlocks;
 
     int mob_count, mob_level;
-    Mob *pMobs;
+    mob_t *pMobs;
 } save_t;
 #pragma pack(pop)
 
-extern save_t *pCurrent_save;
+extern save_t *pSave_current;
 
-void initialize_save(void);
-void instantiate_save(void);
-
+void save_initialize(void);
 void save_input(void);
-void render_save_menu(void);
+void save_render(void);
 
+void save_instantiate(void);
+const LPCWSTR get_save_folder(void);
+const bool * const get_save_spots(void);
 void load_save_index(const int index);
 
-const LPCWSTR get_save_folder(void);
-
-bool *get_save_spots(void);
-
-void free_save(void);
+void save_free(void);
