@@ -125,6 +125,7 @@ static void player_swing_tool(void) {
 static void handle_player_actions(const bool is_left_click) {
     if (is_left_click)
         player_swing_tool();
+    sound_play_sound_effect(PLAYER_SOUND_SWING);
 }
 
 static void update_player_offset(void) {
