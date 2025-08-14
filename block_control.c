@@ -8,6 +8,7 @@
 #include "player.h"
 #include "inventory.h"
 #include "boss_malakh.h"
+#include "sound.h"
 
 int block_control_selected_x = 0, block_control_selected_y = 0;
 
@@ -85,6 +86,9 @@ static void handle_mouse_click(const bool left) {
                 boss_initialize(boss_spawn_x, boss_spawn_y, 100, 10);
                 boss_spawned = true;
 
+                sound_play_sound_effect(BOSS_SOUND_SPAWN);
+                
+                
                 inventory_decrement_item(pEquipped);
             }
         }
