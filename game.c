@@ -83,6 +83,7 @@ void game_initialize(void) {
     inventory_initialize();
     save_initialize();
     save_free();
+    inventory_add_item(110, 1);
 }
 
 static void update_BGM(void) {
@@ -91,17 +92,22 @@ static void update_BGM(void) {
             sound_play_BGM("boss");
             current_BGM_state = AMBIENT_BGM_BOSS;
         }
-    } else if (current_BGM_state == AMBIENT_BGM_BOSS)
+        return;
+    }
+    else if (current_BGM_state == AMBIENT_BGM_BOSS)
         current_BGM_state = AMBIENT_BGM_NONE;
-    
+
     if (date_time_is_night()) { //밤일때
         if (current_BGM_state != AMBIENT_BGM_NIGHT) {
             sound_play_BGM("night");
             current_BGM_state = AMBIENT_BGM_NIGHT;
         }
-    } else if (current_BGM_state != AMBIENT_BGM_DAY) { //낮일때
-        sound_play_BGM("day");
-        current_BGM_state = AMBIENT_BGM_DAY;
+    }
+    else {
+        if (current_BGM_state != AMBIENT_BGM_DAY) { //낮일때
+            sound_play_BGM("day");
+            current_BGM_state = AMBIENT_BGM_DAY;
+        }
     }
 }
 
