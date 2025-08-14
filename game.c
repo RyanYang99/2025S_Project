@@ -83,7 +83,6 @@ void game_initialize(void) {
     inventory_initialize();
     save_initialize();
     save_free();
-    inventory_add_item(110, 1);
 }
 
 static void update_BGM(void) {
