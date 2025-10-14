@@ -1,13 +1,13 @@
 ﻿#include "leak.hpp"
-#include "tool.h"
+#include "tool.hpp"
 
 #include <stdbool.h>
 
 #include "map.hpp"
-#include "item.h"
-#include "player.h"
-#include "inventory.h"
-#include "item_database.h"
+#include "item.hpp"
+#include "player.hpp"
+#include "inventory.hpp"
+#include "item_database.hpp"
 
 static const color_character_t pWooden_sword[TEXTURE_SIZE][TEXTURE_SIZE] = {
     { { ' ', 0, BACKGROUND_T_TRANSPARENT }, { ' ', FOREGROUND_T_BLACK, BACKGROUND_T_YELLOW }, { ' ', 0, BACKGROUND_T_TRANSPARENT } },
@@ -268,7 +268,7 @@ const color_character_t tool_get_texture(const tool_t tool, const int x, const i
             return pIron_shovel[y][x];
     }
 
-    return (color_character_t){ 0 };
+    return {};
 }
 
 //스윙 텍스처 반환
@@ -311,5 +311,5 @@ const color_character_t tool_get_swing_texture(const tool_t tool, const int x, c
             return pIron_shovel_swing[y][x];
     }
 
-    return (color_character_t) { 0 };
+    return {};
 }

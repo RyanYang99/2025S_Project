@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "console.h"
+#include "console.hpp"
 
 typedef enum {
     ITEM_NONE = 0,

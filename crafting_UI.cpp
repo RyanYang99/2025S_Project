@@ -1,14 +1,16 @@
-﻿#include "leak.hpp"
-#include "crafting_UI.h"
+﻿#define _CRT_SECURE_NO_WARNINGS
+
+#include "leak.hpp"
+#include "crafting_UI.hpp"
 
 #include <stdio.h>
 #include <stdbool.h>
 
 #include "map.hpp"
-#include "input.h"
-#include "player.h"
-#include "inventory.h"
-#include "item_database.h"
+#include "input.hpp"
+#include "player.hpp"
+#include "inventory.hpp"
+#include "item_database.hpp"
 
 #define MATERIAL_STRING_COUNT 128
 #define CRAFTING_MAX_RECIPES 64
@@ -124,7 +126,7 @@ static void craft_selected_recipe(void) {
                 pItem->quantity -= to_remove;
                 remaining -= to_remove;
                 if (pItem->quantity <= 0)
-                    *pItem = (player_item_t){ 0 };
+                    *pItem = {};
             }
         }
     }
@@ -133,13 +135,13 @@ static void craft_selected_recipe(void) {
 }
 
 void crafting_UI_input(void) {
-    if (!keyboard_pressed)
+    if (!Input::keyboard_pressed())
         return;
 
-    const char lower = (char)tolower(input_character);
-    if (input_special_character == INPUT_UP && selected_recipe_index > 0)
+    const char lower = (char)tolower(Input::input_character()), input_special_character{ Input::input_special_character() };
+    if (input_special_character == InputDirection::up && selected_recipe_index > 0)
         --selected_recipe_index;
-    else if (input_special_character == INPUT_DOWN && selected_recipe_index < (is_workbench_nearby() ? recipe_count - 1 : without_workbench_count - 1))
+    else if (input_special_character == InputDirection::down && selected_recipe_index < (is_workbench_nearby() ? recipe_count - 1 : without_workbench_count - 1))
         ++selected_recipe_index;
     else if (lower == 'e')
         craft_selected_recipe();

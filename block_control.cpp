@@ -1,14 +1,18 @@
 ﻿#include "leak.hpp"
-#include "block_control.h"
+#include "block_control.hpp"
 
-#include <math.h>
+#include <cmath>
+#include <cstdlib>
 
-#include "tool.h"
-#include "input.h"
-#include "player.h"
-#include "inventory.h"
-#include "boss_malakh.h"
-#include "sound.h"
+#include "map.hpp"
+#include "tool.hpp"
+#include "sound.hpp"
+#include "input.hpp"
+#include "player.hpp"
+#include "console.hpp"
+#include "inventory.hpp"
+#include "boss_malakh.hpp"
+#include "item_database.hpp"
 
 int block_control_selected_x = 0, block_control_selected_y = 0;
 
@@ -79,7 +83,7 @@ static void handle_mouse_click(const bool left) {
 
     if (pEquipped->item_DB_index == BLOCK_SEED_OF_MALAKH) {
         if (!boss_spawned) {
-            if (map_set_block(block_control_selected_x, block_control_selected_y, pItem_information->index)) {
+            if (map_set_block(block_control_selected_x, block_control_selected_y, static_cast<block_t>(pItem_information->index))) {
 
                 const int boss_spawn_y = block_control_selected_y - BOSS_SPRITE_HEIGHT;
                 const int boss_spawn_x = block_control_selected_x;
@@ -94,7 +98,7 @@ static void handle_mouse_click(const bool left) {
         }
     } else if (pItem_information->is_placeable &&
         tool_can_place_block(block_control_selected_x, block_control_selected_y) &&
-        map_set_block(block_control_selected_x, block_control_selected_y, pItem_information->index))
+        map_set_block(block_control_selected_x, block_control_selected_y, static_cast<block_t>(pItem_information->index)))
         inventory_decrement_item(pEquipped);
 }
 
@@ -117,9 +121,9 @@ static void handle_in_console(const bool in_console) {
 
 //초기화 및 해제
 void block_control_initialize(void) {
-    input_subscribe_mouse_click(handle_mouse_click);
-    input_subscribe_mouse_position(handle_mouse_move);
-    input_subscribe_mouse_in_console(handle_in_console);
+    Input::subscribe_input_mouse_click(handle_mouse_click);
+    Input::subscribe_input_mouse_position(handle_mouse_move);
+    Input::subscribe_input_mouse_in_console(handle_in_console);
 }
 
 //가상 커서 렌더링 (모서리 스타일)
@@ -137,21 +141,17 @@ void block_control_render(void) {
     } else if (cursor_out_of_range)
         color = FOREGROUND_T_RED;
 
-    color_character_t character = {
-        .character = L'■',
-        .background = BACKGROUND_T_BLACK,
-        .foreground = color
-    };
+    color_character_t character { L'■', BACKGROUND_T_BLACK, color };
 
     //각 모서리에 문자를 출력
-    console_print_color_character(character, (COORD) { (SHORT)draw_x, (SHORT)draw_y });
-    console_print_color_character(character, (COORD) { (SHORT)(draw_x + TEXTURE_SIZE - 1), (SHORT)draw_y });
-    console_print_color_character(character, (COORD) { (SHORT)draw_x, (SHORT)(draw_y + TEXTURE_SIZE - 1) });
-    console_print_color_character(character, (COORD) { (SHORT)(draw_x + TEXTURE_SIZE - 1), (SHORT)(draw_y + TEXTURE_SIZE - 1) });
+    console_print_color_character(character, { (SHORT)draw_x, (SHORT)draw_y });
+    console_print_color_character(character, { (SHORT)(draw_x + TEXTURE_SIZE - 1), (SHORT)draw_y });
+    console_print_color_character(character, { (SHORT)draw_x, (SHORT)(draw_y + TEXTURE_SIZE - 1) });
+    console_print_color_character(character, { (SHORT)(draw_x + TEXTURE_SIZE - 1), (SHORT)(draw_y + TEXTURE_SIZE - 1) });
 }
 
 void block_control_destroy(void) {
-    input_unsubscribe_mouse_click(handle_mouse_click);
-    input_unsubscribe_mouse_position(handle_mouse_move);
-    input_unsubscribe_mouse_in_console(handle_in_console);
+    Input::unsubscribe_input_mouse_click(handle_mouse_click);
+    Input::unsubscribe_input_mouse_position(handle_mouse_move);
+    Input::unsubscribe_input_mouse_in_console(handle_in_console);
 }

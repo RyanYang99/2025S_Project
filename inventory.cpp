@@ -1,13 +1,15 @@
 ﻿#include "leak.hpp"
-#include "inventory.h"
+#include "inventory.hpp"
+
+#include <string>
 
 #include "map.hpp"
-#include "save.h"
-#include "item.h"
-#include "tool.h"
-#include "input.h"
-#include "delta.h"
-#include "console.h"
+#include "save.hpp"
+#include "item.hpp"
+#include "tool.hpp"
+#include "input.hpp"
+#include "delta.hpp"
+#include "console.hpp"
 
 #define INVENTORY_BACKGROUND BACKGROUND_T_BLACK
 #define INVENTORY_FOREGROUND FOREGROUND_T_WHITE
@@ -43,7 +45,7 @@ static void handle_mouse_click(const bool left) {
     if (!pItem_info)
         return;
 
-    if (item_use(pItem->item_DB_index))
+    if (item_use(static_cast<item_t>(pItem->item_DB_index)))
         inventory_decrement_item(pItem);
 }
 
@@ -70,15 +72,15 @@ void inventory_initialize(void) {
         }
     }
 
-    input_subscribe_mouse_click(handle_mouse_click);
+    Input::subscribe_input_mouse_click(handle_mouse_click);
 }
 
 //I키 입력시 인벤토리 호출
 void inventory_input(void) {
-    if (!keyboard_pressed)
+    if (!Input::keyboard_pressed())
         return;
 
-    int number = input_character - '0';
+    int number = Input::input_character() - '0';
     const bool is_number = number >= 0 && number <= 9;
     if (number == 0)
         number = max_hotbar_index;
@@ -91,19 +93,20 @@ void inventory_input(void) {
         name_render_timer = 0.0f;
     }
 
-    if (tolower(input_character) == 'i')
+    if (tolower(Input::input_character()) == 'i')
         is_inventory_open = !is_inventory_open;
 
     if (!is_inventory_open)
         return;
 
-    if (input_special_character == INPUT_UP && current_selection_index > 0)
+    const char input_special_character{ Input::input_special_character() };
+    if (input_special_character == InputDirection::up && current_selection_index > 0)
         --current_selection_index;
-    else if (input_special_character == INPUT_DOWN && current_selection_index < max_selection_index)
+    else if (input_special_character == InputDirection::down && current_selection_index < max_selection_index)
         ++current_selection_index;
-    else if (input_special_character == INPUT_LEFT && current_page_index > 0)
+    else if (input_special_character == InputDirection::left && current_page_index > 0)
         --current_page_index;
-    else if (input_special_character == INPUT_RIGHT && current_page_index < max_page_index)
+    else if (input_special_character == InputDirection::right && current_page_index < max_page_index)
         ++current_page_index;
     else if (is_number && number <= max_hotbar_index) {
         const int index = current_page_index * ITEMS_PER_PAGE + current_selection_index;
@@ -185,16 +188,13 @@ static void render_hotbar(void) {
     for (int i = 0; i < HOTBAR_COUNT; ++i) {
         const bool is_selected = (inventory.selected_hotbar_index == i);
         //테두리 색상 (선택 시 밝게, 아니면 어둡게)
-        const WORD border_background = is_selected ? BACKGROUND_T_WHITE : BACKGROUND_T_DARKGRAY;
+        const WORD border_background = static_cast<WORD>(is_selected ? BACKGROUND_T_WHITE : BACKGROUND_T_DARKGRAY);
 
         /*
             1. 테두리 영역 출력
             위, 아래 가로줄 (빈칸 문자 + 테두리 배경색)
         */
-        const color_character_t character = {
-            .character = ' ',
-            .background = border_background,
-        };
+        const color_character_t character { ' ', border_background };
         const int slot_start_x = position.X + i * slot_width, slot_start_y = position.Y;
 
         /*
@@ -202,22 +202,20 @@ static void render_hotbar(void) {
             위, 아래 가로줄 (빈칸 문자 + 테두리 배경색)
         */
         for (int tx = 0; tx < slot_width; ++tx) {
-            console_print_color_character(character, (COORD){ (SHORT)(slot_start_x + tx), (SHORT)slot_start_y });
-            console_print_color_character(character, (COORD){ (SHORT)(slot_start_x + tx), (SHORT)(slot_start_y + slot_height - 1) });
+            console_print_color_character(character, { (SHORT)(slot_start_x + tx), (SHORT)slot_start_y });
+            console_print_color_character(character, { (SHORT)(slot_start_x + tx), (SHORT)(slot_start_y + slot_height - 1) });
         }
 
         //좌, 우 세로줄
         for (int ty = 1; ty < slot_height - 1; ++ty) {
-            console_print_color_character(character, (COORD){ (SHORT)(slot_start_x), (SHORT)(slot_start_y + ty) });
-            console_print_color_character(character, (COORD){ (SHORT)(slot_start_x + slot_width - 1), (SHORT)(slot_start_y + ty) });
+            console_print_color_character(character, { (SHORT)(slot_start_x), (SHORT)(slot_start_y + ty) });
+            console_print_color_character(character, { (SHORT)(slot_start_x + slot_width - 1), (SHORT)(slot_start_y + ty) });
         }
 
         //2. 슬롯 내부 텍스처 출력 (기존 방식과 동일)
         for (int ty = 1; ty < slot_height - 1; ++ty)
             for (int tx = 1; tx < slot_width - 1; ++tx) {
-                color_character_t texture_character = {
-                    .character = ' '
-                };
+                color_character_t texture_character { ' ' };
 
                 if (inventory.pHotbar[i].pPlayer_Item) {
                     const int item_index = inventory.pHotbar[i].pPlayer_Item->item_DB_index;
@@ -230,14 +228,14 @@ static void render_hotbar(void) {
                     const int texture_x = tx - 1, texture_y = ty - 1;
 
                     if (item_type == ITEM_TYPE_MATERIAL)
-                        texture_character = map_get_block_texture(item_index, texture_x, texture_y);
+                        texture_character = map_get_block_texture(static_cast<block_t>(item_index), texture_x, texture_y);
                     else if (item_type == ITEM_TYPE_TOOL)
-                        texture_character = tool_get_texture(item_index, texture_x, texture_y);
+                        texture_character = tool_get_texture(static_cast<tool_t>(item_index), texture_x, texture_y);
                     else if (item_type == ITEM_TYPE_MISC)
-                        texture_character = item_get_texture(item_index, texture_x, texture_y);
+                        texture_character = item_get_texture(static_cast<item_t>(item_index), texture_x, texture_y);
                 }
 
-                console_print_color_character(texture_character, (COORD){ (SHORT)(slot_start_x + tx), (SHORT)(slot_start_y + ty) });
+                console_print_color_character(texture_character, { (SHORT)(slot_start_x + tx), (SHORT)(slot_start_y + ty) });
             }
     }
 }
@@ -277,22 +275,22 @@ void inventory_render(void) {
     position.Y += 2;
     position.X += (SHORT)console_fprint_string("%s", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND, pItem_info->name);
 
-    char *pDescription = "";
+    std::string description{};
     switch (pItem_info->type) {
         case ITEM_TYPE_MATERIAL:
-            pDescription = ": Used in crafting.";
+            description = ": Used in crafting.";
             break;
 
         case ITEM_TYPE_MISC:
-            pDescription = ": Has a special ability.";
+            description = ": Has a special ability.";
             break;
     }
 
-    console_fprint_string("%s", position, INVENTORY_BACKGROUND, FOREGROUND_T_YELLOW, pDescription);
+    console_fprint_string("%s", position, INVENTORY_BACKGROUND, FOREGROUND_T_YELLOW, description.c_str());
 }
 
 void inventory_destroy(void) {
-    input_unsubscribe_mouse_click(handle_mouse_click);
+    Input::unsubscribe_input_mouse_click(handle_mouse_click);
 }
 
 const int inventory_get_count(const int item_DB_index) {

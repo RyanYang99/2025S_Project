@@ -1,17 +1,20 @@
-﻿#include "leak.hpp"
-#include "save.h"
+﻿#define _CRT_SECURE_NO_WARNINGS
+
+#include "leak.hpp"
+#include "save.hpp"
 
 #include <stdio.h>
 #include <string.h>
+#include <string>
 
 #include <ShlObj_core.h>
-#include "game.h"
-#include "input.h"
-#include "delta.h"
-#include "player.h"
+#include "game.hpp"
+#include "input.hpp"
+#include "delta.hpp"
+#include "player.hpp"
 
 static bool should_render_save_menu = false, pUsed[MAX_SAVE_SPOTS] = { 0 };
-static char *pMessage = "";
+static std::string pMessage{};
 
 save_t *pSave_current = NULL;
 
@@ -59,9 +62,10 @@ static void write_save(LPCWSTR const pPath) {
 }
 
 void save_input(void) {
-    if (!keyboard_pressed)
+    if (!Input::keyboard_pressed())
         return;
 
+    const char input_character{ Input::input_character() };
     if (input_character == VK_ESCAPE) {
         if (!should_render_save_menu)
             get_save_spots();
@@ -101,7 +105,7 @@ void save_render(void) {
     if (!should_render_save_menu)
         return;
 
-    const bool has_message = strcmp(pMessage, "");
+    const bool has_message = strcmp(pMessage.c_str(), "");
     if (has_message)
         timer += delta_time;
     if (timer >= 2.0f) {
@@ -120,7 +124,7 @@ void save_render(void) {
 }
 
 void save_instantiate(void) {
-    pSave_current = calloc(1, sizeof(save_t));
+    pSave_current = static_cast<save_t *>(calloc(1, sizeof(save_t)));
 }
 
 LPCWSTR const get_save_folder(void) {
@@ -150,7 +154,7 @@ const bool * const get_save_spots(void) {
 
 static save_t *load_save(LPCWSTR const pPath) {
     FILE *pFile = _wfopen(pPath, L"rb");
-    save_t *pSave = malloc(sizeof(save_t));
+    save_t *pSave = static_cast<save_t *>(malloc(sizeof(save_t)));
 
     fread(&pSave->game_time, sizeof(pSave->game_time), 1, pFile);
     fread(&pSave->x, sizeof(pSave->x), 1, pFile);
@@ -164,13 +168,13 @@ static save_t *load_save(LPCWSTR const pPath) {
     fread(&pSave->map_y, sizeof(pSave->map_y), 1, pFile);
 
     const int size = pSave->map_x * pSave->map_y;
-    pSave->pBlocks = malloc(sizeof(block_info_t) * size);
+    pSave->pBlocks = static_cast<block_info_t *>(malloc(sizeof(block_info_t) * size));
     fread(pSave->pBlocks, sizeof(block_info_t), size, pFile);
 
     fread(&pSave->mob_count, sizeof(pSave->mob_count), 1, pFile);
     fread(&pSave->mob_level, sizeof(pSave->mob_level), 1, pFile);
 
-    pSave->pMobs = malloc(sizeof(mob_t) * pSave->mob_count);
+    pSave->pMobs = static_cast<mob_t *>(malloc(sizeof(mob_t) * pSave->mob_count));
     fread(pSave->pMobs, sizeof(mob_t), pSave->mob_count, pFile);
 
     fclose(pFile);

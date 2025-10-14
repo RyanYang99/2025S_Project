@@ -11,7 +11,7 @@ typedef enum {
 } direction_t;
 
 //이동 가능 여부를 확인하는 함수 포인터 타입을 정의
-typedef const bool (*is_movable_t)(const int x, const int y);
+typedef bool (*is_movable_t)(const int x, const int y);
 
 const direction_t astar_find_next_direction(const int start_x,
                                             const int start_y,

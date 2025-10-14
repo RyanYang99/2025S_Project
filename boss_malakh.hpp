@@ -1,12 +1,8 @@
 ﻿#pragma once
 
-#include <stdbool.h>
+#include "console.hpp"
 
-#include "console.h"
-
-#define BOSS_SPRITE_WIDTH 20
-#define BOSS_SPRITE_HEIGHT 20
-#define BOSS_DRAW_SCALE 3 //렌더링 스케일
+constexpr int BOSS_SPRITE_WIDTH{ 20 }, BOSS_SPRITE_HEIGHT{ 20 }, BOSS_DRAW_SCALE{ 3 };
 
 //보스 상태
 typedef enum {
@@ -18,30 +14,30 @@ typedef enum {
 } boss_state_t;
 
 //보스 구조체
-typedef struct {
-    int x, y, hp, max_hp, atk;
-    boss_state_t state;
+struct boss_malakh_t {
+    int x{}, y{}, hp{}, max_hp{}, atk{};
+    boss_state_t state{};
 
     //델타 타임 기반 타이머와 쿨타임
-    float action_timer, //상태 전환용 타이머
-          missile_timer,
-          horizontal_laser_timer,
-          vertical_laser_timer,
-          missile_attack_cool_time,
-          horizontal_laser_cool_time,
-          vertical_laser_cool_time;
+    float action_timer{}, //상태 전환용 타이머
+          missile_timer{},
+          horizontal_laser_timer{},
+          vertical_laser_timer{},
+          missile_attack_cool_time{},
+          horizontal_laser_cool_time{},
+          vertical_laser_cool_time{};
 
     //레이저 패턴
-    bool is_horizontal_laser_active,
-         is_vertical_laser_active,
-         horizontal_laser_from_right,
-         is_vertical_laser_from_left;
-    int vertical_laser_target_x, horizontal_laser_target_y,
-        current_horizontal_laser_y, current_vertical_laser_x;
-    float horizontal_laser_damage_cool_time, vertical_laser_damage_cool_time;
+    bool is_horizontal_laser_active{},
+         is_vertical_laser_active{},
+         horizontal_laser_from_right{},
+         is_vertical_laser_from_left{};
+    int vertical_laser_target_x, horizontal_laser_target_y{},
+        current_horizontal_laser_y, current_vertical_laser_x{};
+    float horizontal_laser_damage_cool_time, vertical_laser_damage_cool_time{};
 
-    color_character_t pSprite_data[BOSS_SPRITE_HEIGHT][BOSS_SPRITE_WIDTH];
-} boss_malakh_t;
+    color_character_t pSprite_data[BOSS_SPRITE_HEIGHT][BOSS_SPRITE_WIDTH]{};
+};
 
 extern bool boss_spawned;
 extern boss_malakh_t boss;

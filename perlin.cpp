@@ -1,5 +1,5 @@
 ﻿#include "leak.hpp"
-#include "perlin.h"
+#include "perlin.hpp"
 
 #include <math.h>
 #include <stdlib.h>

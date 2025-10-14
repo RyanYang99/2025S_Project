@@ -1,8 +1,8 @@
 ﻿#include "leak.hpp"
-#include "item.h"
+#include "item.hpp"
 
 #include "map.hpp"
-#include "player.h"
+#include "player.hpp"
 
 static const color_character_t pHealth_potion[TEXTURE_SIZE][TEXTURE_SIZE] = {
     { { ' ', BACKGROUND_T_TRANSPARENT, 0 }, { ' ', BACKGROUND_T_WHITE, 0 }, { ' ', BACKGROUND_T_TRANSPARENT, 0 } },
@@ -42,5 +42,5 @@ const color_character_t item_get_texture(const item_t item, const int x, const i
             return pApple[y][x];
     }
 
-    return (color_character_t){ 0 };
+    return {};
 }

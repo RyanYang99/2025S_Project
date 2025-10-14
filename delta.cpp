@@ -1,5 +1,5 @@
 ﻿#include "leak.hpp"
-#include "delta.h"
+#include "delta.hpp"
 
 #include <time.h>
 

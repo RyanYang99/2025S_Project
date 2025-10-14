@@ -2,13 +2,13 @@
 
 #include <stdio.h>
 
-#include "save.h"
-#include "game.h"
-#include "input.h"
-#include "sound.h"
-#include "main_menu.h"
-#include "crafting_UI.h"
-#include "item_database.h"
+#include "save.hpp"
+#include "game.hpp"
+#include "input.hpp"
+#include "sound.hpp"
+#include "main_menu.hpp"
+#include "crafting_UI.hpp"
+#include "item_database.hpp"
 
 static bool force_old_console(void) {
     if (console_is_new_windows_terminal()) {
@@ -24,7 +24,7 @@ static bool force_old_console(void) {
         PROCESS_INFORMATION process_information = { 0 };
 
         const int path_character = (int)wcslen(pArgv[0]) + 4, path_size = sizeof(WCHAR) * path_character;
-        LPWSTR pArgument = calloc(path_size, sizeof(WCHAR));
+        LPWSTR pArgument = static_cast<LPWSTR>(calloc(path_size, sizeof(WCHAR)));
         wcscat_s(pArgument, path_size, L"-- ");
         wcscat_s(pArgument, path_size, pArgv[0]);
 
@@ -76,11 +76,11 @@ int main(void) {
         } else
             save_free();
 
-        input_initialize();
+        Input::initialize();
         game_initialize();
         game_update();
         game_destroy();
-        input_destroy();
+        Input::destroy();
     }
 
     database_destroy();

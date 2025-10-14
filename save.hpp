@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "mob.h"
+#include "mob.hpp"
 #include "map.hpp"
-#include "perlin.h"
-#include "inventory.h"
-#include "date_time.h"
+#include "perlin.hpp"
+#include "inventory.hpp"
+#include "date_time.hpp"
 
 #define MAX_SAVE_SPOTS 3
 

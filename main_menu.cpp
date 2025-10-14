@@ -1,14 +1,16 @@
-﻿#include "leak.hpp"
-#include "main_menu.h"
+﻿#define _CRT_SECURE_NO_WARNINGS
+
+#include "leak.hpp"
+#include "main_menu.hpp"
 
 #include <time.h>
 #include <conio.h>
 
 #include "map.hpp"
-#include "save.h"
-#include "sound.h"
-#include "date_time.h"
-#include "formatter.h"
+#include "save.hpp"
+#include "sound.hpp"
+#include "date_time.hpp"
+#include "formatter.hpp"
 
 #define PRINT_SELECTION(string, y, index, background, foreground) \
     console_print_center("%s%s%s", y + index, background, foreground, selection == index ? selected_left : "", string, selection == index ? selected_right : "")
@@ -54,7 +56,7 @@ const main_menu_state_t main_menu(void) {
 
     int selection = 0;
     while (true) {
-        char **ppLogo = ppLogoSmall;
+        const char **ppLogo = ppLogoSmall;
         int lines = 1;
         if (console_size.Y >= 4 + 3) {
             ppLogo = ppLogoMedium;
@@ -115,7 +117,7 @@ const main_menu_state_t main_menu(void) {
         }
     }
 
-    return 0;
+    return main_menu_state_t::MAIN_MENU_STATE_NEW_GAME;
 }
 
 const bool main_menu_load_menu(void) {

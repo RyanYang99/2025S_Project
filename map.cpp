@@ -5,13 +5,13 @@
 #include <math.h>
 #include <stdbool.h>
 
-#include "save.h"
-#include "perlin.h"
-#include "player.h"
-#include "date_time.h"
-#include "item_database.h"
+#include "save.hpp"
+#include "perlin.hpp"
+#include "player.hpp"
+#include "date_time.hpp"
+#include "item_database.hpp"
 
-#include "input.h"
+#include "input.hpp"
 
 typedef enum {
     BIOME_PLAINS,
@@ -138,7 +138,7 @@ static COORD render_aft_or_forward(const COORD console_position_half, COORD cons
 
     for (int x = forward ? player.x : (player.x - 1); forward ? (x < map.size.x) : x >= 0; forward ? ++x : --x) {
         for (int y = player.y; y < map.size.y; ++y) {
-            texture_size = render_block((POINT) { x, y }, console_position, forward, true);
+            texture_size = render_block({ x, y }, console_position, forward, true);
             console_position.Y += texture_size.Y;
 
             if (console_position.Y >= console_size.Y)
@@ -147,7 +147,7 @@ static COORD render_aft_or_forward(const COORD console_position_half, COORD cons
 
         console_position.Y = console_position_half.Y - 1;
         for (int y = player.y - 1; y >= 0; --y) {
-            texture_size = render_block((POINT) { x, y }, console_position, forward, false);
+            texture_size = render_block({ x, y }, console_position, forward, false);
             console_position.Y -= texture_size.Y;
 
             if (console_position.Y < 0)
@@ -341,16 +341,16 @@ static void generate_trees(const int start, const int end) {
 static void allocate_map(void) {
     if (!map.ppBlocks) {
         const int y_size = sizeof(block_info_t*) * map.size.y;
-        map.ppBlocks = malloc(y_size);
+        map.ppBlocks = static_cast<block_info_t **>(malloc(y_size));
         memset(map.ppBlocks, 0, y_size);
     }
 
     const int x_size = sizeof(block_info_t) * map.size.x;
     for (int y = 0; y < map.size.y; ++y)
         if (!map.ppBlocks[y])
-            map.ppBlocks[y] = malloc(x_size);
+            map.ppBlocks[y] = static_cast<block_info_t *>(malloc(x_size));
         else
-            map.ppBlocks[y] = realloc(map.ppBlocks[y], x_size);
+            map.ppBlocks[y] = static_cast<block_info_t *>(realloc(map.ppBlocks[y], x_size));
 }
 
 //width가 음수일 경우 맵을 왼쪽으로 늘림, 양수일 경우 오른쪽
@@ -518,7 +518,7 @@ const color_character_t map_get_block_texture(const block_t block, const int x, 
             return pSeed_of_Malakh[y][x];
     }
 
-    return (color_character_t){ 0 };
+    return {};
 }
 
 const bool map_is_air_or_star(const block_t block) {
@@ -527,9 +527,9 @@ const bool map_is_air_or_star(const block_t block) {
 
 void map_subscribe_offset_change(const offset_changed_t callback) {
     if (!pOffset_callbacks)
-        pOffset_callbacks = malloc(sizeof(offset_changed_t));
+        pOffset_callbacks = static_cast<offset_changed_t *>(malloc(sizeof(offset_changed_t)));
     else
-        pOffset_callbacks = realloc(pOffset_callbacks, sizeof(offset_changed_t) * (offset_callback_count + 1));
+        pOffset_callbacks = static_cast<offset_changed_t *>(realloc(pOffset_callbacks, sizeof(offset_changed_t) * (offset_callback_count + 1)));
 
     pOffset_callbacks[offset_callback_count++] = callback;
 }
@@ -557,9 +557,9 @@ void map_save(void) {
 
     const int size = sizeof(block_info_t) * map.size.x * map.size.y;
     if (!pSave_current->pBlocks)
-        pSave_current->pBlocks = malloc(size);
+        pSave_current->pBlocks = static_cast<block_info_t *>(malloc(size));
     else
-        pSave_current->pBlocks = realloc(pSave_current->pBlocks, size);
+        pSave_current->pBlocks = static_cast<block_info_t *>(realloc(pSave_current->pBlocks, size));
 
     for (int y = 0; y < map.size.y; ++y)
         for (int x = 0; x < map.size.x; ++x)

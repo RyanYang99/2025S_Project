@@ -1,10 +1,10 @@
 ﻿#include "leak.hpp"
-#include "date_time.h"
+#include "date_time.hpp"
 
-#include "save.h"
-#include "delta.h"
-#include "console.h"
-#include "formatter.h"
+#include "save.hpp"
+#include "delta.hpp"
+#include "console.hpp"
+#include "formatter.hpp"
 
 date_time_t date_time_elapsed_since_start = { 0 };
 
@@ -42,17 +42,18 @@ void date_time_update(void) {
 
 void date_time_render(void) {
     static float blink = 0.0f;
-    static char* pBlink = " ";
+    static char blink_character{ ' ' };
+
     blink += delta_time;
     if (blink >= 2.0f) {
         blink = 0.0f;
-        pBlink = " ";
+        blink_character = ' ';
     }
     else if (blink >= 1.0f)
-        pBlink = ":";
+        blink_character = ':';
 
     char * const pDay = format_string("Day %d", date_time_elapsed_since_start.day),
-         * const pTime = format_string("%02d%s%02d", date_time_elapsed_since_start.hour, pBlink, date_time_elapsed_since_start.minute);
+         * const pTime = format_string("%02d%c%02d", date_time_elapsed_since_start.hour, blink_character, date_time_elapsed_since_start.minute);
 
     COORD position = {
         .X = (SHORT)(console_size.X - strlen(pDay))

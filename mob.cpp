@@ -1,19 +1,19 @@
 ﻿#include "leak.hpp"
-#include "Mob.h"
+#include "mob.hpp"
 
 #include <time.h>
 
-#include "save.h"
+#include "save.hpp"
 #include "map.hpp"
-#include "tool.h"
-#include "sound.h"
-#include "input.h"
+#include "tool.hpp"
+#include "sound.hpp"
+#include "input.hpp"
 #include "astar.hpp"
-#include "delta.h"
-#include "player.h"
-#include "date_time.h"
-#include "boss_malakh.h"
-#include "block_control.h"
+#include "delta.hpp"
+#include "player.hpp"
+#include "date_time.hpp"
+#include "boss_malakh.hpp"
+#include "block_control.hpp"
 
 #define GRAVITY 25.0f
 #define BG_BLACK BACKGROUND_T_BLACK
@@ -112,7 +112,7 @@ static void handle_mob_click(const bool left_click) {
             int extra = 0;
             const player_item_t * const pItem = inventory.pHotbar[inventory.selected_hotbar_index].pPlayer_Item;
             if (pItem)
-                extra = tool_get_damage_to_mob(pItem->item_DB_index);
+                extra = tool_get_damage_to_mob(static_cast<tool_t>(pItem->item_DB_index));
 
             const int total_attack = player.attack_power + extra;
             mobs[i].HP -= total_attack;
@@ -145,7 +145,7 @@ void mob_initialize(void) {
     } else
         mob_count = 0;
 
-    input_subscribe_mouse_click(handle_mob_click);
+    Input::subscribe_input_mouse_click(handle_mob_click);
     map_subscribe_offset_change(update_mob_offset);
 }
 
@@ -472,7 +472,7 @@ void mob_render(void) {
 }
 
 void mob_destroy(void) {
-    input_unsubscribe_mouse_click(handle_mob_click);
+    Input::unsubscribe_input_mouse_click(handle_mob_click);
     map_unsubscribe_offset_change(update_mob_offset);
 }
 
@@ -485,9 +485,9 @@ void mob_save(void) {
 
     const size_t size = sizeof(mob_t) * mob_count;
     if (!pSave_current->pMobs)
-        pSave_current->pMobs = malloc(size);
+        pSave_current->pMobs = static_cast<mob_t *>(malloc(size));
     else
-        pSave_current->pMobs = realloc(pSave_current->pMobs, size);
+        pSave_current->pMobs = static_cast<mob_t *>(realloc(pSave_current->pMobs, size));
 
     for (int i = 0; i < mob_count; ++i)
         pSave_current->pMobs[i] = mobs[i];

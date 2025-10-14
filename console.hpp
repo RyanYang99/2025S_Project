@@ -28,11 +28,49 @@ typedef enum { \
 X_color_t(BACKGROUND);
 X_color_t(FOREGROUND);
 
-typedef struct {
-    wchar_t character;
-    BACKGROUND_color_t background;
-    FOREGROUND_color_t foreground;
-} color_character_t;
+struct color_character_t {
+    wchar_t character{};
+    BACKGROUND_color_t background{};
+    FOREGROUND_color_t foreground{};
+
+    color_character_t(void) = default;
+
+    color_character_t(char character_) : character(character_) {}
+
+    color_character_t(wchar_t character_) : character(character_) {}
+
+    color_character_t(char character_, BACKGROUND_color_t background_) : character(character_), background(background_) {}
+
+    color_character_t(wchar_t character_, BACKGROUND_color_t background_) : character(character_), background(background_) {}
+
+    color_character_t(char character_, int background_) : character(character_), background(static_cast<BACKGROUND_color_t>(background_)) {}
+
+    color_character_t(wchar_t character_, int background_) : character(character_), background(static_cast<BACKGROUND_color_t>(background_)) {}
+
+    color_character_t(char character_,
+                      BACKGROUND_color_t background_,
+                      FOREGROUND_color_t foreground_) : character(character_),
+                                                        background(background_),
+                                                        foreground(foreground_) {}
+
+    color_character_t(wchar_t character_,
+                      BACKGROUND_color_t background_,
+                      FOREGROUND_color_t foreground_) : character(character_),
+                                                        background(background_),
+                                                        foreground(foreground_) {}
+
+    color_character_t(char character_,
+                      int background_,
+                      int foreground_) : character(character_),
+                                         background(static_cast<BACKGROUND_color_t>(background_)),
+                                         foreground(static_cast<FOREGROUND_color_t>(foreground_)) {}
+
+    color_character_t(wchar_t character_,
+                      int background_,
+                      int foreground_) : character(character_),
+                                         background(static_cast<BACKGROUND_color_t>(background_)),
+                                         foreground(static_cast<FOREGROUND_color_t>(foreground_)) {}
+};
 
 extern COORD console_size;
 

@@ -1,20 +1,18 @@
 ﻿#include "leak.hpp"
-#include "boss_malakh.h"
+#include "boss_malakh.hpp"
 
-#include <stdlib.h>
-
+#include "input.hpp"
 #include "map.hpp"
-#include "tool.h"
-#include "delta.h"
+#include "tool.hpp"
+#include "delta.hpp"
 #include "astar.hpp"
-#include "input.h"
-#include "sound.h"
-#include "player.h"
-#include "console.h"
-#include "inventory.h"
-#include "formatter.h"
-#include "block_control.h"
-#include "item_database.h"
+#include "sound.hpp"
+#include "player.hpp"
+#include "console.hpp"
+#include "inventory.hpp"
+#include "formatter.hpp"
+#include "block_control.hpp"
+#include "item_database.hpp"
 
 //가독성을 위한 매크로
 #define FG_WHITE FOREGROUND_T_WHITE
@@ -29,15 +27,9 @@
 #define BG_YELLOW BACKGROUND_T_YELLOW
 #define BG_BLACK BACKGROUND_T_BLACK
 
-#define BOSS_SPRITE_WIDTH 20
-#define BOSS_SPRITE_HEIGHT 20
-#define BOSS_DRAW_SCALE 3
-
 //보스 데미지 텍스트 관련
-#define MAX_BOSS_DAMAGE_TEXTS 10
-#define BOSS_DAMAGE_TEXT_DURATION 1.0f
-
-#define MAX_MISSILES 5
+constexpr int MAX_BOSS_DAMAGE_TEXTS{ 10 }, MAX_MISSILES{ 5 };
+constexpr float BOSS_DAMAGE_TEXT_DURATION{ 1.0f };
 
 //미사일 구조체
 typedef struct {
@@ -55,10 +47,10 @@ typedef struct {
 } boss_damage_text_t;
 
 bool boss_spawned = false;
-boss_malakh_t boss = { 0 };
+boss_malakh_t boss{};
 
-static boss_missile_t pBoss_missiles[MAX_MISSILES] = { 0 };
-static boss_damage_text_t pBoss_damage_texts[MAX_BOSS_DAMAGE_TEXTS] = { 0 };
+static boss_missile_t pBoss_missiles[MAX_MISSILES]{};
+static boss_damage_text_t pBoss_damage_texts[MAX_BOSS_DAMAGE_TEXTS]{};
 
 //보스 스프라이트 데이터 (생략)
 static const color_character_t pBoss_malakh_sprite_data[BOSS_SPRITE_HEIGHT][BOSS_SPRITE_WIDTH] = {
@@ -147,7 +139,7 @@ static void boss_handle_player_attack(const bool left_click) {
         const player_item_t * const pItem = inventory.pHotbar[inventory.selected_hotbar_index].pPlayer_Item;
         int extra = 0;
         if (pItem)
-            extra = tool_get_damage_to_mob(pItem->item_DB_index);
+            extra = tool_get_damage_to_mob(static_cast<tool_t>(pItem->item_DB_index));
 
         boss_damage(player.attack_power + extra);
         return;
@@ -205,7 +197,7 @@ void boss_initialize(const int start_x, const int start_y, const int hp, const i
     for (int i = 0; i < MAX_BOSS_DAMAGE_TEXTS; ++i)
         pBoss_damage_texts[i].active = false;
 
-    input_subscribe_mouse_click(boss_handle_player_attack);
+    Input::subscribe_input_mouse_click(boss_handle_player_attack);
     map_subscribe_offset_change(boss_handle_offset);
 }
 
@@ -424,11 +416,7 @@ void boss_update(void) {
 
 //미사일 렌더링
 static void boss_render_missiles(void) {
-    const color_character_t character = {
-        .character = '*',
-        .background = BG_BLACK,
-        .foreground = FG_RED
-    };
+    const color_character_t character = { '*', BG_BLACK, FG_RED };
 
     for (int i = 0; i < MAX_MISSILES; ++i)
         if (pBoss_missiles[i].is_active) {
@@ -461,11 +449,7 @@ static void boss_render_pattern(void) {
             boss.is_horizontal_laser_active = false;
 
         //3줄 레이저를 한번에 출력
-        const color_character_t character = {
-            .character = L'═',
-            .background = BG_BLACK,
-            .foreground = FG_RED
-        };
+        const color_character_t character = { L'═', BG_BLACK, FG_RED };
 
         for (int i = 0; i < 3; ++i) {
             COORD laser_position = {
@@ -497,11 +481,7 @@ static void boss_render_pattern(void) {
         }
 
         //3줄 레이저를 한번에 출력
-        const color_character_t character = {
-            .character = L'║',
-            .background = BG_BLACK,
-            .foreground = FG_RED
-        };
+        const color_character_t character = { L'║', BG_BLACK, FG_RED };
 
         for (int i = 0; i < 3; ++i) {
             COORD laser_position = {
@@ -577,6 +557,6 @@ void boss_render(void) {
 }
 
 void boss_destroy(void) {
-    input_unsubscribe_mouse_click(boss_handle_player_attack);
+    Input::subscribe_input_mouse_click(boss_handle_player_attack);
     map_unsubscribe_offset_change(boss_handle_offset);
 }

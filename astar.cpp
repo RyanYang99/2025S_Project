@@ -1,6 +1,8 @@
 ﻿#include "leak.hpp"
 #include "astar.hpp"
 
+#include <cstdlib>
+
 #include "map.hpp"
 
 typedef struct node_t {
@@ -28,12 +30,12 @@ const direction_t astar_find_next_direction(const int start_x,
         allocated_x = map.size.x;
 
         const int size = sizeof(node_t *) * allocated_x * map.size.y;
-        ppOpen_list = realloc(ppOpen_list, size);
-        ppClosed_list = realloc(ppClosed_list, size);
+        ppOpen_list = static_cast<node_t **>(realloc(ppOpen_list, size));
+        ppClosed_list = static_cast<node_t **>(realloc(ppClosed_list, size));
     }
     open_count = closed_count = 0;
 
-    node_t *pStart = malloc(sizeof(node_t)), *pFinal = NULL;
+    node_t *pStart = static_cast<node_t *>(malloc(sizeof(node_t))), *pFinal = NULL;
     pStart->x = start_x;
     pStart->y = start_y;
     pStart->g = 0;
@@ -96,7 +98,7 @@ const direction_t astar_find_next_direction(const int start_x,
 
             const int tentative_g = pCurrent->g + 1;
             if (!pNeighbor) {
-                pNeighbor = malloc(sizeof(node_t));
+                pNeighbor = static_cast<node_t *>(malloc(sizeof(node_t)));
                 pNeighbor->x = new_x;
                 pNeighbor->y = new_y;
                 pNeighbor->g = tentative_g;

@@ -1,5 +1,5 @@
 ﻿#include "leak.hpp"
-#include "formatter.h"
+#include "formatter.hpp"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,7 +15,7 @@ char *format_string(const char * const pFormat, ...) {
 
 char *format_string_v(const char * const pFormat, const va_list args) {
     const int length = vsnprintf(NULL, 0, pFormat, args);
-    char *pBuffer = malloc(sizeof(char) * (length + 1));
+    char *pBuffer = static_cast<char *>(malloc(sizeof(char) * (length + 1)));
 
     vsnprintf(pBuffer, length + 1, pFormat, args);
     return pBuffer;

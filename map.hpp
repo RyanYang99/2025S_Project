@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "console.h"
+#include "console.hpp"
 
 #define BLOCKS 12
 #define TEXTURE_SIZE 3

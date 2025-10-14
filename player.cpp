@@ -1,15 +1,15 @@
 ﻿#include "leak.hpp"
-#include "player.h"
+#include "player.hpp"
 
 #include <Windows.h>
 #include "map.hpp"
-#include "tool.h"
-#include "save.h"
-#include "input.h"
-#include "delta.h"
-#include "sound.h"
-#include "console.h"
-#include "formatter.h"
+#include "tool.hpp"
+#include "save.hpp"
+#include "input.hpp"
+#include "delta.hpp"
+#include "sound.hpp"
+#include "console.hpp"
+#include "formatter.hpp"
 
 #define PLAYER_SPRITE_WIDTH 5
 #define PLAYER_SPRITE_HEIGHT 5
@@ -168,7 +168,7 @@ void player_initialize(void) {
     player.facing_direction = 1;
 
     //마우스 클릭
-    input_subscribe_mouse_click(handle_player_actions);
+    Input::subscribe_input_mouse_click(handle_player_actions);
     map_subscribe_offset_change(update_player_offset);
 }
 
@@ -193,7 +193,7 @@ static const bool is_walkable(const int x, const int y) {
 
 static void movement(void) {
     //점프 키 확인
-    if (is_key_down(VK_SPACE) && player.is_on_ground) {
+    if (Input::is_key_down(VK_SPACE) && player.is_on_ground) {
         player.velocity_y = JUMP_STRENGTH;
         player.is_on_ground = false;
     }
@@ -201,7 +201,7 @@ static void movement(void) {
     //쿨다운 타이머 업데이트
     player.move_cool_down_timer += delta_time;
 
-    const bool is_a_down = is_key_down('A'), is_d_down = is_key_down('D');
+    const bool is_a_down = Input::is_key_down('A'), is_d_down = Input::is_key_down('D');
 
     //키가 눌렸는지 여부에 따라 애니메이션 상태 설정
     player.is_moving = is_a_down || is_d_down;
@@ -401,7 +401,7 @@ void player_render(void) {
         for (int y = 0; y < TEXTURE_SIZE; ++y)
             for (int x = 0; x < TEXTURE_SIZE; ++x) {
                 int source_x = (player.facing_direction == 1) ? x : (TEXTURE_SIZE - 1 - x);
-                color_character_t tool_pixel = { 0 };
+                color_character_t tool_pixel{};
                 if (player.is_swinging) {
                     //스윙 중일 때는 스윙 텍스처를 가져옴
                     tool_pixel = tool_get_swing_texture((tool_t)pToolInfo->index, source_x, y);
@@ -438,27 +438,27 @@ void player_render(void) {
         .Y = 2
     };
 
-    console_fprint_string("[", position, FOREGROUND_T_WHITE, BACKGROUND_T_TRANSPARENT);
+    console_fprint_string("[", position, BACKGROUND_T_WHITE, FOREGROUND_T_TRANSPARENT);
     position.X += 1;
 
     for (int i = 0; i < filled; ++i) {
-        console_fprint_string(" ", position, BACKGROUND_T_RED, 0); //빨간 체력 바
+        console_fprint_string(" ", position, BACKGROUND_T_RED, FOREGROUND_T_BLACK); //빨간 체력 바
         position.X += 1;
     }
 
     for (int i = 0; i < empty; ++i) {
-        console_fprint_string(" ", position, BACKGROUND_T_DARKGRAY, 0); //회색 빈 바
+        console_fprint_string(" ", position, BACKGROUND_T_DARKGRAY, FOREGROUND_T_BLACK); //회색 빈 바
         position.X += 1;
     }
 
-    console_fprint_string("]", position, FOREGROUND_T_WHITE, BACKGROUND_T_TRANSPARENT);
+    console_fprint_string("]", position, BACKGROUND_T_WHITE, FOREGROUND_T_TRANSPARENT);
     position.X += 2;
 
     console_fprint_string("HP: %d / %d", position, BACKGROUND_T_BLACK, FOREGROUND_T_YELLOW, current_HP, max_HP);
 }
 
 void player_destroy(void) {
-    input_unsubscribe_mouse_click(handle_player_actions);
+    Input::unsubscribe_input_mouse_click(handle_player_actions);
     map_unsubscribe_offset_change(update_player_offset);
 }
 

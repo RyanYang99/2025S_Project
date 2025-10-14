@@ -1,9 +1,9 @@
 ﻿#include "leak.hpp"
-#include "console.h"
+#include "console.hpp"
 
 #include <stdio.h>
 
-#include "formatter.h"
+#include "formatter.hpp"
 
 COORD console_size = { 0 };
 
@@ -54,7 +54,7 @@ static void initialize_double_buffering(void) {
     }
 
     buffer_count = console_size.X * console_size.Y;
-    character_buffer = malloc(sizeof(CHAR_INFO) * buffer_count);
+    character_buffer = static_cast<PCHAR_INFO>(malloc(sizeof(CHAR_INFO) * buffer_count));
 }
 
 static const COORD console_get_size(const HANDLE size_handle) {
@@ -127,9 +127,9 @@ static const bool update_size(void) {
         } else {
             const size_t size = sizeof(CHAR_INFO) * buffer_count;
             if (!character_buffer)
-                character_buffer = malloc(size);
+                character_buffer = static_cast<PCHAR_INFO>(malloc(size));
             else
-                character_buffer = realloc(character_buffer, size);
+                character_buffer = static_cast<PCHAR_INFO>(realloc(character_buffer, size));
         }
 
         written.Right = console_size.X - 1;
@@ -147,7 +147,7 @@ static void flip_double_buffer(void) {
     if (!use_double_buffer || !character_buffer)
         return;
 
-    WriteConsoleOutput(buffer[current_buffer], character_buffer, console_size, (COORD){ 0 }, &written);
+    WriteConsoleOutput(buffer[current_buffer], character_buffer, console_size, {}, &written);
     SetConsoleActiveScreenBuffer(buffer[current_buffer]);
 
     if (!current_buffer)
@@ -296,7 +296,7 @@ static int fprint_string_v(const char * const pFormat, const COORD position, con
     char *pBuffer = format_string_v(pFormat, args);
 
     const int wide_length = MultiByteToWideChar(CP_UTF8, 0, pBuffer, -1, NULL, 0);
-    LPWSTR pWBuffer = malloc(sizeof(WCHAR) * wide_length);
+    LPWSTR pWBuffer = static_cast<LPWSTR>(malloc(sizeof(WCHAR) * wide_length));
     MultiByteToWideChar(CP_UTF8, 0, pBuffer, -1, pWBuffer, wide_length);
 
     const WORD attribute = (WORD)background | (WORD)foreground;

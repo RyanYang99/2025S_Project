@@ -1,5 +1,5 @@
 ﻿#include "leak.hpp"
-#include "sound.h"
+#include "sound.hpp"
 
 #include <stdio.h>
 

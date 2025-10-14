@@ -1,5 +1,7 @@
-﻿#include "leak.hpp"
-#include "item_database.h"
+﻿#define _CRT_SECURE_NO_WARNINGS
+
+#include "leak.hpp"
+#include "item_database.hpp"
 
 #include <stdio.h>
 #include <locale.h>
@@ -20,7 +22,7 @@ static const bool database_add_item(const int index,
                                     const material_tier_t material_tier,
                                     const bool is_placeable) {
     // 크기 증가를 위한 재할당
-    item_information_t *pResized = realloc(database.pItem_information, sizeof(item_information_t) * (database.count + 1));
+    item_information_t *pResized = static_cast<item_information_t *>(realloc(database.pItem_information, sizeof(item_information_t) * (database.count + 1)));
     if (!pResized) {
         return false; //메모리 부족
     }
@@ -63,7 +65,7 @@ static void database_load(void) {
         //문자열 파싱 (CSV 형식: 정수,문자열,정수,정수,정수)
         if (sscanf_s(line, "%d,%31[^,],%d,%d,%d,%d,%d,%d",
             &index, name, (unsigned int)sizeof(name), &max_stack, &type, &base_durability, &tool_kind, &material_tier, &is_placeable) == 8)
-            database_add_item(index, name, max_stack, type, base_durability, tool_kind, material_tier, is_placeable);
+            database_add_item(index, name, max_stack, static_cast<item_type_t>(type), base_durability, static_cast<tool_kind_t>(tool_kind), static_cast<material_tier_t>(material_tier), is_placeable);
     }
 
     fclose(pFile);
@@ -134,7 +136,7 @@ static void database_add_item_from_user(void) {
     printf("is_placeable (0: false, 1: true): ");
     scanf_s("%d", &is_placeable);
 
-    if (database_add_item(index, name, max_stack, type, base_durability, tool_kind, material_tier, is_placeable))
+    if (database_add_item(index, name, max_stack, static_cast<item_type_t>(type), base_durability, static_cast<tool_kind_t>(tool_kind), static_cast<material_tier_t>(material_tier), is_placeable))
         printf("Item added.\n");
     else
         printf("Failed to add an item.\n");

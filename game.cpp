@@ -1,19 +1,19 @@
 ﻿#include "leak.hpp"
-#include "game.h"
+#include "game.hpp"
 
-#include "mob.h"
+#include "mob.hpp"
 #include "map.hpp"
-#include "save.h"
-#include "delta.h"
+#include "save.hpp"
+#include "delta.hpp"
 #include "astar.hpp"
-#include "sound.h"
-#include "input.h"
-#include "player.h"
-#include "inventory.h"
-#include "date_time.h"
-#include "crafting_UI.h"
-#include "boss_malakh.h"
-#include "block_control.h"
+#include "sound.hpp"
+#include "input.hpp"
+#include "player.hpp"
+#include "inventory.hpp"
+#include "date_time.hpp"
+#include "crafting_UI.hpp"
+#include "boss_malakh.hpp"
+#include "block_control.hpp"
 
 typedef enum {
     AMBIENT_BGM_NONE,
@@ -115,7 +115,7 @@ void game_update(void) {
         delta_time_update();
 
         console_update();
-        input_update();
+        Input::update();
         date_time_update();
         update_BGM();
 
