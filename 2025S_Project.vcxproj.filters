@@ -1,138 +1,138 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="astar.c">
+    <ClCompile Include="astar.cpp">
       <Filter>Source File</Filter>
     </ClCompile>
-    <ClCompile Include="block_control.c">
+    <ClCompile Include="block_control.cpp">
       <Filter>Source File</Filter>
     </ClCompile>
-    <ClCompile Include="console.c">
+    <ClCompile Include="console.cpp">
       <Filter>Source File</Filter>
     </ClCompile>
-    <ClCompile Include="Crafting_UI.c">
+    <ClCompile Include="crafting_UI.cpp">
       <Filter>Source File</Filter>
     </ClCompile>
-    <ClCompile Include="date_time.c">
+    <ClCompile Include="date_time.cpp">
       <Filter>Source File</Filter>
     </ClCompile>
-    <ClCompile Include="delta.c">
+    <ClCompile Include="delta.cpp">
       <Filter>Source File</Filter>
     </ClCompile>
-    <ClCompile Include="formatter.c">
+    <ClCompile Include="formatter.cpp">
       <Filter>Source File</Filter>
     </ClCompile>
-    <ClCompile Include="game.c">
+    <ClCompile Include="game.cpp">
       <Filter>Source File</Filter>
     </ClCompile>
-    <ClCompile Include="input.c">
+    <ClCompile Include="input.cpp">
       <Filter>Source File</Filter>
     </ClCompile>
-    <ClCompile Include="inventory.c">
+    <ClCompile Include="inventory.cpp">
       <Filter>Source File</Filter>
     </ClCompile>
-    <ClCompile Include="item.c">
+    <ClCompile Include="item.cpp">
       <Filter>Source File</Filter>
     </ClCompile>
-    <ClCompile Include="item_database.c">
+    <ClCompile Include="item_database.cpp">
       <Filter>Source File</Filter>
     </ClCompile>
-    <ClCompile Include="main.c">
+    <ClCompile Include="main.cpp">
       <Filter>Source File</Filter>
     </ClCompile>
-    <ClCompile Include="main_menu.c">
+    <ClCompile Include="main_menu.cpp">
       <Filter>Source File</Filter>
     </ClCompile>
-    <ClCompile Include="map.c">
+    <ClCompile Include="map.cpp">
       <Filter>Source File</Filter>
     </ClCompile>
-    <ClCompile Include="mob.c">
+    <ClCompile Include="mob.cpp">
       <Filter>Source File</Filter>
     </ClCompile>
-    <ClCompile Include="perlin.c">
+    <ClCompile Include="perlin.cpp">
       <Filter>Source File</Filter>
     </ClCompile>
-    <ClCompile Include="player.c">
+    <ClCompile Include="player.cpp">
       <Filter>Source File</Filter>
     </ClCompile>
-    <ClCompile Include="save.c">
+    <ClCompile Include="save.cpp">
       <Filter>Source File</Filter>
     </ClCompile>
-    <ClCompile Include="sound.c">
+    <ClCompile Include="sound.cpp">
       <Filter>Source File</Filter>
     </ClCompile>
-    <ClCompile Include="tool.c">
+    <ClCompile Include="tool.cpp">
       <Filter>Source File</Filter>
     </ClCompile>
-    <ClCompile Include="boss_malakh.c">
+    <ClCompile Include="boss_malakh.cpp">
       <Filter>Source File</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="astar.h">
+    <ClInclude Include="astar.hpp">
       <Filter>Header File</Filter>
     </ClInclude>
-    <ClInclude Include="block_control.h">
+    <ClInclude Include="block_control.hpp">
       <Filter>Header File</Filter>
     </ClInclude>
-    <ClInclude Include="console.h">
+    <ClInclude Include="console.hpp">
       <Filter>Header File</Filter>
     </ClInclude>
-    <ClInclude Include="Crafting_UI.h">
+    <ClInclude Include="crafting_UI.hpp">
       <Filter>Header File</Filter>
     </ClInclude>
-    <ClInclude Include="date_time.h">
+    <ClInclude Include="date_time.hpp">
       <Filter>Header File</Filter>
     </ClInclude>
-    <ClInclude Include="delta.h">
+    <ClInclude Include="delta.hpp">
       <Filter>Header File</Filter>
     </ClInclude>
-    <ClInclude Include="formatter.h">
+    <ClInclude Include="formatter.hpp">
       <Filter>Header File</Filter>
     </ClInclude>
-    <ClInclude Include="game.h">
+    <ClInclude Include="game.hpp">
       <Filter>Header File</Filter>
     </ClInclude>
-    <ClInclude Include="input.h">
+    <ClInclude Include="input.hpp">
       <Filter>Header File</Filter>
     </ClInclude>
-    <ClInclude Include="inventory.h">
+    <ClInclude Include="inventory.hpp">
       <Filter>Header File</Filter>
     </ClInclude>
-    <ClInclude Include="item.h">
+    <ClInclude Include="item.hpp">
       <Filter>Header File</Filter>
     </ClInclude>
-    <ClInclude Include="item_database.h">
+    <ClInclude Include="item_database.hpp">
       <Filter>Header File</Filter>
     </ClInclude>
-    <ClInclude Include="leak.h">
+    <ClInclude Include="leak.hpp">
       <Filter>Header File</Filter>
     </ClInclude>
-    <ClInclude Include="main_menu.h">
+    <ClInclude Include="main_menu.hpp">
       <Filter>Header File</Filter>
     </ClInclude>
-    <ClInclude Include="map.h">
+    <ClInclude Include="map.hpp">
       <Filter>Header File</Filter>
     </ClInclude>
-    <ClInclude Include="mob.h">
+    <ClInclude Include="mob.hpp">
       <Filter>Header File</Filter>
     </ClInclude>
-    <ClInclude Include="perlin.h">
+    <ClInclude Include="perlin.hpp">
       <Filter>Header File</Filter>
     </ClInclude>
-    <ClInclude Include="player.h">
+    <ClInclude Include="player.hpp">
       <Filter>Header File</Filter>
     </ClInclude>
-    <ClInclude Include="save.h">
+    <ClInclude Include="save.hpp">
       <Filter>Header File</Filter>
     </ClInclude>
-    <ClInclude Include="sound.h">
+    <ClInclude Include="sound.hpp">
       <Filter>Header File</Filter>
     </ClInclude>
-    <ClInclude Include="tool.h">
+    <ClInclude Include="tool.hpp">
       <Filter>Header File</Filter>
     </ClInclude>
-    <ClInclude Include="boss_malakh.h">
+    <ClInclude Include="boss_malakh.hpp">
       <Filter>Header File</Filter>
     </ClInclude>
   </ItemGroup>
