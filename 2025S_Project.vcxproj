@@ -128,13 +128,16 @@
     <ClCompile Include="tool.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ambient_BGM_state.hpp" />
     <ClInclude Include="astar.hpp" />
     <ClInclude Include="block_control.hpp" />
     <ClInclude Include="boss_malakh.hpp" />
+    <ClInclude Include="callback.hpp" />
     <ClInclude Include="console.hpp" />
     <ClInclude Include="crafting_UI.hpp" />
     <ClInclude Include="date_time.hpp" />
     <ClInclude Include="delta.hpp" />
+    <ClInclude Include="direction.hpp" />
     <ClInclude Include="formatter.hpp" />
     <ClInclude Include="game.hpp" />
     <ClInclude Include="input.hpp" />

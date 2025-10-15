@@ -15,68 +15,24 @@
             내용 위와 동일 (bool)
 */
 
-#include <vector>
-
 #include <Windows.h>
-#include <wincontypes.h>
+
+#include "callback.hpp"
 
 #define CALLBACK_MEMBER(name, return_type) Callback<name##_t, return_type> name
 
 #define CALLBACK_METHODS_DECLARE(name) \
 static void subscribe_##name(const name##_t callback); \
 \
-static void unsubscribe_##name(const name##_t callback) \
+static void unsubscribe_##name(const name##_t callback) noexcept \
 
 //left: true 일때 왼쪽 마우스 버튼, false 일때 오른쪽 마우스 버튼
 typedef void (*input_mouse_click_t)(const bool left);
 typedef void (*input_mouse_position_t)(const COORD position);
 typedef void (*input_mouse_in_console_t)(const bool in_console);
 
-enum InputDirection {
-    up = 72,
-    left = 75,
-    right = 77,
-    down = 80
-};
-
-template <typename T, typename U>
-class Callback {
-private:
-    std::vector<T> callbacks{};
-
-public:
-    void subscribe(const T &callback) {
-        callbacks.push_back(callback);
-    }
-
-    void unsubscribe(const T &callback) noexcept {
-        size_t i{};
-        bool found{};
-
-        for (; i < callbacks.size(); ++i)
-            if (callbacks[i] == callback) {
-                found = true;
-                break;
-            }
-
-        if (!found)
-            return;
-
-        callbacks.erase(callbacks.begin() + i);
-    }
-
-    void call(const U parameter) const {
-        for (const T callback : callbacks)
-            callback(parameter);
-    }
-
-    void clear(void) noexcept {
-        callbacks.clear();
-    }
-};
-
 //윈도우 콜백을 사용해야 하기 때문에 static 클래스 사용
-class Input {
+class input {
 private:
     static bool keyboard_pressed_;
     static char input_character_, input_special_character_;
@@ -93,19 +49,21 @@ private:
 
 public:
     static void initialize(void) noexcept;
-    static void update(void) noexcept;
-    static void destroy(void) noexcept;
 
+    static bool keyboard_pressed(void) noexcept;
+    static char input_character(void) noexcept;
+    static char input_special_character(void) noexcept;
     static bool is_key_down(const int virtual_key_code) noexcept;
+
+    static void update(void) noexcept;
 
     CALLBACK_METHODS_DECLARE(input_mouse_click);
     CALLBACK_METHODS_DECLARE(input_mouse_position);
     CALLBACK_METHODS_DECLARE(input_mouse_in_console);
 
-    static bool keyboard_pressed(void) noexcept;
-    static char input_character(void) noexcept;
-    static char input_special_character(void) noexcept;
+    static void destroy(void) noexcept;
 
+    //디버깅시 마우스 훅 제거
 #if _DEBUG
     static void pause_hook(void) noexcept;
     static void resume_hook(void) noexcept;

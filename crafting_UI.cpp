@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#include "direction.hpp"
 #include "map.hpp"
 #include "input.hpp"
 #include "player.hpp"
@@ -135,13 +136,13 @@ static void craft_selected_recipe(void) {
 }
 
 void crafting_UI_input(void) {
-    if (!Input::keyboard_pressed())
+    if (!input::keyboard_pressed())
         return;
 
-    const char lower = (char)tolower(Input::input_character()), input_special_character{ Input::input_special_character() };
-    if (input_special_character == InputDirection::up && selected_recipe_index > 0)
+    const char lower = (char)tolower(input::input_character()), input_special_character{ input::input_special_character() };
+    if (input_special_character == static_cast<char>(direction::up) && selected_recipe_index > 0)
         --selected_recipe_index;
-    else if (input_special_character == InputDirection::down && selected_recipe_index < (is_workbench_nearby() ? recipe_count - 1 : without_workbench_count - 1))
+    else if (input_special_character == static_cast<char>(direction::down) && selected_recipe_index < (is_workbench_nearby() ? recipe_count - 1 : without_workbench_count - 1))
         ++selected_recipe_index;
     else if (lower == 'e')
         craft_selected_recipe();

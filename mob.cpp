@@ -3,6 +3,7 @@
 
 #include <time.h>
 
+#include "game.hpp"
 #include "save.hpp"
 #include "map.hpp"
 #include "tool.hpp"
@@ -145,7 +146,7 @@ void mob_initialize(void) {
     } else
         mob_count = 0;
 
-    Input::subscribe_input_mouse_click(handle_mob_click);
+    input::subscribe_input_mouse_click(handle_mob_click);
     map_subscribe_offset_change(update_mob_offset);
 }
 
@@ -206,7 +207,7 @@ static void mob_spawn(void) {
 static void mob_spawn_manager(void) {
     // 보스가 없을 때만 몬스터 생성
     if (boss.state == E_BOSS_STATE_DEFEATED) {
-        if (date_time_is_night()) {
+        if (game::instance()->elapsed_since_start().is_night()) {
             static float mob_spawn_timer = 0.0f;
             const float mob_spawn_cool_time = 2.0f;
 
@@ -472,7 +473,7 @@ void mob_render(void) {
 }
 
 void mob_destroy(void) {
-    Input::unsubscribe_input_mouse_click(handle_mob_click);
+    input::unsubscribe_input_mouse_click(handle_mob_click);
     map_unsubscribe_offset_change(update_mob_offset);
 }
 

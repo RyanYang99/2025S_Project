@@ -121,9 +121,9 @@ static void handle_in_console(const bool in_console) {
 
 //초기화 및 해제
 void block_control_initialize(void) {
-    Input::subscribe_input_mouse_click(handle_mouse_click);
-    Input::subscribe_input_mouse_position(handle_mouse_move);
-    Input::subscribe_input_mouse_in_console(handle_in_console);
+    input::subscribe_input_mouse_click(handle_mouse_click);
+    input::subscribe_input_mouse_position(handle_mouse_move);
+    input::subscribe_input_mouse_in_console(handle_in_console);
 }
 
 //가상 커서 렌더링 (모서리 스타일)
@@ -151,7 +151,7 @@ void block_control_render(void) {
 }
 
 void block_control_destroy(void) {
-    Input::unsubscribe_input_mouse_click(handle_mouse_click);
-    Input::unsubscribe_input_mouse_position(handle_mouse_move);
-    Input::unsubscribe_input_mouse_in_console(handle_in_console);
+    input::unsubscribe_input_mouse_click(handle_mouse_click);
+    input::unsubscribe_input_mouse_position(handle_mouse_move);
+    input::unsubscribe_input_mouse_in_console(handle_in_console);
 }

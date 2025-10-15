@@ -135,6 +135,15 @@
     <ClInclude Include="boss_malakh.hpp">
       <Filter>Header File</Filter>
     </ClInclude>
+    <ClInclude Include="callback.hpp">
+      <Filter>Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="direction.hpp">
+      <Filter>Header File</Filter>
+    </ClInclude>
+    <ClInclude Include="ambient_BGM_state.hpp">
+      <Filter>Header File</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="items.csv">

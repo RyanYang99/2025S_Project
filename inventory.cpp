@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "game.hpp"
+#include "direction.hpp"
 #include "map.hpp"
 #include "save.hpp"
 #include "item.hpp"
@@ -72,15 +74,15 @@ void inventory_initialize(void) {
         }
     }
 
-    Input::subscribe_input_mouse_click(handle_mouse_click);
+    input::subscribe_input_mouse_click(handle_mouse_click);
 }
 
 //I키 입력시 인벤토리 호출
 void inventory_input(void) {
-    if (!Input::keyboard_pressed())
+    if (!input::keyboard_pressed())
         return;
 
-    int number = Input::input_character() - '0';
+    int number = input::input_character() - '0';
     const bool is_number = number >= 0 && number <= 9;
     if (number == 0)
         number = max_hotbar_index;
@@ -93,20 +95,20 @@ void inventory_input(void) {
         name_render_timer = 0.0f;
     }
 
-    if (tolower(Input::input_character()) == 'i')
+    if (tolower(input::input_character()) == 'i')
         is_inventory_open = !is_inventory_open;
 
     if (!is_inventory_open)
         return;
 
-    const char input_special_character{ Input::input_special_character() };
-    if (input_special_character == InputDirection::up && current_selection_index > 0)
+    const char input_special_character{ input::input_special_character() };
+    if (input_special_character == static_cast<char>(direction::up) && current_selection_index > 0)
         --current_selection_index;
-    else if (input_special_character == InputDirection::down && current_selection_index < max_selection_index)
+    else if (input_special_character == static_cast<char>(direction::down) && current_selection_index < max_selection_index)
         ++current_selection_index;
-    else if (input_special_character == InputDirection::left && current_page_index > 0)
+    else if (input_special_character == static_cast<char>(direction::left) && current_page_index > 0)
         --current_page_index;
-    else if (input_special_character == InputDirection::right && current_page_index < max_page_index)
+    else if (input_special_character == static_cast<char>(direction::right) && current_page_index < max_page_index)
         ++current_page_index;
     else if (is_number && number <= max_hotbar_index) {
         const int index = current_page_index * ITEMS_PER_PAGE + current_selection_index;
@@ -228,7 +230,7 @@ static void render_hotbar(void) {
                     const int texture_x = tx - 1, texture_y = ty - 1;
 
                     if (item_type == ITEM_TYPE_MATERIAL)
-                        texture_character = map_get_block_texture(static_cast<block_t>(item_index), texture_x, texture_y);
+                        texture_character = map_get_block_texture(static_cast<block_t>(item_index), texture_x, texture_y, game::instance()->elapsed_since_start().hour());
                     else if (item_type == ITEM_TYPE_TOOL)
                         texture_character = tool_get_texture(static_cast<tool_t>(item_index), texture_x, texture_y);
                     else if (item_type == ITEM_TYPE_MISC)
@@ -290,7 +292,7 @@ void inventory_render(void) {
 }
 
 void inventory_destroy(void) {
-    Input::unsubscribe_input_mouse_click(handle_mouse_click);
+    input::unsubscribe_input_mouse_click(handle_mouse_click);
 }
 
 const int inventory_get_count(const int item_DB_index) {

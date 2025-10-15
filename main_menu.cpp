@@ -18,12 +18,7 @@
 static const char * const selected_left = "> ",
                   * const selected_right = " <";
 
-static void update_time(void) {
-    time_t now = time(NULL);
-    const struct tm *pTime_info = localtime(&now);
-
-    date_time_elapsed_since_start.hour = pTime_info->tm_hour;
-}
+static date_time menu_time{};
 
 const main_menu_state_t main_menu(void) {
     const char *ppLogoSmall[1] = { "TerraCraft" },
@@ -78,8 +73,8 @@ const main_menu_state_t main_menu(void) {
         if (bottom + center_lines - 1 >= console_size.Y)
             bottom = console_size.Y - center_lines;
 
-        update_time();
-        console_fill(map_get_block_texture(BLOCK_AIR, 0, 0));
+        menu_time.set_local_time();
+        console_fill(map_get_block_texture(BLOCK_AIR, 0, 0, menu_time.hour()));
 
         for (int i = 0; i < lines; ++i)
             console_print_center(ppLogo[i], i + top - offset, BACKGROUND_T_BLACK, FOREGROUND_T_GREEN);

@@ -5,6 +5,7 @@
 #include <math.h>
 #include <stdbool.h>
 
+#include "game.hpp"
 #include "save.hpp"
 #include "perlin.hpp"
 #include "player.hpp"
@@ -122,7 +123,8 @@ static COORD render_block(const POINT map_position, const COORD console_position
 
             console_print_color_character(map_get_block_texture(map.ppBlocks[map_position.y][map_position.x].type,
                                                                 ltr ? tx : (TEXTURE_SIZE - tx - 1),
-                                                                utd ? ty : (TEXTURE_SIZE - ty - 1)),
+                                                                utd ? ty : (TEXTURE_SIZE - ty - 1),
+                                                                game::instance()->elapsed_since_start().hour()),
                                           position);
         }
 
@@ -414,7 +416,7 @@ void map_create(void) {
 
         map.size.x = 0;
         map.size.y = MAP_MAX_Y;
-        resize_map(10);
+        resize_map(true);
     }
 }
 
@@ -460,23 +462,22 @@ const bool map_damage_block(const int x, const int y, const int damage) {
     return false;
 }
 
-const color_character_t map_get_block_texture(const block_t block, const int x, const int y) {
+const color_character_t map_get_block_texture(const block_t block, const int x, const int y, const int hour) {
     if (map_is_air_or_star(block)) {
-        if (date_time_elapsed_since_start.hour >= 0 && date_time_elapsed_since_start.hour <= 4 ||
-            date_time_elapsed_since_start.hour >= 20 && date_time_elapsed_since_start.hour <= 24) {
+        if (hour >= 0 && hour <= 4 ||
+            hour >= 20 && hour <= 24) {
             if (block == BLOCK_AIR)
                 return pAir_midnight[y][x];
             else
                 return pStar[y][x];
-        }
-        else if (date_time_elapsed_since_start.hour >= 5 && date_time_elapsed_since_start.hour <= 6)
+        } else if (hour >= 5 && hour <= 6)
             return pAir_dawn[y][x];
-        else if (date_time_elapsed_since_start.hour >= 7 && date_time_elapsed_since_start.hour <= 8 ||
-            date_time_elapsed_since_start.hour >= 18 && date_time_elapsed_since_start.hour <= 19)
+        else if (hour >= 7 && hour <= 8 ||
+                 hour >= 18 && hour <= 19)
             return pAir_sun[y][x];
-        else if (date_time_elapsed_since_start.hour >= 9 && date_time_elapsed_since_start.hour <= 15)
+        else if (hour >= 9 && hour <= 15)
             return pAir_noon[y][x];
-        else if (date_time_elapsed_since_start.hour >= 16 && date_time_elapsed_since_start.hour <= 17)
+        else if (hour >= 16 && hour <= 17)
             return pAir_afternoon[y][x];
     }
 

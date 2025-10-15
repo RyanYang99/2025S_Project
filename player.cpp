@@ -168,7 +168,7 @@ void player_initialize(void) {
     player.facing_direction = 1;
 
     //마우스 클릭
-    Input::subscribe_input_mouse_click(handle_player_actions);
+    input::subscribe_input_mouse_click(handle_player_actions);
     map_subscribe_offset_change(update_player_offset);
 }
 
@@ -193,7 +193,7 @@ static const bool is_walkable(const int x, const int y) {
 
 static void movement(void) {
     //점프 키 확인
-    if (Input::is_key_down(VK_SPACE) && player.is_on_ground) {
+    if (input::is_key_down(VK_SPACE) && player.is_on_ground) {
         player.velocity_y = JUMP_STRENGTH;
         player.is_on_ground = false;
     }
@@ -201,7 +201,7 @@ static void movement(void) {
     //쿨다운 타이머 업데이트
     player.move_cool_down_timer += delta_time;
 
-    const bool is_a_down = Input::is_key_down('A'), is_d_down = Input::is_key_down('D');
+    const bool is_a_down = input::is_key_down('A'), is_d_down = input::is_key_down('D');
 
     //키가 눌렸는지 여부에 따라 애니메이션 상태 설정
     player.is_moving = is_a_down || is_d_down;
@@ -458,7 +458,7 @@ void player_render(void) {
 }
 
 void player_destroy(void) {
-    Input::unsubscribe_input_mouse_click(handle_player_actions);
+    input::unsubscribe_input_mouse_click(handle_player_actions);
     map_unsubscribe_offset_change(update_player_offset);
 }
 

@@ -14,45 +14,40 @@
 #include "crafting_UI.hpp"
 #include "boss_malakh.hpp"
 #include "block_control.hpp"
+#include "ambient_BGM_state.hpp"
 
-typedef enum {
-    AMBIENT_BGM_NONE,
-    AMBIENT_BGM_DAY, //낮 BGM 재생 중
-    AMBIENT_BGM_NIGHT, //밤 BGM 재생 중
-    AMBIENT_BGM_BOSS
-} ambient_BGM_state_t;
+#if _DEBUG
+#include <format>
 
-bool game_exit = false;
+#include "console.hpp"
+#endif
 
-static ambient_BGM_state_t current_BGM_state = AMBIENT_BGM_NONE;
+game *game::instance_{};
 
 #if _DEBUG
 static void render_debug_text(void) {
-    const BACKGROUND_color_t background = BACKGROUND_T_BLACK;
-    const FOREGROUND_color_t foreground = FOREGROUND_T_WHITE;
+    const BACKGROUND_color_t background{ BACKGROUND_T_BLACK };
+    const FOREGROUND_color_t foreground{ FOREGROUND_T_WHITE };
 
-    COORD position = {
-        .X = 0,
-        .Y = console_size.Y - 4
-    };
+    COORD position = { 0, console_size.Y - 4 };
 
-    int fps = -1;
+    int fps{ -1 };
     if (delta_time > 0.0f)
-        fps = (int)(1.0f / delta_time);
-    console_fprint_string("FPS: %d", position, background, foreground, fps);
+        fps = static_cast<int>(1.0f / delta_time);
+    console_fprint_string(std::format("FPS: {}", fps).c_str(), position, background, foreground);
     ++position.Y;
 
-    console_fprint_string("Player: (%d, %d)", position, background, foreground, player.x, player.y);
+    console_fprint_string(std::format("Player: ({}, {})", player.x, player.y).c_str(), position, background, foreground);
     ++position.Y;
 
-    console_fprint_string("Mouse: (%d, %d)", position, background, foreground, block_control_selected_x, block_control_selected_y);
+    console_fprint_string(std::format("Mouse: ({}, {})", block_control_selected_x, block_control_selected_y).c_str(), position, background, foreground);
     ++position.Y;
 
-    console_fprint_string("Boss Spawned: %d", position, background, foreground, boss_spawned);
+    console_fprint_string(std::format("Boss Spawned: {}", boss_spawned).c_str(), position, background, foreground);
 }
 #endif
 
-static void render(void) {
+void game::render(void) {
     map_render();
     if (boss_spawned)
         boss_render();
@@ -62,7 +57,7 @@ static void render(void) {
 
     block_control_render();
     inventory_render();
-    date_time_render();
+    elapsed_since_start_.render();
     save_render();
     crafting_UI_render();
 
@@ -71,11 +66,41 @@ static void render(void) {
 #endif
 }
 
-void game_initialize(void) {
-    game_exit = boss_spawned = false;
-    current_BGM_state = AMBIENT_BGM_NONE;
+void game::update_BGM(void) {
+    if (boss_spawned) {
+        if (current_BGM_state != ambient_BGM_state_t::boss) {
+            sound_play_BGM("boss");
+            current_BGM_state = ambient_BGM_state_t::boss;
+        }
+        return;
+    }
+    else if (current_BGM_state == ambient_BGM_state_t::boss)
+        current_BGM_state = ambient_BGM_state_t::none;
 
-    date_time_initialize();
+    if (elapsed_since_start_.is_night()) { //밤일때
+        if (current_BGM_state != ambient_BGM_state_t::night) {
+            sound_play_BGM("night");
+            current_BGM_state = ambient_BGM_state_t::night;
+        }
+    }
+    else {
+        if (current_BGM_state != ambient_BGM_state_t::day) { //낮일때
+            sound_play_BGM("day");
+            current_BGM_state = ambient_BGM_state_t::day;
+        }
+    }
+}
+
+game *game::instance(void) noexcept {
+    return instance_;
+}
+
+game::game(void) {
+    instance_ = this;
+
+    if (pSave_current)
+        elapsed_since_start_ = pSave_current->game_time;
+
     map_create();
     player_initialize();
     mob_initialize();
@@ -85,38 +110,21 @@ void game_initialize(void) {
     save_free();
 }
 
-static void update_BGM(void) {
-    if (boss_spawned) {
-        if (current_BGM_state != AMBIENT_BGM_BOSS) {
-            sound_play_BGM("boss");
-            current_BGM_state = AMBIENT_BGM_BOSS;
-        }
-        return;
-    }
-    else if (current_BGM_state == AMBIENT_BGM_BOSS)
-        current_BGM_state = AMBIENT_BGM_NONE;
-
-    if (date_time_is_night()) { //밤일때
-        if (current_BGM_state != AMBIENT_BGM_NIGHT) {
-            sound_play_BGM("night");
-            current_BGM_state = AMBIENT_BGM_NIGHT;
-        }
-    }
-    else {
-        if (current_BGM_state != AMBIENT_BGM_DAY) { //낮일때
-            sound_play_BGM("day");
-            current_BGM_state = AMBIENT_BGM_DAY;
-        }
-    }
+const date_time &game::elapsed_since_start(void) const noexcept {
+    return elapsed_since_start_;
 }
 
-void game_update(void) {
-    while (!game_exit) {
+void game::exit(const bool _exit) noexcept {
+    exit_ = _exit;
+}
+
+void game::update(void) {
+    while (!exit_) {
         delta_time_update();
 
         console_update();
-        Input::update();
-        date_time_update();
+        input::update();
+        elapsed_since_start_.update();
         update_BGM();
 
         player_update();
@@ -134,7 +142,9 @@ void game_update(void) {
     }
 }
 
-void game_destroy(void) {
+game::~game(void) {
+    instance_ = nullptr;
+
     mob_destroy();
     boss_destroy();
     astar_destroy();

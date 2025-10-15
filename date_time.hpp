@@ -1,17 +1,22 @@
 ﻿#pragma once
 
-#include <stdbool.h>
+class date_time {
+private:
+    int day_{}, hour_{ 12 }, minute_{};
+    float second_{};
 
-typedef struct {
-    int day, hour, minute;
-    float second;
-} date_time_t;
+public:
+    int day(void) const noexcept;
+    int hour(void) const noexcept;
+    int minute(void) const noexcept;
+    float second(void) const noexcept;
 
-extern date_time_t date_time_elapsed_since_start;
+    void set_local_time(void) noexcept;
 
-void date_time_initialize(void);
-void date_time_update(void);
-void date_time_render(void);
+    void update(void) noexcept;
+    void render(void);
 
-const bool date_time_is_night(void);
-void date_time_save(void);
+    bool is_night(void) const noexcept;
+
+    void save(void) const noexcept;
+};

@@ -10,7 +10,7 @@
 
 #pragma pack(push, 1)
 typedef struct {
-    date_time_t game_time;
+    date_time game_time;
 
     int x, y, HP, max_HP;
 

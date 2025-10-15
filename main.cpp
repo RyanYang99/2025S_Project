@@ -76,11 +76,11 @@ int main(void) {
         } else
             save_free();
 
-        Input::initialize();
-        game_initialize();
-        game_update();
-        game_destroy();
-        Input::destroy();
+        input::initialize();
+
+        game game_{};
+        game_.update();
+        input::destroy();
     }
 
     database_destroy();

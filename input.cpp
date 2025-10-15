@@ -3,36 +3,35 @@
 
 #include <conio.h>
 #include <Windows.h>
-#include <consoleapi.h>
-#include <processenv.h>
 
 #include "console.hpp"
+#include "callback.hpp"
 
-#define CALLBACK_MEMBER_INITIALIZE(name, return_type) Callback<name##_t, return_type> Input::##name{}
+#define CALLBACK_MEMBER_INITIALIZE(name, return_type) Callback<name##_t, return_type> input::##name{}
 
 #define CALLBACK_METHODS_DEFINE(name) \
-void Input::subscribe_##name(const name##_t callback) { \
+void input::subscribe_##name(const name##_t callback) { \
     name##.subscribe(callback); \
 } \
 \
-void Input::unsubscribe_##name(const name##_t callback) { \
+void input::unsubscribe_##name(const name##_t callback) noexcept { \
     name##.unsubscribe(callback); \
 }
 
-bool Input::keyboard_pressed_{};
-char Input::input_character_{}, Input::input_special_character_{};
+bool input::keyboard_pressed_{};
+char input::input_character_{}, input::input_special_character_{};
 
-HANDLE Input::input_handle{};
-DWORD Input::original_mode{};
-HHOOK Input::hook{};
+HANDLE input::input_handle{};
+DWORD input::original_mode{};
+HHOOK input::hook{};
 
 CALLBACK_MEMBER_INITIALIZE(input_mouse_click, bool);
 CALLBACK_MEMBER_INITIALIZE(input_mouse_position, COORD);
 CALLBACK_MEMBER_INITIALIZE(input_mouse_in_console, bool);
 
-LRESULT CALLBACK Input::windows_callback(const int nCode, const WPARAM wParam, const LPARAM lParam) {
+LRESULT CALLBACK input::windows_callback(const int nCode, const WPARAM wParam, const LPARAM lParam) {
     if (nCode == HC_ACTION) {
-        const POINT point = reinterpret_cast<MSLLHOOKSTRUCT *>(lParam)->pt;
+        const POINT point{ reinterpret_cast<MSLLHOOKSTRUCT *>(lParam)->pt };
         input_mouse_position.call(console_convert_from_monitor(point));
 
         if (wParam == WM_LBUTTONUP)
@@ -46,7 +45,7 @@ LRESULT CALLBACK Input::windows_callback(const int nCode, const WPARAM wParam, c
     return CallNextHookEx(NULL, nCode, wParam, lParam);
 }
 
-void Input::initialize(void) noexcept {
+void input::initialize(void) noexcept {
     input_handle = GetStdHandle(STD_INPUT_HANDLE);
     GetConsoleMode(input_handle, &original_mode);
     SetConsoleMode(input_handle, ENABLE_EXTENDED_FLAGS | ENABLE_MOUSE_INPUT);
@@ -54,7 +53,23 @@ void Input::initialize(void) noexcept {
     hook = SetWindowsHookEx(WH_MOUSE_LL, windows_callback, NULL, 0);
 }
 
-void Input::update(void) noexcept {
+bool input::keyboard_pressed(void) noexcept {
+    return keyboard_pressed_;
+}
+
+char input::input_character(void) noexcept {
+    return input_character_;
+}
+
+char input::input_special_character(void) noexcept {
+    return input_special_character_;
+}
+
+bool input::is_key_down(const int virtual_key_code) noexcept {
+    return GetAsyncKeyState(virtual_key_code) & 0x8000;
+}
+
+void input::update(void) noexcept {
     MSG msg{};
     while (PeekMessage(&msg, NULL, WM_MOUSEFIRST, WM_MOUSELAST, PM_REMOVE)) {
         TranslateMessage(&msg);
@@ -73,27 +88,11 @@ void Input::update(void) noexcept {
     }
 }
 
-bool Input::is_key_down(const int virtual_key_code) noexcept {
-    return GetAsyncKeyState(virtual_key_code) & 0x8000;
-}
-
 CALLBACK_METHODS_DEFINE(input_mouse_click)
 CALLBACK_METHODS_DEFINE(input_mouse_position)
 CALLBACK_METHODS_DEFINE(input_mouse_in_console)
 
-bool Input::keyboard_pressed(void) noexcept {
-    return keyboard_pressed_;
-}
-
-char Input::input_character(void) noexcept {
-    return input_character_;
-}
-
-char Input::input_special_character(void) noexcept {
-    return input_special_character_;
-}
-
-void Input::destroy(void) noexcept {
+void input::destroy(void) noexcept {
     SetConsoleMode(input_handle, original_mode);
 
     input_mouse_click.clear();
@@ -104,11 +103,11 @@ void Input::destroy(void) noexcept {
 }
 
 #if _DEBUG
-void Input::pause_hook(void) noexcept {
+void input::pause_hook(void) noexcept {
     UnhookWindowsHookEx(hook);
 }
 
-void Input::resume_hook(void) noexcept {
+void input::resume_hook(void) noexcept {
     hook = SetWindowsHookEx(WH_MOUSE_LL, windows_callback, NULL, 0);
 }
 #endif

@@ -1,83 +1,89 @@
 ﻿#include "leak.hpp"
 #include "date_time.hpp"
 
+#include <ctime>
+#include <string>
+#include <format>
+
 #include "save.hpp"
 #include "delta.hpp"
 #include "console.hpp"
-#include "formatter.hpp"
 
-date_time_t date_time_elapsed_since_start = { 0 };
-
-void date_time_initialize(void) {
-    if (pSave_current)
-        date_time_elapsed_since_start = pSave_current->game_time;
-    else {
-        date_time_elapsed_since_start.second = 0.0f;
-        date_time_elapsed_since_start.minute = date_time_elapsed_since_start.day = 0;
-        date_time_elapsed_since_start.hour = 12;
-    }
+int date_time::day(void) const noexcept {
+    return day_;
 }
 
-void date_time_update(void) {
-    date_time_elapsed_since_start.second += delta_time * (86400.0f / 1200.0f); //1일당 게임 초 / 1일당 실제 초
+int date_time::hour(void) const noexcept {
+    return hour_;
+}
+
+int date_time::minute(void) const noexcept {
+    return minute_;
+}
+
+float date_time::second(void) const noexcept {
+    return second_;
+}
+
+void date_time::set_local_time(void) noexcept {
+    const time_t now{ time(nullptr) };
+    tm time_information{};
+    localtime_s(&time_information, &now);
+
+    hour_ = time_information.tm_hour;
+}
+
+void date_time::update(void) noexcept {
+    second_ += delta_time * (86400.0f / 1200.0f); //1일당 게임 초 / 1일당 실제 초
     //date_time_elapsed_since_start.second += delta_time * (86400.0f / 60.0f);
 
-    if (date_time_elapsed_since_start.second >= 60.0f) {
-        const int minutes = (int)(date_time_elapsed_since_start.second / 60.0f);
+    if (second_ >= 60.0f) {
+        const int minutes = static_cast<int>(second_ / 60.0f);
 
-        date_time_elapsed_since_start.minute += minutes;
-        date_time_elapsed_since_start.second -= minutes * 60.0f;
+        minute_ += minutes;
+        second_ -= minutes * 60.0f;
     }
 
-    if (date_time_elapsed_since_start.minute >= 60) {
-        date_time_elapsed_since_start.hour += date_time_elapsed_since_start.minute / 60;
-        date_time_elapsed_since_start.minute %= 60;
+    if (minute_ >= 60) {
+        hour_ += minute_ / 60;
+        minute_ %= 60;
     }
 
-    if (date_time_elapsed_since_start.hour >= 24) {
-        date_time_elapsed_since_start.day += date_time_elapsed_since_start.hour / 24;
-        date_time_elapsed_since_start.hour %= 24;
+    if (hour_ >= 24) {
+        day_ += hour_ / 24;
+        hour_ %= 24;
     }
 }
 
-void date_time_render(void) {
-    static float blink = 0.0f;
+void date_time::render(void) {
+    static float blink{};
     static char blink_character{ ' ' };
 
     blink += delta_time;
     if (blink >= 2.0f) {
         blink = 0.0f;
         blink_character = ' ';
-    }
-    else if (blink >= 1.0f)
+    } else if (blink >= 1.0f)
         blink_character = ':';
 
-    char * const pDay = format_string("Day %d", date_time_elapsed_since_start.day),
-         * const pTime = format_string("%02d%c%02d", date_time_elapsed_since_start.hour, blink_character, date_time_elapsed_since_start.minute);
+    const std::string sDay{ std::format("Day {}", day_) },
+                      time{ std::format("{}{}{}", hour_, blink_character, minute_) };
 
-    COORD position = {
-        .X = (SHORT)(console_size.X - strlen(pDay))
-    };
-    console_fprint_string(pDay, position, BACKGROUND_T_BLACK, FOREGROUND_T_WHITE);
+    COORD position = { static_cast<SHORT>(console_size.X - sDay.length()), 0 };
+    console_fprint_string(sDay.c_str(), position, BACKGROUND_T_BLACK, FOREGROUND_T_WHITE);
 
-    position.X = (SHORT)(console_size.X - strlen(pTime));
+    position.X = static_cast<SHORT>(console_size.X - time.length());
     ++position.Y;
-    console_fprint_string(pTime, position, BACKGROUND_T_BLACK, FOREGROUND_T_WHITE);
-
-    free(pDay);
-    free(pTime);
+    console_fprint_string(time.c_str(), position, BACKGROUND_T_BLACK, FOREGROUND_T_WHITE);
 }
 
-const bool date_time_is_night(void) {
-    const int current_hour = date_time_elapsed_since_start.hour;
-
-    //21시부터 6시까지 밤시간
-    return (current_hour >= 21 || current_hour <= 6);
+bool date_time::is_night(void) const noexcept {
+    return hour_ >= 21 || hour_ <= 6;
 }
 
-void date_time_save(void) {
+void date_time::save(void) const noexcept {
     if (!pSave_current)
         save_instantiate();
 
-    pSave_current->game_time = date_time_elapsed_since_start;
+    pSave_current->game_time = *this;
 }

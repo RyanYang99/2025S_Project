@@ -197,7 +197,7 @@ void boss_initialize(const int start_x, const int start_y, const int hp, const i
     for (int i = 0; i < MAX_BOSS_DAMAGE_TEXTS; ++i)
         pBoss_damage_texts[i].active = false;
 
-    Input::subscribe_input_mouse_click(boss_handle_player_attack);
+    input::subscribe_input_mouse_click(boss_handle_player_attack);
     map_subscribe_offset_change(boss_handle_offset);
 }
 
@@ -557,6 +557,6 @@ void boss_render(void) {
 }
 
 void boss_destroy(void) {
-    Input::subscribe_input_mouse_click(boss_handle_player_attack);
+    input::subscribe_input_mouse_click(boss_handle_player_attack);
     map_unsubscribe_offset_change(boss_handle_offset);
 }

@@ -62,10 +62,10 @@ static void write_save(LPCWSTR const pPath) {
 }
 
 void save_input(void) {
-    if (!Input::keyboard_pressed())
+    if (!input::keyboard_pressed())
         return;
 
-    const char input_character{ Input::input_character() };
+    const char input_character{ input::input_character() };
     if (input_character == VK_ESCAPE) {
         if (!should_render_save_menu)
             get_save_spots();
@@ -74,12 +74,12 @@ void save_input(void) {
         pMessage = "";
     } else if (should_render_save_menu) {
         if (tolower(input_character) == 'q')
-            game_exit = true;
+            game::instance()->exit(true);
         else {
             const int number = input_character - '0';
 
             if (number >= 1 && number <= MAX_SAVE_SPOTS) {
-                date_time_save();
+                game::instance()->elapsed_since_start().save();
                 player_save();
                 inventory_save();
                 map_save();
@@ -116,7 +116,7 @@ void save_render(void) {
     int y = console_size.Y / 2 - (MAX_SAVE_SPOTS + 2 + has_message) / 2;
     console_print_center("=== Save ===", y++, BACKGROUND_T_BLACK, FOREGROUND_T_BLUE);
     if (has_message)
-        console_print_center("%s", y++, BACKGROUND_T_BLACK, FOREGROUND_T_CYAN, pMessage);
+        console_print_center("%s", y++, BACKGROUND_T_BLACK, FOREGROUND_T_CYAN, pMessage.c_str());
     console_print_center("[1 ~ 3]: Save, [ESC]: Close [Q]: Main Menu", y++, BACKGROUND_T_BLACK, FOREGROUND_T_BLUE);
 
     for (int i = 0; i < MAX_SAVE_SPOTS; ++i)
