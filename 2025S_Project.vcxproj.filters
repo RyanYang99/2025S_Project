@@ -16,7 +16,7 @@
     <ClCompile Include="date_time.cpp">
       <Filter>Source File</Filter>
     </ClCompile>
-    <ClCompile Include="delta.cpp">
+    <ClCompile Include="delta_time.cpp">
       <Filter>Source File</Filter>
     </ClCompile>
     <ClCompile Include="formatter.cpp">
@@ -84,7 +84,7 @@
     <ClInclude Include="date_time.hpp">
       <Filter>Header File</Filter>
     </ClInclude>
-    <ClInclude Include="delta.hpp">
+    <ClInclude Include="delta_time.hpp">
       <Filter>Header File</Filter>
     </ClInclude>
     <ClInclude Include="formatter.hpp">

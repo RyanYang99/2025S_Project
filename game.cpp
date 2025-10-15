@@ -4,7 +4,7 @@
 #include "mob.hpp"
 #include "map.hpp"
 #include "save.hpp"
-#include "delta.hpp"
+#include "delta_time.hpp"
 #include "astar.hpp"
 #include "sound.hpp"
 #include "input.hpp"
@@ -32,8 +32,8 @@ static void render_debug_text(void) {
     COORD position = { 0, console_size.Y - 4 };
 
     int fps{ -1 };
-    if (delta_time > 0.0f)
-        fps = static_cast<int>(1.0f / delta_time);
+    if (delta_time_t::delta_time > 0.0f)
+        fps = static_cast<int>(1.0f / delta_time_t::delta_time);
     console_fprint_string(std::format("FPS: {}", fps).c_str(), position, background, foreground);
     ++position.Y;
 
@@ -120,7 +120,7 @@ void game::exit(const bool _exit) noexcept {
 
 void game::update(void) {
     while (!exit_) {
-        delta_time_update();
+        delta_time_t::update();
 
         console_update();
         input::update();

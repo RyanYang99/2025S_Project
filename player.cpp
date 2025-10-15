@@ -6,7 +6,7 @@
 #include "tool.hpp"
 #include "save.hpp"
 #include "input.hpp"
-#include "delta.hpp"
+#include "delta_time.hpp"
 #include "sound.hpp"
 #include "console.hpp"
 #include "formatter.hpp"
@@ -199,7 +199,7 @@ static void movement(void) {
     }
 
     //쿨다운 타이머 업데이트
-    player.move_cool_down_timer += delta_time;
+    player.move_cool_down_timer += delta_time_t::delta_time;
 
     const bool is_a_down = input::is_key_down('A'), is_d_down = input::is_key_down('D');
 
@@ -239,10 +239,10 @@ static void update_damage_texts(void) {
     for (int i = 0; i < MAX_DAMAGE_TEXTS; ++i) {
         if (pDamage_texts[i].active) {
             //위로 움직이는 효과
-            pDamage_texts[i].precise_y -= delta_time * 5.0f; //움직이는 속도
+            pDamage_texts[i].precise_y -= delta_time_t::delta_time * 5.0f; //움직이는 속도
 
             //타이머 감소
-            pDamage_texts[i].timer -= delta_time;
+            pDamage_texts[i].timer -= delta_time_t::delta_time;
             if (pDamage_texts[i].timer <= 0.0f)
                 pDamage_texts[i].active = false; //시간이 지나면 비활성화
         }
@@ -258,7 +258,7 @@ void player_update(void) {
 
     //스윙 타이머 업데이트
     if (player.is_swinging) {
-        player.swing_timer -= delta_time;
+        player.swing_timer -= delta_time_t::delta_time;
         if (player.swing_timer <= 0.0f)
             player.is_swinging = false;
     }
@@ -278,10 +278,10 @@ void player_update(void) {
 
     //중력 적용 (공중에 있을 때만)
     if (!player.is_on_ground)
-        player.velocity_y += GRAVITY * delta_time;
+        player.velocity_y += GRAVITY * delta_time_t::delta_time;
 
     //속도에 따라 정밀 y좌표 업데이트
-    player.precise_y += player.velocity_y * delta_time;
+    player.precise_y += player.velocity_y * delta_time_t::delta_time;
 
     //정밀 y좌표를 정수 y좌표로 변환하여 충돌 처리
     int new_y = (int)player.precise_y;
@@ -305,7 +305,7 @@ void player_update(void) {
 
     //3. 애니메이션 업데이트
     if (player.is_moving) {
-        player.animation_timer += delta_time;
+        player.animation_timer += delta_time_t::delta_time;
         if (player.animation_timer >= 1.0f / ANIMATION_SPEED) {
             player.animation_timer = 0.0f;
             player.current_frame = (player.current_frame + 1) % 2;

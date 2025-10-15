@@ -109,7 +109,7 @@
     <ClCompile Include="boss_malakh.cpp" />
     <ClCompile Include="console.cpp" />
     <ClCompile Include="crafting_UI.cpp" />
-    <ClCompile Include="delta.cpp" />
+    <ClCompile Include="delta_time.cpp" />
     <ClCompile Include="formatter.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="input.cpp" />
@@ -136,7 +136,7 @@
     <ClInclude Include="console.hpp" />
     <ClInclude Include="crafting_UI.hpp" />
     <ClInclude Include="date_time.hpp" />
-    <ClInclude Include="delta.hpp" />
+    <ClInclude Include="delta_time.hpp" />
     <ClInclude Include="direction.hpp" />
     <ClInclude Include="formatter.hpp" />
     <ClInclude Include="game.hpp" />

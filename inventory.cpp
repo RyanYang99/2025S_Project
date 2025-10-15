@@ -10,7 +10,7 @@
 #include "item.hpp"
 #include "tool.hpp"
 #include "input.hpp"
-#include "delta.hpp"
+#include "delta_time.hpp"
 #include "console.hpp"
 
 #define INVENTORY_BACKGROUND BACKGROUND_T_BLACK
@@ -181,7 +181,7 @@ static void render_hotbar(void) {
             should_render_name = false;
             name_render_timer = 0.0f;
         }
-        name_render_timer += delta_time;
+        name_render_timer += delta_time_t::delta_time;
 
         const item_information_t *pInformation = database_find_item_by_index(inventory.pHotbar[inventory.selected_hotbar_index].pPlayer_Item->item_DB_index);
         console_print_center("%s", position.Y - 2, BACKGROUND_T_BLACK, FOREGROUND_T_WHITE, pInformation->name);
@@ -251,7 +251,7 @@ void inventory_render(void) {
     if (!is_inventory_open)
         return;
 
-    blink_time += delta_time;
+    blink_time += delta_time_t::delta_time;
     if (blink_time >= 0.5f && blink_time < 1.0f)
         blink = true;
     else if (blink_time >= 1.0f) {

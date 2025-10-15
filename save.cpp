@@ -10,7 +10,7 @@
 #include <ShlObj_core.h>
 #include "game.hpp"
 #include "input.hpp"
-#include "delta.hpp"
+#include "delta_time.hpp"
 #include "player.hpp"
 
 static bool should_render_save_menu = false, pUsed[MAX_SAVE_SPOTS] = { 0 };
@@ -107,7 +107,7 @@ void save_render(void) {
 
     const bool has_message = strcmp(pMessage.c_str(), "");
     if (has_message)
-        timer += delta_time;
+        timer += delta_time_t::delta_time;
     if (timer >= 2.0f) {
         timer = 0.0f;
         pMessage = "";
