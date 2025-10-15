@@ -5,6 +5,8 @@
 
 #include <time.h>
 #include <conio.h>
+#include <string>
+#include <format>
 
 #include "map.hpp"
 #include "save.hpp"
@@ -129,9 +131,9 @@ const bool main_menu_load_menu(void) {
         console_print_center("[Space]: Load, [ESC]: Back", y++, BACKGROUND_T_BLACK, FOREGROUND_T_CYAN);
 
         for (int i = 0; i < MAX_SAVE_SPOTS; ++i) {
-            char * const pString = format_string("Save Slot %d: %s", i, pUsed[i] ? "Used" : "Empty");
-            PRINT_SELECTION(pString, y, i, BACKGROUND_T_BLACK, FOREGROUND_T_CYAN);
-            free(pString);
+            const std::string string{ std::format("Save Slot {}: {}", i, pUsed[i] ? "Used" : "Empty") };
+
+            PRINT_SELECTION(string.c_str(), y, i, BACKGROUND_T_BLACK, FOREGROUND_T_CYAN);
         }
 
         if (_kbhit()) {

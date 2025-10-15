@@ -1,7 +1,11 @@
 ﻿#include "leak.hpp"
 #include "player.hpp"
 
+#include <string>
+#include <format>
+
 #include <Windows.h>
+
 #include "map.hpp"
 #include "tool.hpp"
 #include "save.hpp"
@@ -329,10 +333,9 @@ static void render_damage_texts(void) {
                 .Y = (SHORT)(center_position.Y - (PLAYER_SPRITE_HEIGHT / 2) - 1 - (player.precise_y - pDamage_texts[i].precise_y))
             };
 
-            char * const pText = format_string(" Hit - %d! ", pDamage_texts[i].damage_value);
-            draw_position.X -= (SHORT)(strlen(pText) / 2);
-            console_fprint_string(pText, draw_position, BACKGROUND_T_BLACK, FOREGROUND_T_RED);
-            free(pText);
+            const std::string text{ std::format(" Hit - {} ", pDamage_texts[i].damage_value) };
+            draw_position.X -= (SHORT)(text.length() / 2);
+            console_fprint_string(text.c_str(), draw_position, BACKGROUND_T_BLACK, FOREGROUND_T_RED);
         }
     }
 }

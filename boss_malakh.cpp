@@ -1,6 +1,9 @@
 ﻿#include "leak.hpp"
 #include "boss_malakh.hpp"
 
+#include <string>
+#include <format>
+
 #include "input.hpp"
 #include "map.hpp"
 #include "tool.hpp"
@@ -10,7 +13,6 @@
 #include "player.hpp"
 #include "console.hpp"
 #include "inventory.hpp"
-#include "formatter.hpp"
 #include "block_control.hpp"
 #include "item_database.hpp"
 
@@ -539,17 +541,16 @@ void boss_render(void) {
                 }
 
     //보스 체력 바 렌더링
-    char * const pText = format_string("HP: %d / %d", boss.hp, boss.max_hp);
+    const std::string text{ std::format("HP: {} / {}", boss.hp, boss.max_hp) };
     COORD hp_position = {
-        .X = (SHORT)(boss_screen_base_x + (BOSS_SPRITE_WIDTH * BOSS_DRAW_SCALE / 2.0f) - (int)(strlen(pText) / 2.0f)),
+        .X = (SHORT)(boss_screen_base_x + (BOSS_SPRITE_WIDTH * BOSS_DRAW_SCALE / 2.0f) - (int)(text.length() / 2.0f)),
         .Y = (SHORT)(boss_screen_base_y - 1)
     };
     if (hp_position.X < 0)
         hp_position.X = 0;
     if (hp_position.Y < 0)
         hp_position.Y = 0;
-    console_fprint_string(pText, hp_position, BACKGROUND_T_BLACK, FOREGROUND_T_WHITE);
-    free(pText);
+    console_fprint_string(text.c_str(), hp_position, BACKGROUND_T_BLACK, FOREGROUND_T_WHITE);
 
     //패턴 렌더링
     boss_render_pattern();
