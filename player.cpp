@@ -45,67 +45,67 @@ static damage_text_t pDamage_texts[MAX_DAMAGE_TEXTS] = { 0 };
 */
 static const color_character_t pPlayer_sprite_stand[PLAYER_SPRITE_HEIGHT][PLAYER_SPRITE_WIDTH] = {
     //머리 (위:머리카락, 아래:피부)
-    { { ' ', 0, 0 }, { L'▄', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW }, { L'▄', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW }, { L'▄', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { L'▄', BG::dark_yellow, FG::dark_yellow }, { L'▄', BG::dark_yellow, FG::dark_yellow }, { L'▄', BG::dark_yellow, FG::dark_yellow }, { ' ', 0, 0 } },
     //몸통과 팔
-    { { L'█', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW }, {L'█', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_WHITE}, {L'▀', BACKGROUND_color_t::BACKGROUND_T_WHITE, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW}, {L'█', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_WHITE}, { L'█', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW } },
+    { { L'█', BG::dark_yellow, FG::dark_yellow }, {L'█', BG::dark_yellow, FG::white}, {L'▀', BG::white, FG::dark_yellow}, {L'█', BG::dark_yellow, FG::white}, { L'█', BG::dark_yellow, FG::dark_yellow } },
     //허리, 바지
-    { { L'█', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW }, { L'█', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE }, { L'█', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE }, { L'█', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE }, { L'█', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW } },
+    { { L'█', BG::dark_yellow, FG::dark_yellow }, { L'█', BG::black, FG::white }, { L'█', BG::black, FG::white }, { L'█', BG::black, FG::white }, { L'█', BG::dark_yellow, FG::dark_yellow } },
     //다리
-    { { ' ', 0, 0 }, { L'▓', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_GRAY }, { ' ', 0, 0 }, { L'▓', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_GRAY }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { L'▓', BG::black, FG::gray }, { ' ', 0, 0 }, { L'▓', BG::black, FG::gray }, { ' ', 0, 0 } },
     //신발
-    { { ' ', 0, 0 }, { L'█', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_BLACK }, { ' ', 0, 0 }, { L'█', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_BLACK }, { ' ', 0, 0 } }
+    { { ' ', 0, 0 }, { L'█', BG::black, FG::black }, { ' ', 0, 0 }, { L'█', BG::black, FG::black }, { ' ', 0, 0 } }
 },
 //걷기 애니메이션 (2 프레임)
 pPlayer_sprite_walk[2][PLAYER_SPRITE_HEIGHT][PLAYER_SPRITE_WIDTH] = {
     //프레임 0
     {
-        { { ' ', 0, 0 }, { L'▄', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW }, { L'▄', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW }, { L'▄', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW }, { ' ', 0, 0 } },
-        { { L'█', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW }, {L'█', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_WHITE}, {L'▀', BACKGROUND_color_t::BACKGROUND_T_WHITE, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW}, {L'█', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_WHITE}, { ' ' , 0, 0 } },
-        { { ' ', 0, 0 }, { L'█', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE }, { L'█', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE }, { L'█', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE }, { ' ', 0, 0 } },
-        { { ' ', 0, 0 }, { L'▓', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_GRAY }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
-        { { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_BLACK }, { ' ', 0, 0 }, { ' ', 0, 0 } }
+        { { ' ', 0, 0 }, { L'▄', BG::dark_yellow, FG::dark_yellow }, { L'▄', BG::dark_yellow, FG::dark_yellow }, { L'▄', BG::dark_yellow, FG::dark_yellow }, { ' ', 0, 0 } },
+        { { L'█', BG::dark_yellow, FG::dark_yellow }, {L'█', BG::dark_yellow, FG::white}, {L'▀', BG::white, FG::dark_yellow}, {L'█', BG::dark_yellow, FG::white}, { ' ' , 0, 0 } },
+        { { ' ', 0, 0 }, { L'█', BG::black, FG::white }, { L'█', BG::black, FG::white }, { L'█', BG::black, FG::white }, { ' ', 0, 0 } },
+        { { ' ', 0, 0 }, { L'▓', BG::black, FG::gray }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
+        { { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::black, FG::black }, { ' ', 0, 0 }, { ' ', 0, 0 } }
     },
     //프레임 1
     {
-        { { ' ', 0, 0 }, { L'▄', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW }, { L'▄', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW }, { L'▄', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW }, { ' ', 0, 0 } },
-        { {L' '}, {L'█', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_WHITE}, {L'▀', BACKGROUND_color_t::BACKGROUND_T_WHITE, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW}, {L'█', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_WHITE}, { L'█', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW } },
-        { { ' ', 0, 0 }, { L'█', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE }, { L'█', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE }, { L'█', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE }, { ' ', 0, 0 } },
-        { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'▓', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_GRAY }, { ' ', 0, 0 } },
-        { { L'█', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_BLACK }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } }
+        { { ' ', 0, 0 }, { L'▄', BG::dark_yellow, FG::dark_yellow }, { L'▄', BG::dark_yellow, FG::dark_yellow }, { L'▄', BG::dark_yellow, FG::dark_yellow }, { ' ', 0, 0 } },
+        { {L' '}, {L'█', BG::dark_yellow, FG::white}, {L'▀', BG::white, FG::dark_yellow}, {L'█', BG::dark_yellow, FG::white}, { L'█', BG::dark_yellow, FG::dark_yellow } },
+        { { ' ', 0, 0 }, { L'█', BG::black, FG::white }, { L'█', BG::black, FG::white }, { L'█', BG::black, FG::white }, { ' ', 0, 0 } },
+        { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'▓', BG::black, FG::gray }, { ' ', 0, 0 } },
+        { { L'█', BG::black, FG::black }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } }
     }
 },
 //무장하고 서 있는 자세
 pPlayer_sprite_stand_armed[PLAYER_SPRITE_HEIGHT][PLAYER_SPRITE_WIDTH] = {
     //머리
-    { { ' ', 0, 0 }, { L'▄', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW }, { L'▄', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW }, { L'▄', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { L'▄', BG::dark_yellow, FG::dark_yellow }, { L'▄', BG::dark_yellow, FG::dark_yellow }, { L'▄', BG::dark_yellow, FG::dark_yellow }, { ' ', 0, 0 } },
     //몸통과 옆으로 뻗은 오른팔
-    { { L'█', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW }, {L'█', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_WHITE}, {L'▀', BACKGROUND_color_t::BACKGROUND_T_WHITE, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW}, {L'█', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_WHITE}, { L'█', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW } },
+    { { L'█', BG::dark_yellow, FG::dark_yellow }, {L'█', BG::dark_yellow, FG::white}, {L'▀', BG::white, FG::dark_yellow}, {L'█', BG::dark_yellow, FG::white}, { L'█', BG::dark_yellow, FG::dark_yellow } },
     //허리, 바지
-    { { L'█', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW }, { L'█', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE }, { L'█', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE }, { L'█', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE }, { ' ', 0, 0 } },
+    { { L'█', BG::dark_yellow, FG::dark_yellow }, { L'█', BG::black, FG::white }, { L'█', BG::black, FG::white }, { L'█', BG::black, FG::white }, { ' ', 0, 0 } },
     //다리
-    { { ' ', 0, 0 }, { L'▓', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_GRAY }, { ' ', 0, 0 }, { L'▓', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_GRAY }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { L'▓', BG::black, FG::gray }, { ' ', 0, 0 }, { L'▓', BG::black, FG::gray }, { ' ', 0, 0 } },
     //신발
-    { { ' ', 0, 0 }, { L'█', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_BLACK }, { ' ', 0, 0 }, { L'█', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_BLACK }, { ' ', 0, 0 } }
+    { { ' ', 0, 0 }, { L'█', BG::black, FG::black }, { ' ', 0, 0 }, { L'█', BG::black, FG::black }, { ' ', 0, 0 } }
 },
 //무장하고 걷는 애니메이션
 pPlayer_sprite_walk_armed[2][PLAYER_SPRITE_HEIGHT][PLAYER_SPRITE_WIDTH] = {
     //프레임 1
     {
-        { { ' ', 0, 0 }, { L'▄', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW }, { L'▄', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW }, { L'▄', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW }, { ' ', 0, 0 } },
+        { { ' ', 0, 0 }, { L'▄', BG::dark_yellow, FG::dark_yellow }, { L'▄', BG::dark_yellow, FG::dark_yellow }, { L'▄', BG::dark_yellow, FG::dark_yellow }, { ' ', 0, 0 } },
         //왼팔 뒤로, 오른팔은 고정
-        { { ' ', 0, 0 }, {L'█', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_WHITE}, {L'▀', BACKGROUND_color_t::BACKGROUND_T_WHITE, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW}, {L'█', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_WHITE}, { L'█', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW } },
-        { { ' ', 0, 0 }, { L'█', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE }, { L'█', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE }, { L'█', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE }, { ' ', 0, 0 } },
-        { { ' ', 0, 0 }, { L'▓', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_GRAY }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
-        { { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_BLACK }, { ' ', 0, 0 }, { ' ', 0, 0 } }
+        { { ' ', 0, 0 }, {L'█', BG::dark_yellow, FG::white}, {L'▀', BG::white, FG::dark_yellow}, {L'█', BG::dark_yellow, FG::white}, { L'█', BG::dark_yellow, FG::dark_yellow } },
+        { { ' ', 0, 0 }, { L'█', BG::black, FG::white }, { L'█', BG::black, FG::white }, { L'█', BG::black, FG::white }, { ' ', 0, 0 } },
+        { { ' ', 0, 0 }, { L'▓', BG::black, FG::gray }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
+        { { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::black, FG::black }, { ' ', 0, 0 }, { ' ', 0, 0 } }
     },
     //프레임 2
     {
-        { { ' ', 0, 0 }, { L'▄', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW }, { L'▄', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW }, { L'▄', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW }, { ' ', 0, 0 } },
+        { { ' ', 0, 0 }, { L'▄', BG::dark_yellow, FG::dark_yellow }, { L'▄', BG::dark_yellow, FG::dark_yellow }, { L'▄', BG::dark_yellow, FG::dark_yellow }, { ' ', 0, 0 } },
         //왼팔 앞으로, 오른팔은 고정
-        { { L'█', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW }, {L'█', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_WHITE}, {L'▀', BACKGROUND_color_t::BACKGROUND_T_WHITE, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW}, {L'█', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_WHITE}, { L'█', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW } },
-        { { ' ', 0, 0 }, { L'█', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE }, { L'█', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE }, { L'█', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE }, { ' ', 0, 0 } },
-        { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'▓', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_GRAY }, { ' ', 0, 0 } },
-        { { L'█', BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_BLACK }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } }
+        { { L'█', BG::dark_yellow, FG::dark_yellow }, {L'█', BG::dark_yellow, FG::white}, {L'▀', BG::white, FG::dark_yellow}, {L'█', BG::dark_yellow, FG::white}, { L'█', BG::dark_yellow, FG::dark_yellow } },
+        { { ' ', 0, 0 }, { L'█', BG::black, FG::white }, { L'█', BG::black, FG::white }, { L'█', BG::black, FG::white }, { ' ', 0, 0 } },
+        { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'▓', BG::black, FG::gray }, { ' ', 0, 0 } },
+        { { L'█', BG::black, FG::black }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } }
     }
 };
 
@@ -335,7 +335,7 @@ static void render_damage_texts(void) {
 
             const std::string text{ std::format(" Hit - {} ", pDamage_texts[i].damage_value) };
             draw_position.X -= (SHORT)(text.length() / 2);
-            console::print(text, draw_position, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_RED);
+            console::print(text, draw_position, BG::black, FG::red);
         }
     }
 }
@@ -370,7 +370,7 @@ void player_render(void) {
         for (int x = 0; x < PLAYER_SPRITE_WIDTH; ++x) {
             color_character_t pixel = pCurrent_sprite[y][(player.facing_direction == 1) ? x : (PLAYER_SPRITE_WIDTH - 1 - x)];
 
-            if (pixel.character == ' ' && pixel.background == BACKGROUND_color_t::BACKGROUND_T_BLACK)
+            if (pixel.character == ' ' && pixel.background == BG::black)
                 continue;
 
             const COORD draw_position = {
@@ -413,7 +413,7 @@ void player_render(void) {
                     tool_pixel = tool_get_texture((tool_t)pToolInfo->index, source_x, y);
                 }
 
-                if (tool_pixel.foreground == FOREGROUND_color_t::FOREGROUND_T_TRANSPARENT) continue;
+                if (tool_pixel.foreground == FG::transparent) continue;
 
                 COORD draw_pos = {
                     (SHORT)(center_position.X + (tool_hand_offset_x - PLAYER_SPRITE_WIDTH / 2) + x),
@@ -441,23 +441,23 @@ void player_render(void) {
         .Y = 2
     };
 
-    console::print("[", position, BACKGROUND_color_t::BACKGROUND_T_WHITE, FOREGROUND_color_t::FOREGROUND_T_TRANSPARENT);
+    console::print("[", position, BG::white, FG::transparent);
     position.X += 1;
 
     for (int i = 0; i < filled; ++i) {
-        console::print(" ", position, BACKGROUND_color_t::BACKGROUND_T_RED, FOREGROUND_color_t::FOREGROUND_T_BLACK); //빨간 체력 바
+        console::print(" ", position, BG::red, FG::black); //빨간 체력 바
         position.X += 1;
     }
 
     for (int i = 0; i < empty; ++i) {
-        console::print(" ", position, BACKGROUND_color_t::BACKGROUND_T_DARKGRAY, FOREGROUND_color_t::FOREGROUND_T_BLACK); //회색 빈 바
+        console::print(" ", position, BG::dark_gray, FG::black); //회색 빈 바
         position.X += 1;
     }
 
-    console::print("]", position, BACKGROUND_color_t::BACKGROUND_T_WHITE, FOREGROUND_color_t::FOREGROUND_T_TRANSPARENT);
+    console::print("]", position, BG::white, FG::transparent);
     position.X += 2;
 
-    console::print(std::format("HP: {} / {}", current_HP, max_HP), position, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_YELLOW);
+    console::print(std::format("HP: {} / {}", current_HP, max_HP), position, BG::black, FG::yellow);
 }
 
 void player_destroy(void) {

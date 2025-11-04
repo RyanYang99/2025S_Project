@@ -110,7 +110,6 @@
     <ClCompile Include="console.cpp" />
     <ClCompile Include="crafting_UI.cpp" />
     <ClCompile Include="delta_time.cpp" />
-    <ClCompile Include="formatter.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="inventory.cpp" />

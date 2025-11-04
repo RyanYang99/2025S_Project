@@ -3,8 +3,6 @@
 
 #include <string>
 
-#include "formatter.hpp"
-
 COORD console::size_{};
 
 int console::current_buffer{};
@@ -209,7 +207,7 @@ void console::fill(const color_character_t &character) {
 
 void console::print(const color_character_t &character, const COORD &position) {
     WORD attribute{ static_cast<WORD>(-1) };
-    if (character.background != BACKGROUND_color_t::BACKGROUND_T_TRANSPARENT)
+    if (character.background != BG::transparent)
         attribute = static_cast<WORD>(character.background) | static_cast<WORD>(character.foreground);
 
     write(position, character.character, attribute);
@@ -217,8 +215,8 @@ void console::print(const color_character_t &character, const COORD &position) {
 
 size_t console::print(const std::string &string,
                       COORD position,
-                      const BACKGROUND_color_t background,
-                      const FOREGROUND_color_t foreground) {
+                      const BG background,
+                      const FG foreground) {
     for (const char character : string) {
         print({ character, background, foreground }, position);
         ++position.X;
@@ -229,8 +227,8 @@ size_t console::print(const std::string &string,
 
 void console::print_center(const std::string &string,
                            const int y,
-                           const BACKGROUND_color_t background,
-                           const FOREGROUND_color_t foreground) {
+                           const BG background,
+                           const FG foreground) {
     COORD position{ static_cast<SHORT>(size_.X / 2), static_cast<SHORT>(y) };
     if (position.X < 0)
         return;

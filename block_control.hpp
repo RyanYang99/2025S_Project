@@ -6,4 +6,4 @@ extern int block_control_selected_x, block_control_selected_y;
 void block_control_initialize(void);
 void block_control_render(void);
 //모듈 정리: 프로그램 종료 전 호출
-void block_control_destroy(void);
+void block_control_destroy(void) noexcept;

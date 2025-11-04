@@ -16,22 +16,6 @@
 #include "block_control.hpp"
 #include "item_database.hpp"
 
-//가독성을 위한 매크로
-#define FG_WHITE FOREGROUND_color_t::FOREGROUND_T_WHITE
-#define FG_YELLOW FOREGROUND_color_t::FOREGROUND_T_YELLOW
-#define FG_CYAN FOREGROUND_color_t::FOREGROUND_T_CYAN
-#define FG_MAGENTA FOREGROUND_color_t::FOREGROUND_T_MAGENTA
-#define FG_RED FOREGROUND_color_t::FOREGROUND_T_RED
-#define FG_BLUE FOREGROUND_color_t::FOREGROUND_T_BLUE
-#define FG_BLACK FOREGROUND_color_t::FOREGROUND_T_BLACK
-
-#define BG_BLUE BACKGROUND_color_t::BACKGROUND_T_BLUE
-#define BG_WHITE BACKGROUND_color_t::BACKGROUND_T_WHITE
-#define BG_RED BACKGROUND_color_t::BACKGROUND_T_RED
-#define BG_YELLOW BACKGROUND_color_t::BACKGROUND_T_YELLOW
-#define BG_BLACK BACKGROUND_color_t::BACKGROUND_T_BLACK
-#define BG_CYAN BACKGROUND_color_t::BACKGROUND_T_CYAN
-
 //보스 데미지 텍스트 관련
 constexpr int MAX_BOSS_DAMAGE_TEXTS{ 10 }, MAX_MISSILES{ 5 };
 constexpr float BOSS_DAMAGE_TEXT_DURATION{ 1.0f };
@@ -62,35 +46,35 @@ static const color_character_t pBoss_malakh_sprite_data[BOSS_SPRITE_HEIGHT][BOSS
     //0              1              2              3              4              5              6              7              8              9              10             11             12             13             14             15             16             17             18             19
     { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //1
-    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_YELLOW, FG_YELLOW }, { L'█', BG_YELLOW, FG_YELLOW }, { L'█', BG_YELLOW, FG_YELLOW }, { L'█', BG_YELLOW, FG_YELLOW }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::yellow, FG::yellow }, { L'█', BG::yellow, FG::yellow }, { L'█', BG::yellow, FG::yellow }, { L'█', BG::yellow, FG::yellow }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //2
-    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_YELLOW, FG_YELLOW }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_YELLOW, FG_YELLOW }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::yellow, FG::yellow }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::yellow, FG::yellow }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //3
-    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_BLUE, FG_BLUE }, { L'█', BG_YELLOW, FG_YELLOW }, { L'█', BG_YELLOW, FG_YELLOW }, { L'█', BG_BLUE, FG_BLUE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::blue, FG::blue }, { L'█', BG::yellow, FG::yellow }, { L'█', BG::yellow, FG::yellow }, { L'█', BG::blue, FG::blue }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //4
-    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::white, FG::white }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::white, FG::white }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //5
-    { { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { L'█', BG_CYAN, FG_CYAN }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_RED, FG_RED }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_RED, FG_RED }, { L'█', BG_BLACK, FG_BLACK }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { L'█', BG_CYAN, FG_CYAN }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::white, FG::white }, { L'█', BG::cyan, FG::cyan }, { L'█', BG::white, FG::white }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::black, FG::black }, { L'█', BG::red, FG::red }, { L'█', BG::black, FG::black }, { L'█', BG::black, FG::black }, { L'█', BG::red, FG::red }, { L'█', BG::black, FG::black }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::white, FG::white }, { L'█', BG::cyan, FG::cyan }, { L'█', BG::white, FG::white }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //6
-    { { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_BLACK, FG_BLACK }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { L'█', BG::white, FG::white }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::white, FG::white }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::black, FG::black }, { L'█', BG::black, FG::black }, { L'█', BG::black, FG::black }, { L'█', BG::black, FG::black }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::white, FG::white }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::white, FG::white }, { ' ', 0, 0 } },
     //7
-    { { L'█', BG_WHITE, FG_WHITE }, { L'█', BG_WHITE, FG_WHITE }, { L'█', BG_CYAN, FG_CYAN }, { L'█', BG_WHITE, FG_WHITE }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_YELLOW, FG_YELLOW }, { L'█', BG_YELLOW, FG_YELLOW }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_BLACK, FG_BLACK }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { L'█', BG_WHITE, FG_WHITE }, { L'█', BG_CYAN, FG_CYAN }, { L'█', BG_WHITE, FG_WHITE }, { L'█', BG_WHITE, FG_WHITE } },
+    { { L'█', BG::white, FG::white }, { L'█', BG::white, FG::white }, { L'█', BG::cyan, FG::cyan }, { L'█', BG::white, FG::white }, { L'█', BG::white, FG::white }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::black, FG::black }, { L'█', BG::black, FG::black }, { L'█', BG::yellow, FG::yellow }, { L'█', BG::yellow, FG::yellow }, { L'█', BG::black, FG::black }, { L'█', BG::black, FG::black }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::white, FG::white }, { L'█', BG::white, FG::white }, { L'█', BG::cyan, FG::cyan }, { L'█', BG::white, FG::white }, { L'█', BG::white, FG::white } },
     //8
-    { { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { L'█', BG_CYAN, FG_CYAN }, { L'█', BG_WHITE, FG_WHITE }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_RED, FG_RED }, { L'█', BG_RED, FG_RED }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_BLACK, FG_BLACK }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { L'█', BG_WHITE, FG_WHITE }, { L'█', BG_CYAN, FG_CYAN }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::white, FG::white }, { L'█', BG::cyan, FG::cyan }, { L'█', BG::white, FG::white }, { L'█', BG::white, FG::white }, { ' ', 0, 0 }, { L'█', BG::black, FG::black }, { L'█', BG::black, FG::black }, { L'█', BG::red, FG::red }, { L'█', BG::red, FG::red }, { L'█', BG::black, FG::black }, { L'█', BG::black, FG::black }, { ' ', 0, 0 }, { L'█', BG::white, FG::white }, { L'█', BG::white, FG::white }, { L'█', BG::cyan, FG::cyan }, { L'█', BG::white, FG::white }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //9
-    { { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_BLACK, FG_BLACK }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { L'█', BG::white, FG::white }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::white, FG::white }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::black, FG::black }, { L'█', BG::black, FG::black }, { L'█', BG::black, FG::black }, { L'█', BG::black, FG::black }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::white, FG::white }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::white, FG::white }, { ' ', 0, 0 } },
     //10
-    { { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_RED, FG_RED }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_RED, FG_RED }, { L'█', BG_BLACK, FG_BLACK }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE } },
+    { { L'█', BG::white, FG::white }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::black, FG::black }, { L'█', BG::red, FG::red }, { L'█', BG::black, FG::black }, { L'█', BG::black, FG::black }, { L'█', BG::red, FG::red }, { L'█', BG::black, FG::black }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::white, FG::white } },
     //11
     { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //12
-    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::white, FG::white }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::white, FG::white }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //13
-    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::white, FG::white }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::white, FG::white }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //14
-    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::white, FG::white }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::white, FG::white }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //15
-    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::white, FG::white }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::white, FG::white }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //16
     { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //17
@@ -365,22 +349,22 @@ static void boss_update_missiles(void) {
 
             //일정한 속도로 타일 이동
             if (pBoss_missiles[i].move_timer >= 1.0f / missile_speed) {
-                direction_t next_direction = astar_find_next_direction(pBoss_missiles[i].x, pBoss_missiles[i].y, player.x, player.y, boss_is_missile_movable);
+                astar::direction next_direction = astar::find_next_direction(pBoss_missiles[i].x, pBoss_missiles[i].y, player.x, player.y, boss_is_missile_movable);
 
                 switch (next_direction) {
-                    case DIRECTION_UP:
+                    case astar::direction::up:
                         --pBoss_missiles[i].y;
                         break;
 
-                    case DIRECTION_RIGHT:
+                    case astar::direction::right:
                         ++pBoss_missiles[i].x;
                         break;
 
-                    case DIRECTION_DOWN:
+                    case astar::direction::down:
                         ++pBoss_missiles[i].y;
                         break;
 
-                    case DIRECTION_LEFT:
+                    case astar::direction::left:
                         --pBoss_missiles[i].x;
                         break;
                 }
@@ -421,7 +405,7 @@ void boss_update(void) {
 
 //미사일 렌더링
 static void boss_render_missiles(void) {
-    const color_character_t character = { '*', BG_BLACK, FG_RED };
+    const color_character_t character = { '*', BG::black, FG::red };
     const COORD &size{ console::size() };
 
     for (int i = 0; i < MAX_MISSILES; ++i)
@@ -457,7 +441,7 @@ static void boss_render_pattern(void) {
             boss.is_horizontal_laser_active = false;
 
         //3줄 레이저를 한번에 출력
-        const color_character_t character = { L'═', BG_BLACK, FG_RED };
+        const color_character_t character = { L'═', BG::black, FG::red };
 
         for (int i = 0; i < 3; ++i) {
             COORD laser_position = {
@@ -489,7 +473,7 @@ static void boss_render_pattern(void) {
         }
 
         //3줄 레이저를 한번에 출력
-        const color_character_t character = { L'║', BG_BLACK, FG_RED };
+        const color_character_t character = { L'║', BG::black, FG::red };
 
         for (int i = 0; i < 3; ++i) {
             COORD laser_position = {
@@ -518,7 +502,7 @@ static void boss_render_damage_texts(void) {
                 .Y = (SHORT)(center_position.Y + (pBoss_damage_texts[i].precise_y - player.y))
             };
 
-            console::print(std::format("Attack! -{}", pBoss_damage_texts[i].damage_value), draw_position, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE);
+            console::print(std::format("Attack! -{}", pBoss_damage_texts[i].damage_value), draw_position, BG::black, FG::white);
         }
     }
 }
@@ -559,7 +543,7 @@ void boss_render(void) {
         hp_position.X = 0;
     if (hp_position.Y < 0)
         hp_position.Y = 0;
-    console::print(text, hp_position, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE);
+    console::print(text, hp_position, BG::black, FG::white);
 
     //패턴 렌더링
     boss_render_pattern();

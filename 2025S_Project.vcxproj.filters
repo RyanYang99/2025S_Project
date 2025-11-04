@@ -19,9 +19,6 @@
     <ClCompile Include="delta_time.cpp">
       <Filter>Source File</Filter>
     </ClCompile>
-    <ClCompile Include="formatter.cpp">
-      <Filter>Source File</Filter>
-    </ClCompile>
     <ClCompile Include="game.cpp">
       <Filter>Source File</Filter>
     </ClCompile>

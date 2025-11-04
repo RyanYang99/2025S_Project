@@ -18,17 +18,6 @@
 #include "block_control.hpp"
 
 #define GRAVITY 25.0f
-#define BG_BLACK BACKGROUND_color_t::BACKGROUND_T_BLACK
-#define FG_WHITE FOREGROUND_color_t::FOREGROUND_T_WHITE
-#define FG_YELLOW FOREGROUND_color_t::FOREGROUND_T_YELLOW
-#define FG_CYAN FOREGROUND_color_t::FOREGROUND_T_CYAN
-#define FG_MAGENTA FOREGROUND_color_t::FOREGROUND_T_MAGENTA
-#define FG_RED FOREGROUND_color_t::FOREGROUND_T_RED
-#define FG_GREEN FOREGROUND_color_t::FOREGROUND_T_GREEN
-#define FG_DARKYELLOW FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW
-#define FG_DARKGREEN FOREGROUND_color_t::FOREGROUND_T_DARKGREEN
-#define FG_BLACK FOREGROUND_color_t::FOREGROUND_T_BLACK
-#define FG_GRAY FOREGROUND_color_t::FOREGROUND_T_GRAY
 
 #define MOB_SPRITE_WIDTH 5
 #define MOB_SPRITE_HEIGHT 5
@@ -51,38 +40,38 @@ static mob_t mobs[MAX_MOB] = { 0 };
 
 //idle 상태
 const static color_character_t pZombie_sprite_data[MOB_SPRITE_HEIGHT][MOB_SPRITE_WIDTH] = {
-    { { ' ', 0, 0 }, { L'▀', BG_BLACK, FG_RED }, { L'▀', BG_BLACK, FG_RED }, { L'▀', BG_BLACK, FG_RED }, { ' ', 0, 0 } },
-    { { ' ', 0, 0 }, { 'o', BG_BLACK, FG_WHITE }, { ' ', 0, 0 }, { 'o', BG_BLACK, FG_WHITE }, { ' ', 0, 0 } },
-    { { L'█', BG_BLACK, FG_DARKGREEN }, { L'█', BG_BLACK, FG_DARKGREEN }, { L'█', BG_BLACK, FG_DARKGREEN }, { L'█', BG_BLACK, FG_DARKGREEN }, { L'█', BG_BLACK, FG_DARKGREEN } },
-    { { ' ', 0, 0 }, { L'█', BG_BLACK, FG_DARKYELLOW }, { L'█', BG_BLACK, FG_DARKYELLOW }, { L'█', BG_BLACK, FG_DARKYELLOW }, { ' ', 0, 0 } },
-    { { ' ', 0, 0 }, { L'█', BG_BLACK, FG_GREEN }, { ' ', 0, 0 }, { L'█', BG_BLACK, FG_GREEN }, { ' ', 0, 0 } }
+    { { ' ', 0, 0 }, { L'▀', BG::black, FG::red }, { L'▀', BG::black, FG::red }, { L'▀', BG::black, FG::red }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { 'o', BG::black, FG::white }, { ' ', 0, 0 }, { 'o', BG::black, FG::white }, { ' ', 0, 0 } },
+    { { L'█', BG::black, FG::dark_green }, { L'█', BG::black, FG::dark_green }, { L'█', BG::black, FG::dark_green }, { L'█', BG::black, FG::dark_green }, { L'█', BG::black, FG::dark_green } },
+    { { ' ', 0, 0 }, { L'█', BG::black, FG::dark_yellow }, { L'█', BG::black, FG::dark_yellow }, { L'█', BG::black, FG::dark_yellow }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { L'█', BG::black, FG::green }, { ' ', 0, 0 }, { L'█', BG::black, FG::green }, { ' ', 0, 0 } }
 },
 //걷는 상태
 pZombie_sprite_walk[2][MOB_SPRITE_HEIGHT][MOB_SPRITE_WIDTH] = {
     // 프레임 0:
     {
-        { { ' ', 0, 0 }, { L'▀', BG_BLACK, FG_RED }, { L'▀', BG_BLACK, FG_RED }, { L'▀', BG_BLACK, FG_RED }, { ' ', 0, 0 } }, // 머리
-        { { ' ', 0, 0 }, { 'o', BG_BLACK, FG_WHITE }, { ' ', 0, 0 }, { 'o', BG_BLACK, FG_WHITE }, { ' ', 0, 0 } }, // 팔과 눈
-        { { L'█', BG_BLACK, FG_GREEN }, { L'█', BG_BLACK, FG_DARKGREEN }, { L'█', BG_BLACK, FG_DARKGREEN }, { L'█', BG_BLACK, FG_DARKGREEN }, { ' ', 0, 0 } },
-        { { ' ', 0, 0 }, { L'▓', BG_BLACK, FG_DARKYELLOW }, { L'▓', BG_BLACK, FG_DARKYELLOW }, { ' ', 0, 0 }, { ' ', 0, 0 } },
-        { { ' ', 0, 0 }, { L'█', BG_BLACK, FG_GREEN }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } }
+        { { ' ', 0, 0 }, { L'▀', BG::black, FG::red }, { L'▀', BG::black, FG::red }, { L'▀', BG::black, FG::red }, { ' ', 0, 0 } }, // 머리
+        { { ' ', 0, 0 }, { 'o', BG::black, FG::white }, { ' ', 0, 0 }, { 'o', BG::black, FG::white }, { ' ', 0, 0 } }, // 팔과 눈
+        { { L'█', BG::black, FG::green }, { L'█', BG::black, FG::dark_green }, { L'█', BG::black, FG::dark_green }, { L'█', BG::black, FG::dark_green }, { ' ', 0, 0 } },
+        { { ' ', 0, 0 }, { L'▓', BG::black, FG::dark_yellow }, { L'▓', BG::black, FG::dark_yellow }, { ' ', 0, 0 }, { ' ', 0, 0 } },
+        { { ' ', 0, 0 }, { L'█', BG::black, FG::green }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } }
     },
     // 프레임 1
     {
-        { { ' ', 0, 0 }, { L'▀', BG_BLACK, FG_RED }, { L'▀', BG_BLACK, FG_RED }, { L'▀', BG_BLACK, FG_RED }, { ' ', 0, 0 } }, // 머리
-        { { ' ', 0, 0 }, { 'o', BG_BLACK, FG_WHITE }, { ' ', 0, 0 }, { 'o', BG_BLACK, FG_WHITE }, { ' ', 0, 0 } }, // 팔과 눈
-        { { ' ', 0, 0 }, { L'█', BG_BLACK, FG_DARKGREEN }, { L'█', BG_BLACK, FG_DARKGREEN }, { L'█', BG_BLACK, FG_DARKGREEN }, { L'█', BG_BLACK, FG_GREEN } },
-        { { ' ', 0, 0 }, { L'▓', BG_BLACK, FG_DARKYELLOW }, { L'▓', BG_BLACK, FG_DARKYELLOW }, { ' ', 0, 0 }, { ' ', 0, 0 } },
-        { { L'█', BG_BLACK, FG_GREEN }, { ' ', 0, 0 }, { L'█', BG_BLACK, FG_GREEN }, { ' ', 0, 0 }, { ' ', 0, 0 } }
+        { { ' ', 0, 0 }, { L'▀', BG::black, FG::red }, { L'▀', BG::black, FG::red }, { L'▀', BG::black, FG::red }, { ' ', 0, 0 } }, // 머리
+        { { ' ', 0, 0 }, { 'o', BG::black, FG::white }, { ' ', 0, 0 }, { 'o', BG::black, FG::white }, { ' ', 0, 0 } }, // 팔과 눈
+        { { ' ', 0, 0 }, { L'█', BG::black, FG::dark_green }, { L'█', BG::black, FG::dark_green }, { L'█', BG::black, FG::dark_green }, { L'█', BG::black, FG::green } },
+        { { ' ', 0, 0 }, { L'▓', BG::black, FG::dark_yellow }, { L'▓', BG::black, FG::dark_yellow }, { ' ', 0, 0 }, { ' ', 0, 0 } },
+        { { L'█', BG::black, FG::green }, { ' ', 0, 0 }, { L'█', BG::black, FG::green }, { ' ', 0, 0 }, { ' ', 0, 0 } }
     }
 },
 //죽었을때
 pDead_zombie_sprite_data[MOB_SPRITE_HEIGHT][MOB_SPRITE_WIDTH] = {
-    { { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_BLACK, FG_DARKGREEN }, { ' ', 0, 0 }, { ' ', 0, 0 } },
-    { { L'▀', BG_BLACK, FG_RED }, { 'o', BG_BLACK, FG_WHITE }, { L'█', BG_BLACK, FG_DARKGREEN }, { L'█', BG_BLACK, FG_DARKYELLOW }, { L'█', BG_BLACK, FG_GREEN } },
-    { { L'▀', BG_BLACK, FG_RED }, { ' ', 0, 0 }, { L'█', BG_BLACK, FG_DARKGREEN }, { L'█', BG_BLACK, FG_DARKYELLOW }, { ' ', 0, 0 } },
-    { { L'▀', BG_BLACK, FG_RED }, { 'o', BG_BLACK, FG_WHITE }, { L'█', BG_BLACK, FG_DARKGREEN }, { L'█', BG_BLACK, FG_DARKYELLOW }, { L'█', BG_BLACK, FG_GREEN } },
-    { { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_BLACK, FG_DARKGREEN }, { ' ', 0, 0 }, { ' ', 0, 0 } }
+    { { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::black, FG::dark_green }, { ' ', 0, 0 }, { ' ', 0, 0 } },
+    { { L'▀', BG::black, FG::red }, { 'o', BG::black, FG::white }, { L'█', BG::black, FG::dark_green }, { L'█', BG::black, FG::dark_yellow }, { L'█', BG::black, FG::green } },
+    { { L'▀', BG::black, FG::red }, { ' ', 0, 0 }, { L'█', BG::black, FG::dark_green }, { L'█', BG::black, FG::dark_yellow }, { ' ', 0, 0 } },
+    { { L'▀', BG::black, FG::red }, { 'o', BG::black, FG::white }, { L'█', BG::black, FG::dark_green }, { L'█', BG::black, FG::dark_yellow }, { L'█', BG::black, FG::green } },
+    { { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG::black, FG::dark_green }, { ' ', 0, 0 }, { ' ', 0, 0 } }
 };
 
 static mob_damage_text_t pMob_damage_texts[MAX_MOB_DAMAGE_TEXTS];
@@ -243,14 +232,14 @@ static void update_mob_ai(void) {
         if (!mobs[i].is_dead) {
             if (mobs[i].ai_timer >= MOB_SPEED) {
                 mobs[i].ai_timer = 0.0f;
-                const direction_t direction = astar_find_next_direction(mobs[i].x, mobs[i].y, player.x, player.y, is_mob_movable);
-                if (direction == DIRECTION_UP && mobs[i].is_on_ground)
+                const astar::direction direction = astar::find_next_direction(mobs[i].x, mobs[i].y, player.x, player.y, is_mob_movable);
+                if (direction == astar::direction::up && mobs[i].is_on_ground)
                     mobs[i].velocity_y = JUMP_SPEED;
-                else if (direction == DIRECTION_RIGHT)
+                else if (direction == astar::direction::right)
                     mobs[i].velocity_x = 1.0f;
-                else if (direction == DIRECTION_LEFT)
+                else if (direction == astar::direction::left)
                     mobs[i].velocity_x = -1.0f;
-                else if (direction == DIRECTION_NONE)
+                else if (direction == astar::direction::none)
                     mobs[i].velocity_x = 0;
             } else
                 mobs[i].ai_timer += delta_time_t::delta_time;
@@ -418,7 +407,7 @@ static void render_mob_damage_texts(void) {
                 .Y = (SHORT)(center_pos.Y - (PLAYER_SPRITE_HEIGHT / 2) - 1 - (player.precise_y - pMob_damage_texts[i].precise_y))
             };
 
-            console::print(std::format("Attack {} HP!", pMob_damage_texts[i].damage_value), draw_pos, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_YELLOW);
+            console::print(std::format("Attack {} HP!", pMob_damage_texts[i].damage_value), draw_pos, BG::black, FG::yellow);
         }
 }
 
@@ -442,7 +431,7 @@ void mob_render(void) {
                 .X = (SHORT)screen_x,
                 .Y = (SHORT)(screen_y - 1)
             };
-            console::print(std::format("HP: {}", mobs[i].HP), hp_pos, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_RED);
+            console::print(std::format("HP: {}", mobs[i].HP), hp_pos, BG::black, FG::red);
         }
 
         // 몬스터 상태에 따라 스프라이트 선택

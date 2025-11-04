@@ -34,8 +34,8 @@ void date_time::set_local_time(void) noexcept {
 }
 
 void date_time::update(void) noexcept {
-    second_ += delta_time_t::delta_time * (86400.0f / 1200.0f); //1일당 게임 초 / 1일당 실제 초
-    //date_time_elapsed_since_start.second += delta_time_t::delta_time * (86400.0f / 60.0f);
+    //second_ += delta_time_t::delta_time * (86400.0f / 1200.0f); //1일당 게임 초 / 1일당 실제 초
+    second_ += delta_time_t::delta_time * (86400.0f / 60.0f);
 
     if (second_ >= 60.0f) {
         const int minutes = static_cast<int>(second_ / 60.0f);
@@ -70,11 +70,11 @@ void date_time::render(void) {
                       time{ std::format("{}{}{}", hour_, blink_character, minute_) };
 
     COORD position = { static_cast<SHORT>(console::size().X - sDay.length()), 0};
-    console::print(sDay, position, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE);
+    console::print(sDay, position, BG::black, FG::white);
 
     position.X = static_cast<SHORT>(console::size().X - time.length());
     ++position.Y;
-    console::print(time, position, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE);
+    console::print(time, position, BG::black, FG::white);
 }
 
 bool date_time::is_night(void) const noexcept {

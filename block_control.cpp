@@ -2,7 +2,6 @@
 #include "block_control.hpp"
 
 #include <cmath>
-#include <cstdlib>
 
 #include "map.hpp"
 #include "tool.hpp"
@@ -14,19 +13,18 @@
 #include "boss_malakh.hpp"
 #include "item_database.hpp"
 
-int block_control_selected_x = 0, block_control_selected_y = 0;
+int block_control_selected_x{}, block_control_selected_y{};
 
-static bool show = false;
-static int draw_x = 0, draw_y = 0;
+static bool show{};
+static int draw_x{}, draw_y{};
 
-static int cursor_flash_timer = 0;
-static FOREGROUND_color_t cursor_flash_color = FOREGROUND_color_t::FOREGROUND_T_WHITE;
-static bool cursor_out_of_range = false; //범위 초과 여부
+static int cursor_flash_timer{};
+static FG cursor_flash_color{ FG::white };
+static bool cursor_out_of_range{}; //범위 초과 여부
 
 //범위 체크 함수
-static const bool is_cursor_in_range(void) {
-    const int dx = abs(block_control_selected_x - player.x), dy = abs(block_control_selected_y - player.y);
-    return (dx <= 5 && dy <= 5);
+static bool is_cursor_in_range(void) noexcept {
+    return abs(block_control_selected_x - player.x) <= 5 && abs(block_control_selected_y - player.y) <= 5;
 }
 
 //마우스 클릭 시 상호작용 처리
@@ -36,16 +34,16 @@ static void handle_mouse_click(const bool left) {
 
     if (!is_cursor_in_range()) {
         //범위 밖 클릭 → 빨간색 경고
-        cursor_flash_color = FOREGROUND_color_t::FOREGROUND_T_RED;
+        cursor_flash_color = FG::red;
         return;
     }
 
-    cursor_flash_color = FOREGROUND_color_t::FOREGROUND_T_GREEN;
+    cursor_flash_color = FG::green;
     cursor_flash_timer = 50;
 
     //1. 현재 장착된 아이템 가져오기
-    item_information_t *pItem_information = NULL;
-    player_item_t *pEquipped = NULL;
+    item_information_t *pItem_information{};
+    player_item_t *pEquipped{};
     if (inventory.pHotbar[inventory.selected_hotbar_index].pPlayer_Item) {
         pEquipped = &inventory.item[inventory.pHotbar[inventory.selected_hotbar_index].index_in_inventory];
         pItem_information = database_find_item_by_index(pEquipped->item_DB_index);
@@ -53,18 +51,18 @@ static void handle_mouse_click(const bool left) {
 
     if (left) {
         //2. 현재 블록 정보 확인
-        const block_info_t target_block = map_get_block_info(block_control_selected_x, block_control_selected_y);
+        const block_info_t target_block{ map_get_block_info(block_control_selected_x, block_control_selected_y) };
 
         //3. 도구가 해당 블록을 부술 수 있는지 확인
         if (!tool_can_break_block(pItem_information, target_block.type))
             return;
 
         //4. 도구의 데미지 계산
-        const int damage = tool_get_damage_to_block(pItem_information, target_block.type);
+        const int damage{ tool_get_damage_to_block(pItem_information, target_block.type) };
 
         //5. 데미지를 주고 파괴 여부 확인
         if (map_damage_block(block_control_selected_x, block_control_selected_y, damage)) {
-            const int drop = tool_get_drop_from_block(target_block.type);
+            const int drop{ tool_get_drop_from_block(target_block.type) };
 
             if (drop != -1)
                 inventory_add_item(drop, 1);
@@ -85,13 +83,12 @@ static void handle_mouse_click(const bool left) {
         if (!boss_spawned) {
             if (map_set_block(block_control_selected_x, block_control_selected_y, static_cast<block_t>(pItem_information->index))) {
 
-                const int boss_spawn_y = block_control_selected_y - BOSS_SPRITE_HEIGHT;
-                const int boss_spawn_x = block_control_selected_x;
+                const int boss_spawn_y{ block_control_selected_y - BOSS_SPRITE_HEIGHT },
+                          boss_spawn_x{ block_control_selected_x };
                 boss_initialize(boss_spawn_x, boss_spawn_y, 100, 10);
                 boss_spawned = true;
 
                 sound_play_sound_effect(BOSS_SOUND_SPAWN);
-                
                 
                 inventory_decrement_item(pEquipped);
             }
@@ -103,21 +100,21 @@ static void handle_mouse_click(const bool left) {
 }
 
 //마우스 이동 시 최신 위치 갱신
-static void handle_mouse_move(const COORD position) {
+static void handle_mouse_move(const COORD position) noexcept {
     const COORD &size{ console::size() };
 
-    const float screen_x = (float)size.X / 2.0f,
-                screen_y = (float)size.Y / 2.0f,
+    const float screen_x = static_cast<float>(size.X) / 2.0f,
+                screen_y = static_cast<float>(size.Y) / 2.0f,
                 relative_mouse_x = position.X - screen_x,
                 relative_mouse_y = position.Y - screen_y;
 
-    block_control_selected_x = player.x + (int)floorf(relative_mouse_x / TEXTURE_SIZE);
-    block_control_selected_y = player.y + (int)floorf(relative_mouse_y / TEXTURE_SIZE);
-    draw_x = (int)(screen_x + (block_control_selected_x - player.x) * TEXTURE_SIZE);
-    draw_y = (int)(screen_y + (block_control_selected_y - player.y) * TEXTURE_SIZE);
+    block_control_selected_x = player.x + static_cast<int>(floorf(relative_mouse_x / TEXTURE_SIZE));
+    block_control_selected_y = player.y + static_cast<int>(floorf(relative_mouse_y / TEXTURE_SIZE));
+    draw_x = static_cast<int>(screen_x + (block_control_selected_x - player.x) * TEXTURE_SIZE);
+    draw_y = static_cast<int>(screen_y + (block_control_selected_y - player.y) * TEXTURE_SIZE);
 }
 
-static void handle_in_console(const bool in_console) {
+static void handle_in_console(const bool in_console) noexcept {
     show = in_console;
 }
 
@@ -135,24 +132,24 @@ void block_control_render(void) {
 
     cursor_out_of_range = !is_cursor_in_range();
 
-    FOREGROUND_color_t color = FOREGROUND_color_t::FOREGROUND_T_WHITE;
+    FG color{ FG::white };
 
     if (cursor_flash_timer > 0) {
         color = cursor_flash_color;
         --cursor_flash_timer;
     } else if (cursor_out_of_range)
-        color = FOREGROUND_color_t::FOREGROUND_T_RED;
+        color = FG::red;
 
-    color_character_t character { L'■', BACKGROUND_color_t::BACKGROUND_T_BLACK, color };
+    const color_character_t character { L'■', BG::black, color };
 
     //각 모서리에 문자를 출력
-    console::print(character, { (SHORT)draw_x, (SHORT)draw_y });
-    console::print(character, { (SHORT)(draw_x + TEXTURE_SIZE - 1), (SHORT)draw_y });
-    console::print(character, { (SHORT)draw_x, (SHORT)(draw_y + TEXTURE_SIZE - 1) });
-    console::print(character, { (SHORT)(draw_x + TEXTURE_SIZE - 1), (SHORT)(draw_y + TEXTURE_SIZE - 1) });
+    console::print(character, { static_cast<SHORT>(draw_x), static_cast<SHORT>(draw_y) });
+    console::print(character, { static_cast<SHORT>(draw_x + TEXTURE_SIZE - 1), static_cast<SHORT>(draw_y) });
+    console::print(character, { static_cast<SHORT>(draw_x), static_cast<SHORT>(draw_y + TEXTURE_SIZE - 1) });
+    console::print(character, { static_cast<SHORT>(draw_x + TEXTURE_SIZE - 1), static_cast<SHORT>(draw_y + TEXTURE_SIZE - 1) });
 }
 
-void block_control_destroy(void) {
+void block_control_destroy(void) noexcept {
     input::unsubscribe_input_mouse_click(handle_mouse_click);
     input::unsubscribe_input_mouse_position(handle_mouse_move);
     input::unsubscribe_input_mouse_in_console(handle_in_console);

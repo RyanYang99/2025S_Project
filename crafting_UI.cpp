@@ -161,10 +161,10 @@ void crafting_UI_render(void) {
         .X = 1,
         .Y = 1
     };
-    console::print("[ Craftable Items ]", position, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_YELLOW);
+    console::print("[ Craftable Items ]", position, BG::black, FG::yellow);
     ++position.Y;
 
-    const BACKGROUND_color_t background = BACKGROUND_color_t::BACKGROUND_T_BLACK;
+    const BG background = BG::black;
     const bool workbench = is_workbench_nearby();
 
     for (int i = 0; i < (workbench ? recipe_count : without_workbench_count); ++i) {
@@ -174,7 +174,7 @@ void crafting_UI_render(void) {
 
         const item_information_t * const pItem = database_find_item_by_index(pRecipe->result_index);
         const bool selected = i == selected_recipe_index;
-        const FOREGROUND_color_t foreground = selected ? FOREGROUND_color_t::FOREGROUND_T_WHITE : FOREGROUND_color_t::FOREGROUND_T_GRAY;
+        const FG foreground = selected ? FG::white : FG::gray;
 
         const SHORT length{ static_cast<SHORT>(console::print(formatter::vformat(selected ? "> {} x{} " : "  {} x{} ",
                                                                                  pItem ? pItem->name : "???",
@@ -183,7 +183,7 @@ void crafting_UI_render(void) {
         
         const bool craftable = can_craft(pRecipe);
         position.X += length;
-        console::print(std::format("[{}]", craftable ? 'O' : 'X'), position, background, craftable ? FOREGROUND_color_t::FOREGROUND_T_GREEN : FOREGROUND_color_t::FOREGROUND_T_RED);
+        console::print(std::format("[{}]", craftable ? 'O' : 'X'), position, background, craftable ? FG::green : FG::red);
         position.X -= length;
         ++position.Y;
 
@@ -202,11 +202,11 @@ void crafting_UI_render(void) {
                                        inventory_get_count(pRecipe->pIngredient_indices[j]),
                                        pRecipe->pIngredient_counts[j]),
                            position,
-                           BACKGROUND_color_t::BACKGROUND_T_BLACK,
-                           FOREGROUND_color_t::FOREGROUND_T_CYAN);
+                           BG::black,
+                           FG::cyan);
             ++position.Y;
         }
     }
 
-    console::print("[Up / Down]: Select [E]: Craft [C]: Close", position, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_GREEN);
+    console::print("[Up / Down]: Select [E]: Craft [C]: Close", position, BG::black, FG::green);
 }

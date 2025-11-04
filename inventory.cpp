@@ -14,11 +14,11 @@
 #include "delta_time.hpp"
 #include "console.hpp"
 
-#define INVENTORY_BACKGROUND BACKGROUND_color_t::BACKGROUND_T_BLACK
-#define INVENTORY_FOREGROUND FOREGROUND_color_t::FOREGROUND_T_WHITE
-#define INVENTORY_FOREGROUND_DARK FOREGROUND_color_t::FOREGROUND_T_GRAY
-#define INVENTORY_FOREGROUND_BLINK FOREGROUND_color_t::FOREGROUND_T_WHITE
-#define INVENTORY_FOREGROUND_IN_HOTBAR FOREGROUND_color_t::FOREGROUND_T_GREEN
+#define INVENTORY_BACKGROUND BG::black
+#define INVENTORY_FOREGROUND FG::white
+#define INVENTORY_FOREGROUND_DARK FG::gray
+#define INVENTORY_FOREGROUND_BLINK FG::white
+#define INVENTORY_FOREGROUND_IN_HOTBAR FG::green
 
 #define HOTBAR_SIZE_IN_CHARACTERS_X (TEXTURE_SIZE * HOTBAR_COUNT + HOTBAR_COUNT + 1)
 #define HOTBAR_SIZE_IN_CHARACTERS_Y (TEXTURE_SIZE + 2)
@@ -134,7 +134,7 @@ static void render_item(const int y,
         .Y = (SHORT)y
     };
 
-    FOREGROUND_color_t foreground = INVENTORY_FOREGROUND_DARK;
+    FG foreground = INVENTORY_FOREGROUND_DARK;
     if (selected && blink)
         foreground = INVENTORY_FOREGROUND_BLINK;
 
@@ -185,13 +185,13 @@ static void render_hotbar(void) {
         name_render_timer += delta_time_t::delta_time;
 
         const item_information_t *pInformation = database_find_item_by_index(inventory.pHotbar[inventory.selected_hotbar_index].pPlayer_Item->item_DB_index);
-        console::print_center(pInformation->name, position.Y - 2, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE);
+        console::print_center(pInformation->name, position.Y - 2, BG::black, FG::white);
     }
 
     for (int i = 0; i < HOTBAR_COUNT; ++i) {
         const bool is_selected = (inventory.selected_hotbar_index == i);
         //테두리 색상 (선택 시 밝게, 아니면 어둡게)
-        const WORD border_background = static_cast<WORD>(is_selected ? BACKGROUND_color_t::BACKGROUND_T_WHITE : BACKGROUND_color_t::BACKGROUND_T_DARKGRAY);
+        const WORD border_background = static_cast<WORD>(is_selected ? BG::white : BG::dark_gray);
 
         /*
             1. 테두리 영역 출력
@@ -289,7 +289,7 @@ void inventory_render(void) {
             break;
     }
 
-    console::print(description, position, INVENTORY_BACKGROUND, FOREGROUND_color_t::FOREGROUND_T_YELLOW);
+    console::print(description, position, INVENTORY_BACKGROUND, FG::yellow);
 }
 
 void inventory_destroy(void) {

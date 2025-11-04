@@ -26,8 +26,8 @@ game *game::instance_{};
 
 #if _DEBUG
 static void render_debug_text(void) {
-    const BACKGROUND_color_t background{ BACKGROUND_color_t::BACKGROUND_T_BLACK };
-    const FOREGROUND_color_t foreground{ FOREGROUND_color_t::FOREGROUND_T_WHITE };
+    const BG background{ BG::black };
+    const FG foreground{ FG::white };
 
     const COORD &size{ console::size() };
     COORD position = { 0, static_cast<SHORT>(size.Y - 4) };
@@ -69,25 +69,25 @@ void game::render(void) {
 
 void game::update_BGM(void) {
     if (boss_spawned) {
-        if (current_BGM_state != ambient_BGM_state_t::boss) {
+        if (current_BGM_state != BGM::boss) {
             sound_play_BGM("boss");
-            current_BGM_state = ambient_BGM_state_t::boss;
+            current_BGM_state = BGM::boss;
         }
         return;
     }
-    else if (current_BGM_state == ambient_BGM_state_t::boss)
-        current_BGM_state = ambient_BGM_state_t::none;
+    else if (current_BGM_state == BGM::boss)
+        current_BGM_state = BGM::none;
 
     if (elapsed_since_start_.is_night()) { //밤일때
-        if (current_BGM_state != ambient_BGM_state_t::night) {
+        if (current_BGM_state != BGM::night) {
             sound_play_BGM("night");
-            current_BGM_state = ambient_BGM_state_t::night;
+            current_BGM_state = BGM::night;
         }
     }
     else {
-        if (current_BGM_state != ambient_BGM_state_t::day) { //낮일때
+        if (current_BGM_state != BGM::day) { //낮일때
             sound_play_BGM("day");
-            current_BGM_state = ambient_BGM_state_t::day;
+            current_BGM_state = BGM::day;
         }
     }
 }
@@ -148,7 +148,6 @@ game::~game(void) {
 
     mob_destroy();
     boss_destroy();
-    astar_destroy();
     inventory_destroy();
     block_control_destroy();
     player_destroy();

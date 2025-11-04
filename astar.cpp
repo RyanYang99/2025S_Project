@@ -1,148 +1,139 @@
 ﻿#include "leak.hpp"
 #include "astar.hpp"
 
-#include <cstdlib>
+#include <cmath>
+#include <vector>
 
 #include "map.hpp"
 
-typedef struct node_t {
-    int x, y, g, h, f;
-    struct node_t *pParent;
-} node_t;
+namespace astar {
+    struct node {
+        int x, y, g, h, f;
+        struct node *pParent;
+    };
 
-static int allocated_x = 0, open_count = 0, closed_count = 0;
-static node_t **ppOpen_list = NULL,
-              **ppClosed_list = NULL;
+    static int open_count{}, closed_count{};
+    static std::vector<node *> open_list{}, closed_list{};
 
-static int astar_get_h(const int x1, const int y1, const int x2, const int y2) {
-    return abs(x1 - x2) + abs(y1 - y2);
-}
-
-const direction_t astar_find_next_direction(const int start_x,
-                                            const int start_y,
-                                            const int target_x,
-                                            const int target_y,
-                                            const is_movable_t is_movable) {
-    if (start_x == target_x && start_y == target_y)
-        return DIRECTION_NONE;
-
-    if (map.size.x != allocated_x || !ppOpen_list || !ppClosed_list) {
-        allocated_x = map.size.x;
-
-        const int size = sizeof(node_t *) * allocated_x * map.size.y;
-        ppOpen_list = static_cast<node_t **>(realloc(ppOpen_list, size));
-        ppClosed_list = static_cast<node_t **>(realloc(ppClosed_list, size));
+    static int get_h(const int x1, const int y1, const int x2, const int y2) noexcept {
+        return abs(x1 - x2) + abs(y1 - y2);
     }
-    open_count = closed_count = 0;
 
-    node_t *pStart = static_cast<node_t *>(malloc(sizeof(node_t))), *pFinal = NULL;
-    pStart->x = start_x;
-    pStart->y = start_y;
-    pStart->g = 0;
-    pStart->h = astar_get_h(start_x, start_y, target_x, target_y);
-    pStart->f = pStart->h;
-    pStart->pParent = NULL;
+    direction find_next_direction(const int start_x,
+                                  const int start_y,
+                                  const int target_x,
+                                  const int target_y,
+                                  const is_movable is_movable_) noexcept {
+        if (start_x == target_x && start_y == target_y)
+            return direction::none;
 
-    ppOpen_list[open_count++] = pStart;
-
-    int work = 0;
-    while (open_count > 0) {
-        int best_f_index = 0;
-        for (int i = 0; i < open_count; ++i)
-            if (ppOpen_list[i]->f < ppOpen_list[best_f_index]->f)
-                best_f_index = i;
-
-        node_t *pCurrent = ppOpen_list[best_f_index];
-        ppOpen_list[best_f_index] = ppOpen_list[--open_count];
-        ppClosed_list[closed_count++] = pCurrent;
-
-        if (pCurrent->x == target_x && pCurrent->y == target_y) {
-            pFinal = pCurrent;
-            break;
+        if (static_cast<size_t>(map.size.x) != open_list.size()) {
+            open_list.resize(map.size.x);
+            closed_list.resize(map.size.x);
         }
+        open_count = closed_count = 0;
 
-        if (++work > 30 * map.size.y) {
-            pFinal = pCurrent;
-            break;
-        }
+        node *pStart{ new node }, *pFinal{};
+        pStart->x = start_x;
+        pStart->y = start_y;
+        pStart->g = 0;
+        pStart->h = get_h(start_x, start_y, target_x, target_y);
+        pStart->f = pStart->h;
+        pStart->pParent = nullptr;
 
-        for (int i = 0; i < 4; ++i) {
-            int new_x = pCurrent->x, new_y = pCurrent->y;
-            if (i == 0)
-                ++new_x;
-            else if (i == 1)
-                --new_x;
-            else if (i == 2)
-                ++new_y;
-            else
-                --new_y;
+        open_list[open_count++] = pStart;
 
-            if (!is_movable(new_x, new_y))
-                continue;
+        int work = 0;
+        while (open_count > 0) {
+            int best_f_index = 0;
+            for (int i{}; i < open_count; ++i)
+                if (open_list[i]->f < open_list[best_f_index]->f)
+                    best_f_index = i;
 
-            bool in_closed = false;
-            for (int j = 0; j < closed_count; ++j)
-                if (ppClosed_list[j]->x == new_x && ppClosed_list[j]->y == new_y) {
-                    in_closed = true;
-                    break;
+            node *pCurrent = open_list[best_f_index];
+            open_list[best_f_index] = open_list[--open_count];
+            closed_list[closed_count++] = pCurrent;
+
+            if (pCurrent->x == target_x && pCurrent->y == target_y) {
+                pFinal = pCurrent;
+                break;
+            }
+
+            if (++work > 30 * map.size.y) {
+                pFinal = pCurrent;
+                break;
+            }
+
+            for (int i{}; i < 4; ++i) {
+                int new_x = pCurrent->x, new_y = pCurrent->y;
+                if (i == 0)
+                    ++new_x;
+                else if (i == 1)
+                    --new_x;
+                else if (i == 2)
+                    ++new_y;
+                else
+                    --new_y;
+
+                if (!is_movable_ || !is_movable_(new_x, new_y))
+                    continue;
+
+                bool in_closed = false;
+                for (int j{}; j < closed_count; ++j)
+                    if (closed_list[j]->x == new_x && closed_list[j]->y == new_y) {
+                        in_closed = true;
+                        break;
+                    }
+                if (in_closed)
+                    continue;
+
+                node *pNeighbor{};
+                for (int j{}; j < open_count; ++j)
+                    if (open_list[j]->x == new_x && open_list[j]->y == new_y) {
+                        pNeighbor = open_list[j];
+                        break;
+                    }
+
+                const int tentative_g = pCurrent->g + 1;
+                if (!pNeighbor) {
+                    pNeighbor = new node;
+                    pNeighbor->x = new_x;
+                    pNeighbor->y = new_y;
+                    pNeighbor->g = tentative_g;
+                    pNeighbor->h = get_h(new_x, new_y, target_x, target_y);
+                    pNeighbor->f = pNeighbor->g + pNeighbor->h;
+                    pNeighbor->pParent = pCurrent;
+                    open_list[open_count++] = pNeighbor;
+                } else if (pNeighbor->g > tentative_g) {
+                    pNeighbor->g = tentative_g;
+                    pNeighbor->h = get_h(pNeighbor->x, pNeighbor->y, target_x, target_y);
+                    pNeighbor->f = pNeighbor->g + pNeighbor->h;
+                    pNeighbor->pParent = pCurrent;
                 }
-            if (in_closed)
-                continue;
-
-            node_t *pNeighbor = NULL;
-            for (int j = 0; j < open_count; ++j)
-                if (ppOpen_list[j]->x == new_x && ppOpen_list[j]->y == new_y) {
-                    pNeighbor = ppOpen_list[j];
-                    break;
-                }
-
-            const int tentative_g = pCurrent->g + 1;
-            if (!pNeighbor) {
-                pNeighbor = static_cast<node_t *>(malloc(sizeof(node_t)));
-                pNeighbor->x = new_x;
-                pNeighbor->y = new_y;
-                pNeighbor->g = tentative_g;
-                pNeighbor->h = astar_get_h(new_x, new_y, target_x, target_y);
-                pNeighbor->f = pNeighbor->g + pNeighbor->h;
-                pNeighbor->pParent = pCurrent;
-                ppOpen_list[open_count++] = pNeighbor;
-            } else if (pNeighbor->g > tentative_g) {
-                pNeighbor->g = tentative_g;
-                pNeighbor->h = astar_get_h(pNeighbor->x, pNeighbor->y, target_x, target_y);
-                pNeighbor->f = pNeighbor->g + pNeighbor->h;
-                pNeighbor->pParent = pCurrent;
             }
         }
+
+        direction direction{};
+        if (pFinal) {
+            node *pPath = pFinal;
+            while (pPath->pParent && !(start_x == pPath->pParent->x && start_y == pPath->pParent->y))
+                pPath = pPath->pParent;
+
+            if (pPath->x > start_x)
+                direction = direction::right;
+            else if (pPath->x < start_x)
+                direction = direction::left;
+            else if (pPath->y > start_y)
+                direction = direction::down;
+            else if (pPath->y < start_y)
+                direction = direction::up;
+        }
+
+        for (int i{}; i < open_count; ++i)
+            delete open_list[i];
+
+        for (int i{}; i < closed_count; ++i)
+            delete closed_list[i];
+        return direction;
     }
-
-    direction_t direction = DIRECTION_NONE;
-    if (pFinal) {
-        node_t *pPath = pFinal;
-        while (pPath->pParent && !(start_x == pPath->pParent->x && start_y == pPath->pParent->y))
-            pPath = pPath->pParent;
-
-        if (pPath->x > start_x)
-            direction = DIRECTION_RIGHT;
-        else if (pPath->x < start_x)
-            direction = DIRECTION_LEFT;
-        else if (pPath->y > start_y)
-            direction = DIRECTION_DOWN;
-        else if (pPath->y < start_y)
-            direction = DIRECTION_UP;
-    }
-
-    for (int i = 0; i < open_count; ++i)
-        free(ppOpen_list[i]);
-
-    for (int i = 0; i < closed_count; ++i)
-        free(ppClosed_list[i]);
-    return direction;
-}
-
-void astar_destroy(void) {
-    free(ppOpen_list);
-    ppOpen_list = NULL;
-
-    free(ppClosed_list);
-    ppClosed_list = NULL;
 }

@@ -9,7 +9,7 @@ private:
 
     bool exit_{};
     date_time elapsed_since_start_{};
-    ambient_BGM_state_t current_BGM_state{};
+    BGM current_BGM_state{};
 
     void render(void);
     void update_BGM(void);

@@ -115,13 +115,13 @@ void save_render(void) {
     }
 
     int y = console::size().Y / 2 - (MAX_SAVE_SPOTS + 2 + has_message) / 2;
-    console::print_center("=== Save ===", y++, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_BLUE);
+    console::print_center("=== Save ===", y++, BG::black, FG::blue);
     if (has_message)
-        console::print_center(pMessage, y++, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_CYAN);
-    console::print_center("[1 ~ 3]: Save, [ESC]: Close [Q]: Main Menu", y++, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_BLUE);
+        console::print_center(pMessage, y++, BG::black, FG::cyan);
+    console::print_center("[1 ~ 3]: Save, [ESC]: Close [Q]: Main Menu", y++, BG::black, FG::blue);
 
     for (int i = 0; i < MAX_SAVE_SPOTS; ++i)
-        console::print_center(std::format("{}. {}", i + 1, pUsed[i] ? "In Use (Overwrite)" : "Empty"), y++, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_BLUE);
+        console::print_center(std::format("{}. {}", i + 1, pUsed[i] ? "In Use (Overwrite)" : "Empty"), y++, BG::black, FG::blue);
 }
 
 void save_instantiate(void) {

@@ -78,12 +78,12 @@ main_menu_state main_menu(void) {
         console::fill(map_get_block_texture(BLOCK_AIR, 0, 0, menu_time.hour()));
 
         for (int i = 0; i < lines; ++i)
-            console::print_center(ppLogo[i], i + top - offset, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_GREEN);
+            console::print_center(ppLogo[i], i + top - offset, BG::black, FG::green);
 
-        PRINT_SELECTION(pControls, bottom, -1, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE);
-        PRINT_SELECTION(pNew_game, bottom, 0, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_DARKGREEN);
-        PRINT_SELECTION(pLoad_game, bottom, 1, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_CYAN);
-        PRINT_SELECTION(pQuit, bottom, 2, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_DARKRED);
+        PRINT_SELECTION(pControls, bottom, -1, BG::black, FG::white);
+        PRINT_SELECTION(pNew_game, bottom, 0, BG::black, FG::dark_green);
+        PRINT_SELECTION(pLoad_game, bottom, 1, BG::black, FG::cyan);
+        PRINT_SELECTION(pQuit, bottom, 2, BG::black, FG::dark_red);
 
         console::update();
 
@@ -126,13 +126,13 @@ bool main_menu_load_menu(void) {
     while (true) {
         int y = console::size().Y / 2 - half;
 
-        console::print_center("Load Save", y++, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_CYAN);
-        console::print_center("[Space]: Load, [ESC]: Back", y++, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_CYAN);
+        console::print_center("Load Save", y++, BG::black, FG::cyan);
+        console::print_center("[Space]: Load, [ESC]: Back", y++, BG::black, FG::cyan);
 
         for (int i = 0; i < MAX_SAVE_SPOTS; ++i) {
             const std::string string{ std::format("Save Slot {}: {}", i, pUsed[i] ? "Used" : "Empty") };
 
-            PRINT_SELECTION(string.c_str(), y, i, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_CYAN);
+            PRINT_SELECTION(string.c_str(), y, i, BG::black, FG::cyan);
         }
 
         if (_kbhit()) {
