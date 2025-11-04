@@ -3,15 +3,13 @@
 #include "leak.hpp"
 #include "crafting_UI.hpp"
 
-#include <stdio.h>
-#include <stdbool.h>
-
 #include "direction.hpp"
 #include "map.hpp"
 #include "input.hpp"
 #include "player.hpp"
 #include "inventory.hpp"
 #include "item_database.hpp"
+#include "formatter.hpp"
 
 #define MATERIAL_STRING_COUNT 128
 #define CRAFTING_MAX_RECIPES 64
@@ -157,16 +155,16 @@ void crafting_UI_input(void) {
 void crafting_UI_render(void) {
     if (!is_crafting_open)
         return;
-    console_clear();
+    console::clear();
 
     COORD position = {
         .X = 1,
         .Y = 1
     };
-    console_fprint_string("[ Craftable Items ]", position, BACKGROUND_T_BLACK, FOREGROUND_T_YELLOW);
+    console::print("[ Craftable Items ]", position, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_YELLOW);
     ++position.Y;
 
-    const BACKGROUND_color_t background = BACKGROUND_T_BLACK;
+    const BACKGROUND_color_t background = BACKGROUND_color_t::BACKGROUND_T_BLACK;
     const bool workbench = is_workbench_nearby();
 
     for (int i = 0; i < (workbench ? recipe_count : without_workbench_count); ++i) {
@@ -176,18 +174,16 @@ void crafting_UI_render(void) {
 
         const item_information_t * const pItem = database_find_item_by_index(pRecipe->result_index);
         const bool selected = i == selected_recipe_index;
-        const FOREGROUND_color_t foreground = selected ? FOREGROUND_T_WHITE : FOREGROUND_T_GRAY;
+        const FOREGROUND_color_t foreground = selected ? FOREGROUND_color_t::FOREGROUND_T_WHITE : FOREGROUND_color_t::FOREGROUND_T_GRAY;
 
-        const SHORT length = (SHORT)console_fprint_string(selected ? "> %s x%d " : "  %s x%d ",
-                                                  position,
-                                                  background,
-                                                  foreground,
-                                                  pItem ? pItem->name : "???",
-                                                  pRecipe->result_count);
-
+        const SHORT length{ static_cast<SHORT>(console::print(formatter::vformat(selected ? "> {} x{} " : "  {} x{} ",
+                                                                                 pItem ? pItem->name : "???",
+                                                                                 pRecipe->result_count),
+                                                              position, background, foreground)) };
+        
         const bool craftable = can_craft(pRecipe);
         position.X += length;
-        console_fprint_string("[%c]", position, background, craftable ? FOREGROUND_T_GREEN : FOREGROUND_T_RED, craftable ? 'O' : 'X');
+        console::print(std::format("[{}]", craftable ? 'O' : 'X'), position, background, craftable ? FOREGROUND_color_t::FOREGROUND_T_GREEN : FOREGROUND_color_t::FOREGROUND_T_RED);
         position.X -= length;
         ++position.Y;
 
@@ -201,16 +197,16 @@ void crafting_UI_render(void) {
 
             const item_information_t * const pIngredient_item = database_find_item_by_index(pRecipe->pIngredient_indices[j]);
             //재료명 + (가지고있는수량/필요한수량) 표시
-            console_fprint_string("    - %s (%d/%d)",
-                          position,
-                          BACKGROUND_T_BLACK,
-                          FOREGROUND_T_CYAN,
-                          pIngredient_item ? pIngredient_item->name : "???",
-                          inventory_get_count(pRecipe->pIngredient_indices[j]),
-                          pRecipe->pIngredient_counts[j]);
+            console::print(std::format("    - {} ({} / {})",
+                                       pIngredient_item ? pIngredient_item->name : "???",
+                                       inventory_get_count(pRecipe->pIngredient_indices[j]),
+                                       pRecipe->pIngredient_counts[j]),
+                           position,
+                           BACKGROUND_color_t::BACKGROUND_T_BLACK,
+                           FOREGROUND_color_t::FOREGROUND_T_CYAN);
             ++position.Y;
         }
     }
 
-    console_fprint_string("[Up / Down]: Select [E]: Craft [C]: Close", position, BACKGROUND_T_BLACK, FOREGROUND_T_GREEN);
+    console::print("[Up / Down]: Select [E]: Craft [C]: Close", position, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_GREEN);
 }

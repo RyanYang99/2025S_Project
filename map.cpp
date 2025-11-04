@@ -27,77 +27,77 @@ static int offset_callback_count = 0;
 static offset_changed_t *pOffset_callbacks = NULL;
 
 static const color_character_t pAir_midnight[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { ' ' , BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_T_BLACK, 0 } },
-    { { ' ' , BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_T_BLACK, 0 } },
-    { { ' ' , BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_T_BLACK, 0 } }
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_BLACK, 0 } },
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_BLACK, 0 } },
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_BLACK, 0 } }
 }, pAir_dawn[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { ' ' , BACKGROUND_T_DARKBLUE, 0 }, { ' ', BACKGROUND_T_DARKBLUE, 0 }, { ' ', BACKGROUND_T_DARKBLUE, 0 } },
-    { { ' ' , BACKGROUND_T_DARKBLUE, 0 }, { ' ', BACKGROUND_T_DARKBLUE, 0 }, { ' ', BACKGROUND_T_DARKBLUE, 0 } },
-    { { ' ' , BACKGROUND_T_DARKBLUE, 0 }, { ' ', BACKGROUND_T_DARKBLUE, 0 }, { ' ', BACKGROUND_T_DARKBLUE, 0 } }
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_DARKBLUE, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_DARKBLUE, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_DARKBLUE, 0 } },
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_DARKBLUE, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_DARKBLUE, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_DARKBLUE, 0 } },
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_DARKBLUE, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_DARKBLUE, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_DARKBLUE, 0 } }
 }, pAir_sun[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { ' ' , BACKGROUND_T_YELLOW, 0 }, { ' ', BACKGROUND_T_YELLOW, 0 }, { ' ', BACKGROUND_T_YELLOW, 0 } },
-    { { ' ' , BACKGROUND_T_YELLOW, 0 }, { ' ', BACKGROUND_T_YELLOW, 0 }, { ' ', BACKGROUND_T_YELLOW, 0 } },
-    { { ' ' , BACKGROUND_T_YELLOW, 0 }, { ' ', BACKGROUND_T_YELLOW, 0 }, { ' ', BACKGROUND_T_YELLOW, 0 } }
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_YELLOW, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_YELLOW, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_YELLOW, 0 } },
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_YELLOW, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_YELLOW, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_YELLOW, 0 } },
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_YELLOW, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_YELLOW, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_YELLOW, 0 } }
 }, pAir_noon[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { ' ' , BACKGROUND_T_BLUE, 0 }, { ' ', BACKGROUND_T_BLUE, 0 }, { ' ', BACKGROUND_T_BLUE, 0 } },
-    { { ' ' , BACKGROUND_T_BLUE, 0 }, { ' ', BACKGROUND_T_BLUE, 0 }, { ' ', BACKGROUND_T_BLUE, 0 } },
-    { { ' ' , BACKGROUND_T_BLUE, 0 }, { ' ', BACKGROUND_T_BLUE, 0 }, { ' ', BACKGROUND_T_BLUE, 0 } }
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_BLUE, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_BLUE, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_BLUE, 0 } },
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_BLUE, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_BLUE, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_BLUE, 0 } },
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_BLUE, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_BLUE, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_BLUE, 0 } }
 }, pAir_afternoon[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { ' ' , BACKGROUND_T_CYAN, 0 }, { ' ', BACKGROUND_T_CYAN, 0 }, { ' ', BACKGROUND_T_CYAN, 0 } },
-    { { ' ' , BACKGROUND_T_CYAN, 0 }, { ' ', BACKGROUND_T_CYAN, 0 }, { ' ', BACKGROUND_T_CYAN, 0 } },
-    { { ' ' , BACKGROUND_T_CYAN, 0 }, { ' ', BACKGROUND_T_CYAN, 0 }, { ' ', BACKGROUND_T_CYAN, 0 } }
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_CYAN, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_CYAN, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_CYAN, 0 } },
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_CYAN, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_CYAN, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_CYAN, 0 } },
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_CYAN, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_CYAN, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_CYAN, 0 } }
 }, pGrass[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { ' ' , BACKGROUND_T_GREEN, 0 }, { ' ', BACKGROUND_T_GREEN, 0 }, { ' ', BACKGROUND_T_GREEN, 0 } },
-    { { ' ' , BACKGROUND_T_GREEN, 0 }, { ' ', BACKGROUND_T_GREEN, 0 }, { ' ', BACKGROUND_T_GREEN, 0 } },
-    { { ' ' , BACKGROUND_T_GREEN, 0 }, { ' ', BACKGROUND_T_GREEN, 0 }, { ' ', BACKGROUND_T_GREEN, 0 } }
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_GREEN, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_GREEN, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_GREEN, 0 } },
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_GREEN, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_GREEN, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_GREEN, 0 } },
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_GREEN, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_GREEN, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_GREEN, 0 } }
 }, pDirt[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ', BACKGROUND_T_DARKYELLOW, 0 }, { ' ', BACKGROUND_T_DARKYELLOW, 0 } },
-    { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ', BACKGROUND_T_DARKYELLOW, 0 }, { ' ', BACKGROUND_T_DARKYELLOW, 0 } },
-    { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ', BACKGROUND_T_DARKYELLOW, 0 }, { ' ', BACKGROUND_T_DARKYELLOW, 0 } }
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, 0 } },
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, 0 } },
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, 0 } }
 }, pBedrock[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { '#' , BACKGROUND_T_GRAY, FOREGROUND_T_BLACK }, { '#' , BACKGROUND_T_GRAY, FOREGROUND_T_BLACK }, { '#' , BACKGROUND_T_GRAY, FOREGROUND_T_BLACK } },
-    { { '#' , BACKGROUND_T_GRAY, FOREGROUND_T_BLACK }, { '#' , BACKGROUND_T_GRAY, FOREGROUND_T_BLACK }, { '#' , BACKGROUND_T_GRAY, FOREGROUND_T_BLACK } },
-    { { '#' , BACKGROUND_T_GRAY, FOREGROUND_T_BLACK }, { '#' , BACKGROUND_T_GRAY, FOREGROUND_T_BLACK }, { '#' , BACKGROUND_T_GRAY, FOREGROUND_T_BLACK } }
+    { { '#' , BACKGROUND_color_t::BACKGROUND_T_GRAY, FOREGROUND_color_t::FOREGROUND_T_BLACK }, { '#' , BACKGROUND_color_t::BACKGROUND_T_GRAY, FOREGROUND_color_t::FOREGROUND_T_BLACK }, { '#' , BACKGROUND_color_t::BACKGROUND_T_GRAY, FOREGROUND_color_t::FOREGROUND_T_BLACK } },
+    { { '#' , BACKGROUND_color_t::BACKGROUND_T_GRAY, FOREGROUND_color_t::FOREGROUND_T_BLACK }, { '#' , BACKGROUND_color_t::BACKGROUND_T_GRAY, FOREGROUND_color_t::FOREGROUND_T_BLACK }, { '#' , BACKGROUND_color_t::BACKGROUND_T_GRAY, FOREGROUND_color_t::FOREGROUND_T_BLACK } },
+    { { '#' , BACKGROUND_color_t::BACKGROUND_T_GRAY, FOREGROUND_color_t::FOREGROUND_T_BLACK }, { '#' , BACKGROUND_color_t::BACKGROUND_T_GRAY, FOREGROUND_color_t::FOREGROUND_T_BLACK }, { '#' , BACKGROUND_color_t::BACKGROUND_T_GRAY, FOREGROUND_color_t::FOREGROUND_T_BLACK } }
 }, pStone[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { ' ' , BACKGROUND_T_GRAY, 0 }, { ' ' , BACKGROUND_T_GRAY, 0 }, { ' ' , BACKGROUND_T_GRAY, 0 } },
-    { { ' ' , BACKGROUND_T_GRAY, 0 }, { ' ' , BACKGROUND_T_GRAY, 0 }, { ' ' , BACKGROUND_T_GRAY, 0 } },
-    { { ' ' , BACKGROUND_T_GRAY, 0 }, { ' ' , BACKGROUND_T_GRAY, 0 }, { ' ' , BACKGROUND_T_GRAY, 0 } }
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_GRAY, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_GRAY, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_GRAY, 0 } },
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_GRAY, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_GRAY, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_GRAY, 0 } },
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_GRAY, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_GRAY, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_GRAY, 0 } }
 }, pIron_ore[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { '.' , BACKGROUND_T_GRAY, FOREGROUND_T_DARKGRAY }, { '.' , BACKGROUND_T_GRAY, FOREGROUND_T_DARKGRAY }, { '.' , BACKGROUND_T_GRAY, FOREGROUND_T_DARKGRAY } },
-    { { '.' , BACKGROUND_T_GRAY, FOREGROUND_T_DARKGRAY }, { '.' , BACKGROUND_T_GRAY, FOREGROUND_T_DARKGRAY }, { '.' , BACKGROUND_T_GRAY, FOREGROUND_T_DARKGRAY } },
-    { { '.' , BACKGROUND_T_GRAY, FOREGROUND_T_DARKGRAY }, { '.' , BACKGROUND_T_GRAY, FOREGROUND_T_DARKGRAY }, { '.' , BACKGROUND_T_GRAY, FOREGROUND_T_DARKGRAY } }
+    { { '.' , BACKGROUND_color_t::BACKGROUND_T_GRAY, FOREGROUND_color_t::FOREGROUND_T_DARKGRAY }, { '.' , BACKGROUND_color_t::BACKGROUND_T_GRAY, FOREGROUND_color_t::FOREGROUND_T_DARKGRAY }, { '.' , BACKGROUND_color_t::BACKGROUND_T_GRAY, FOREGROUND_color_t::FOREGROUND_T_DARKGRAY } },
+    { { '.' , BACKGROUND_color_t::BACKGROUND_T_GRAY, FOREGROUND_color_t::FOREGROUND_T_DARKGRAY }, { '.' , BACKGROUND_color_t::BACKGROUND_T_GRAY, FOREGROUND_color_t::FOREGROUND_T_DARKGRAY }, { '.' , BACKGROUND_color_t::BACKGROUND_T_GRAY, FOREGROUND_color_t::FOREGROUND_T_DARKGRAY } },
+    { { '.' , BACKGROUND_color_t::BACKGROUND_T_GRAY, FOREGROUND_color_t::FOREGROUND_T_DARKGRAY }, { '.' , BACKGROUND_color_t::BACKGROUND_T_GRAY, FOREGROUND_color_t::FOREGROUND_T_DARKGRAY }, { '.' , BACKGROUND_color_t::BACKGROUND_T_GRAY, FOREGROUND_color_t::FOREGROUND_T_DARKGRAY } }
 }, pLog[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKRED, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 } },
-    { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKRED, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 } },
-    { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKRED, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 } }
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_DARKRED, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, 0 } },
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_DARKRED, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, 0 } },
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_DARKRED, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, 0 } }
 }, pLeaf[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { '.' , BACKGROUND_T_GREEN, FOREGROUND_T_BLACK }, { '.' , BACKGROUND_T_GREEN, FOREGROUND_T_BLACK }, { '.' , BACKGROUND_T_GREEN, FOREGROUND_T_BLACK } },
-    { { '.' , BACKGROUND_T_GREEN, FOREGROUND_T_BLACK }, { '.' , BACKGROUND_T_GREEN, FOREGROUND_T_BLACK }, { '.' , BACKGROUND_T_GREEN, FOREGROUND_T_BLACK } },
-    { { '.' , BACKGROUND_T_GREEN, FOREGROUND_T_BLACK }, { '.' , BACKGROUND_T_GREEN, FOREGROUND_T_BLACK }, { '.' , BACKGROUND_T_GREEN, FOREGROUND_T_BLACK } }
+    { { '.' , BACKGROUND_color_t::BACKGROUND_T_GREEN, FOREGROUND_color_t::FOREGROUND_T_BLACK }, { '.' , BACKGROUND_color_t::BACKGROUND_T_GREEN, FOREGROUND_color_t::FOREGROUND_T_BLACK }, { '.' , BACKGROUND_color_t::BACKGROUND_T_GREEN, FOREGROUND_color_t::FOREGROUND_T_BLACK } },
+    { { '.' , BACKGROUND_color_t::BACKGROUND_T_GREEN, FOREGROUND_color_t::FOREGROUND_T_BLACK }, { '.' , BACKGROUND_color_t::BACKGROUND_T_GREEN, FOREGROUND_color_t::FOREGROUND_T_BLACK }, { '.' , BACKGROUND_color_t::BACKGROUND_T_GREEN, FOREGROUND_color_t::FOREGROUND_T_BLACK } },
+    { { '.' , BACKGROUND_color_t::BACKGROUND_T_GREEN, FOREGROUND_color_t::FOREGROUND_T_BLACK }, { '.' , BACKGROUND_color_t::BACKGROUND_T_GREEN, FOREGROUND_color_t::FOREGROUND_T_BLACK }, { '.' , BACKGROUND_color_t::BACKGROUND_T_GREEN, FOREGROUND_color_t::FOREGROUND_T_BLACK } }
 }, pSnow[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { ' ' , BACKGROUND_T_WHITE, 0 }, { ' ' , BACKGROUND_T_WHITE, 0 }, { ' ' , BACKGROUND_T_WHITE, 0 } },
-    { { ' ' , BACKGROUND_T_WHITE, 0 }, { ' ' , BACKGROUND_T_WHITE, 0 }, { ' ' , BACKGROUND_T_WHITE, 0 } },
-    { { ' ' , BACKGROUND_T_WHITE, 0 }, { ' ' , BACKGROUND_T_WHITE, 0 }, { ' ' , BACKGROUND_T_WHITE, 0 } }
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_WHITE, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_WHITE, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_WHITE, 0 } },
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_WHITE, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_WHITE, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_WHITE, 0 } },
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_WHITE, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_WHITE, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_WHITE, 0 } }
 }, pSand[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { '.' , BACKGROUND_T_DARKYELLOW, FOREGROUND_T_YELLOW }, { '.' , BACKGROUND_T_DARKYELLOW, FOREGROUND_T_YELLOW }, { '.' , BACKGROUND_T_DARKYELLOW, FOREGROUND_T_YELLOW } },
-    { { '.' , BACKGROUND_T_DARKYELLOW, FOREGROUND_T_YELLOW }, { '.' , BACKGROUND_T_DARKYELLOW, FOREGROUND_T_YELLOW }, { '.' , BACKGROUND_T_DARKYELLOW, FOREGROUND_T_YELLOW } },
-    { { '.' , BACKGROUND_T_DARKYELLOW, FOREGROUND_T_YELLOW }, { '.' , BACKGROUND_T_DARKYELLOW, FOREGROUND_T_YELLOW }, { '.' , BACKGROUND_T_DARKYELLOW, FOREGROUND_T_YELLOW } }
+    { { '.' , BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_YELLOW }, { '.' , BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_YELLOW }, { '.' , BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_YELLOW } },
+    { { '.' , BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_YELLOW }, { '.' , BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_YELLOW }, { '.' , BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_YELLOW } },
+    { { '.' , BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_YELLOW }, { '.' , BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_YELLOW }, { '.' , BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, FOREGROUND_color_t::FOREGROUND_T_YELLOW } }
 }, pWater[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { '.' , BACKGROUND_T_DARKBLUE, FOREGROUND_T_BLUE }, { '.' , BACKGROUND_T_DARKBLUE, FOREGROUND_T_BLUE }, { '.' , BACKGROUND_T_DARKBLUE, FOREGROUND_T_BLUE } },
-    { { '.' , BACKGROUND_T_DARKBLUE, FOREGROUND_T_BLUE }, { '.' , BACKGROUND_T_DARKBLUE, FOREGROUND_T_BLUE }, { '.' , BACKGROUND_T_DARKBLUE, FOREGROUND_T_BLUE } },
-    { { '.' , BACKGROUND_T_DARKBLUE, FOREGROUND_T_BLUE }, { '.' , BACKGROUND_T_DARKBLUE, FOREGROUND_T_BLUE }, { '.' , BACKGROUND_T_DARKBLUE, FOREGROUND_T_BLUE } }
+    { { '.' , BACKGROUND_color_t::BACKGROUND_T_DARKBLUE, FOREGROUND_color_t::FOREGROUND_T_BLUE }, { '.' , BACKGROUND_color_t::BACKGROUND_T_DARKBLUE, FOREGROUND_color_t::FOREGROUND_T_BLUE }, { '.' , BACKGROUND_color_t::BACKGROUND_T_DARKBLUE, FOREGROUND_color_t::FOREGROUND_T_BLUE } },
+    { { '.' , BACKGROUND_color_t::BACKGROUND_T_DARKBLUE, FOREGROUND_color_t::FOREGROUND_T_BLUE }, { '.' , BACKGROUND_color_t::BACKGROUND_T_DARKBLUE, FOREGROUND_color_t::FOREGROUND_T_BLUE }, { '.' , BACKGROUND_color_t::BACKGROUND_T_DARKBLUE, FOREGROUND_color_t::FOREGROUND_T_BLUE } },
+    { { '.' , BACKGROUND_color_t::BACKGROUND_T_DARKBLUE, FOREGROUND_color_t::FOREGROUND_T_BLUE }, { '.' , BACKGROUND_color_t::BACKGROUND_T_DARKBLUE, FOREGROUND_color_t::FOREGROUND_T_BLUE }, { '.' , BACKGROUND_color_t::BACKGROUND_T_DARKBLUE, FOREGROUND_color_t::FOREGROUND_T_BLUE } }
 }, pStar[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { ' ' , BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_T_BLACK, 0 } },
-    { { ' ' , BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_T_WHITE, 0 }, { ' ', BACKGROUND_T_BLACK, 0 } },
-    { { ' ' , BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_T_BLACK, 0 } }
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_BLACK, 0 } },
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_WHITE, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_BLACK, 0 } },
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_BLACK, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_BLACK, 0 } }
 }, pWorkbench[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 } },
-    { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_DARKYELLOW, 0 } },
-    { { ' ' , BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_T_TRANSPARENT, 0}, { ' ' , BACKGROUND_T_DARKYELLOW, 0 } }
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, 0 } },
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, 0 } },
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_TRANSPARENT, 0}, { ' ' , BACKGROUND_color_t::BACKGROUND_T_DARKYELLOW, 0 } }
 }, pSeed_of_Malakh[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { ' ' , BACKGROUND_T_BLACK, 0 }, { ' ' , BACKGROUND_T_RED, 0 }, { ' ' , BACKGROUND_T_BLACK, 0 } },
-    { { ' ' , BACKGROUND_T_RED, 0 }, { ' ' , BACKGROUND_T_YELLOW, 0 }, { ' ' , BACKGROUND_T_RED, 0 } },
-    { { ' ' , BACKGROUND_T_BLACK, 0 }, { ' ' , BACKGROUND_T_RED, 0 }, { ' ' , BACKGROUND_T_BLACK, 0 } }
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_BLACK, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_RED, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_BLACK, 0 } },
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_RED, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_YELLOW, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_RED, 0 } },
+    { { ' ' , BACKGROUND_color_t::BACKGROUND_T_BLACK, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_RED, 0 }, { ' ' , BACKGROUND_color_t::BACKGROUND_T_BLACK, 0 } }
 };
 
 static COORD render_block(const POINT map_position, const COORD console_position, const bool ltr, const bool utd) {
@@ -111,21 +111,21 @@ static COORD render_block(const POINT map_position, const COORD console_position
     for (int ty = 0; ty < TEXTURE_SIZE; ++ty) {
         for (int tx = 0; tx < TEXTURE_SIZE; ++tx) {
             const COORD position = {
-                .X = console_position.X + (SHORT)(ltr ? tx : -tx),
-                .Y = console_position.Y + (SHORT)(utd ? ty : -ty) };
+                .X = static_cast<SHORT>(console_position.X + (SHORT)(ltr ? tx : -tx)),
+                .Y = static_cast<SHORT>(console_position.Y + (SHORT)(utd ? ty : -ty)) };
 
-            exit = (position.X < 0 || position.X >= console_size.X) && (position.Y < 0 || position.Y >= console_size.Y);
-            if (position.X < 0 || position.X >= console_size.X || position.Y < 0 || position.Y >= console_size.Y)
+            exit = (position.X < 0 || position.X >= console::size().X) && (position.Y < 0 || position.Y >= console::size().Y);
+            if (position.X < 0 || position.X >= console::size().X || position.Y < 0 || position.Y >= console::size().Y)
                 break;
 
             size.X = (SHORT)tx + 1;
             size.Y = (SHORT)ty + 1;
 
-            console_print_color_character(map_get_block_texture(map.ppBlocks[map_position.y][map_position.x].type,
-                                                                ltr ? tx : (TEXTURE_SIZE - tx - 1),
-                                                                utd ? ty : (TEXTURE_SIZE - ty - 1),
-                                                                game::instance()->elapsed_since_start().hour()),
-                                          position);
+            console::print(map_get_block_texture(map.ppBlocks[map_position.y][map_position.x].type,
+                                                 ltr ? tx : (TEXTURE_SIZE - tx - 1),
+                                                 utd ? ty : (TEXTURE_SIZE - ty - 1),
+                                                 game::instance()->elapsed_since_start().hour()),
+                           position);
         }
 
         if (exit)
@@ -143,7 +143,7 @@ static COORD render_aft_or_forward(const COORD console_position_half, COORD cons
             texture_size = render_block({ x, y }, console_position, forward, true);
             console_position.Y += texture_size.Y;
 
-            if (console_position.Y >= console_size.Y)
+            if (console_position.Y >= console::size().Y)
                 break;
         }
 
@@ -158,7 +158,7 @@ static COORD render_aft_or_forward(const COORD console_position_half, COORD cons
 
         console_position.X += forward ? texture_size.X : -texture_size.X;
         console_position.Y = console_position_half.Y;
-        if ((forward && console_position.X >= console_size.X) || (!forward && console_position.X < 0))
+        if ((forward && console_position.X >= console::size().X) || (!forward && console_position.X < 0))
             break;
     }
 
@@ -375,10 +375,11 @@ static void resize_map(const bool right) {
 }
 
 void map_render(void) {
-    const COORD console_position_half = { console_size.X / 2, console_size.Y / 2 };
+    const COORD console_position_half = { static_cast<SHORT>(console::size().X / 2),
+                                          static_cast<SHORT>(console::size().Y / 2) };
 
     COORD console_position = render_aft_or_forward(console_position_half, console_position_half, true);
-    if (console_position.X != console_size.X)
+    if (console_position.X != console::size().X)
         resize_map(true);
 
     console_position.X = console_position_half.X - 1;

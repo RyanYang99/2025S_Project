@@ -26,24 +26,25 @@ game *game::instance_{};
 
 #if _DEBUG
 static void render_debug_text(void) {
-    const BACKGROUND_color_t background{ BACKGROUND_T_BLACK };
-    const FOREGROUND_color_t foreground{ FOREGROUND_T_WHITE };
+    const BACKGROUND_color_t background{ BACKGROUND_color_t::BACKGROUND_T_BLACK };
+    const FOREGROUND_color_t foreground{ FOREGROUND_color_t::FOREGROUND_T_WHITE };
 
-    COORD position = { 0, console_size.Y - 4 };
+    const COORD &size{ console::size() };
+    COORD position = { 0, static_cast<SHORT>(size.Y - 4) };
 
     int fps{ -1 };
     if (delta_time_t::delta_time > 0.0f)
         fps = static_cast<int>(1.0f / delta_time_t::delta_time);
-    console_fprint_string(std::format("FPS: {}", fps).c_str(), position, background, foreground);
+    console::print(std::format("FPS: {}", fps), position, background, foreground);
     ++position.Y;
 
-    console_fprint_string(std::format("Player: ({}, {})", player.x, player.y).c_str(), position, background, foreground);
+    console::print(std::format("Player: ({}, {})", player.x, player.y), position, background, foreground);
     ++position.Y;
 
-    console_fprint_string(std::format("Mouse: ({}, {})", block_control_selected_x, block_control_selected_y).c_str(), position, background, foreground);
+    console::print(std::format("Mouse: ({}, {})", block_control_selected_x, block_control_selected_y), position, background, foreground);
     ++position.Y;
 
-    console_fprint_string(std::format("Boss Spawned: {}", boss_spawned).c_str(), position, background, foreground);
+    console::print(std::format("Boss Spawned: {}", boss_spawned), position, background, foreground);
 }
 #endif
 
@@ -122,7 +123,7 @@ void game::update(void) {
     while (!exit_) {
         delta_time_t::update();
 
-        console_update();
+        console::update();
         input::update();
         elapsed_since_start_.update();
         update_BGM();

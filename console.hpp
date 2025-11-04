@@ -1,11 +1,11 @@
 ﻿#pragma once
 
-#include <stdbool.h>
+#include <string>
 
 #include <Windows.h>
 
 #define X_color_t(X) \
-typedef enum { \
+enum class X##_color_t { \
     X##_T_BLACK = 0, \
     X##_T_DARKBLUE = X##_BLUE, \
     X##_T_DARKGREEN = X##_GREEN, \
@@ -23,7 +23,7 @@ typedef enum { \
     X##_T_YELLOW = X##_INTENSITY | X##_RED | X##_GREEN, \
     X##_T_WHITE = X##_INTENSITY | X##_RED | X##_GREEN | X##_BLUE, \
     X##_T_TRANSPARENT = -1 \
-} X##_color_t
+};
 
 X_color_t(BACKGROUND);
 X_color_t(FOREGROUND);
@@ -35,55 +35,102 @@ struct color_character_t {
 
     color_character_t(void) = default;
 
-    color_character_t(char character_) : character(character_) {}
+    color_character_t(char character_) noexcept : character(character_) {}
 
-    color_character_t(wchar_t character_) : character(character_) {}
+    color_character_t(wchar_t character_) noexcept : character(character_) {}
 
-    color_character_t(char character_, BACKGROUND_color_t background_) : character(character_), background(background_) {}
+    color_character_t(char character_, BACKGROUND_color_t background_) noexcept  : character(character_), background(background_) {}
 
-    color_character_t(wchar_t character_, BACKGROUND_color_t background_) : character(character_), background(background_) {}
+    color_character_t(wchar_t character_, BACKGROUND_color_t background_) noexcept : character(character_), background(background_) {}
 
-    color_character_t(char character_, int background_) : character(character_), background(static_cast<BACKGROUND_color_t>(background_)) {}
+    color_character_t(char character_, int background_) noexcept : character(character_), background(static_cast<BACKGROUND_color_t>(background_)) {}
 
-    color_character_t(wchar_t character_, int background_) : character(character_), background(static_cast<BACKGROUND_color_t>(background_)) {}
+    color_character_t(wchar_t character_, int background_) noexcept : character(character_), background(static_cast<BACKGROUND_color_t>(background_)) {}
 
     color_character_t(char character_,
                       BACKGROUND_color_t background_,
-                      FOREGROUND_color_t foreground_) : character(character_),
-                                                        background(background_),
-                                                        foreground(foreground_) {}
+                      FOREGROUND_color_t foreground_) noexcept : character(character_),
+                                                                 background(background_),
+                                                                 foreground(foreground_) {}
 
     color_character_t(wchar_t character_,
                       BACKGROUND_color_t background_,
-                      FOREGROUND_color_t foreground_) : character(character_),
-                                                        background(background_),
-                                                        foreground(foreground_) {}
+                      FOREGROUND_color_t foreground_) noexcept : character(character_),
+                                                                 background(background_),
+                                                                 foreground(foreground_) {}
+
+    color_character_t(char character_,
+                      BACKGROUND_color_t background_,
+                      int foreground_) noexcept : character(character_),
+                                                  background(background_),
+                                                  foreground(static_cast<FOREGROUND_color_t>(foreground_)) {}
+
+    color_character_t(wchar_t character_,
+                      BACKGROUND_color_t background_,
+                      int foreground_) noexcept : character(character_),
+                                                  background(background_),
+                                                  foreground(static_cast<FOREGROUND_color_t>(foreground_)) {}
 
     color_character_t(char character_,
                       int background_,
-                      int foreground_) : character(character_),
-                                         background(static_cast<BACKGROUND_color_t>(background_)),
-                                         foreground(static_cast<FOREGROUND_color_t>(foreground_)) {}
+                      int foreground_) noexcept : character(character_),
+                                                  background(static_cast<BACKGROUND_color_t>(background_)),
+                                                  foreground(static_cast<FOREGROUND_color_t>(foreground_)) {}
 
     color_character_t(wchar_t character_,
                       int background_,
-                      int foreground_) : character(character_),
-                                         background(static_cast<BACKGROUND_color_t>(background_)),
-                                         foreground(static_cast<FOREGROUND_color_t>(foreground_)) {}
+                      int foreground_) noexcept : character(character_),
+                                                  background(static_cast<BACKGROUND_color_t>(background_)),
+                                                  foreground(static_cast<FOREGROUND_color_t>(foreground_)) {}
 };
 
-extern COORD console_size;
+class console {
+private:
+    static COORD size_;
 
-void console_initialize(const bool use_double_buffering, const bool should_switch_font);
-void console_update(void);
-void console_destroy(void);
+    static int current_buffer;
+    static HANDLE buffer[2];
 
-const bool console_is_new_windows_terminal(void);
-const COORD console_convert_from_monitor(const POINT point);
-const bool console_is_cursor_inside(const POINT point);
+    static int buffer_count;
+    static PCHAR_INFO character_buffer;
+    static SMALL_RECT written;
 
-void console_clear(void);
-void console_fill(const color_character_t character);
-void console_print_color_character(const color_character_t character, const COORD position);
-int console_fprint_string(const char * const pFormat, const COORD position, const BACKGROUND_color_t background, const FOREGROUND_color_t foreground, ...);
-void console_print_center(const char * const string, const int y, const BACKGROUND_color_t background, const FOREGROUND_color_t foreground, ...);
+    static HANDLE handle;
+
+    static HWND window;
+    static float dpi_scale;
+
+    static const COORD calculate_size(const HANDLE size_handle);
+    static void initialize_double_buffering(void);
+    static void hide_cursor(const HANDLE cursor_handle);
+    static bool update_size(void);
+    static void resize(const HANDLE size_handle);
+    static void flip_double_buffer(void);
+    static int index(const int x, const int y);
+    static void write(const COORD &position, const wchar_t character, const WORD attribute);
+
+public:
+    static void initialize(void);
+    static void update(void);
+
+    static const COORD &size(void) noexcept;
+
+    static bool is_new_windows_terminal(void);
+    static const COORD convert_from_monitor(const POINT &point);
+    static bool is_cursor_inside(const POINT &point);
+
+    static void clear(void);
+
+    static void fill(const color_character_t &character);
+    static void print(const color_character_t &character, const COORD &position);
+    static size_t print(const std::string &string,
+                        COORD position,
+                        const BACKGROUND_color_t background,
+                        const FOREGROUND_color_t foreground);
+    static void print_center(const std::string &string,
+                             const int y,
+                             const BACKGROUND_color_t background,
+                             const FOREGROUND_color_t foreground);
+
+    static void destroy(void);
+};

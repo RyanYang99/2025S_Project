@@ -17,17 +17,20 @@
 #include "item_database.hpp"
 
 //가독성을 위한 매크로
-#define FG_WHITE FOREGROUND_T_WHITE
-#define FG_YELLOW FOREGROUND_T_YELLOW
-#define FG_CYAN FOREGROUND_T_CYAN
-#define FG_MAGENTA FOREGROUND_T_MAGENTA
-#define FG_RED FOREGROUND_T_RED
-#define FG_BLUE FOREGROUND_T_BLUE
-#define BG_BLUE BACKGROUND_T_BLUE
-#define BG_WHITE BACKGROUND_T_WHITE
-#define BG_RED BACKGROUND_T_RED
-#define BG_YELLOW BACKGROUND_T_YELLOW
-#define BG_BLACK BACKGROUND_T_BLACK
+#define FG_WHITE FOREGROUND_color_t::FOREGROUND_T_WHITE
+#define FG_YELLOW FOREGROUND_color_t::FOREGROUND_T_YELLOW
+#define FG_CYAN FOREGROUND_color_t::FOREGROUND_T_CYAN
+#define FG_MAGENTA FOREGROUND_color_t::FOREGROUND_T_MAGENTA
+#define FG_RED FOREGROUND_color_t::FOREGROUND_T_RED
+#define FG_BLUE FOREGROUND_color_t::FOREGROUND_T_BLUE
+#define FG_BLACK FOREGROUND_color_t::FOREGROUND_T_BLACK
+
+#define BG_BLUE BACKGROUND_color_t::BACKGROUND_T_BLUE
+#define BG_WHITE BACKGROUND_color_t::BACKGROUND_T_WHITE
+#define BG_RED BACKGROUND_color_t::BACKGROUND_T_RED
+#define BG_YELLOW BACKGROUND_color_t::BACKGROUND_T_YELLOW
+#define BG_BLACK BACKGROUND_color_t::BACKGROUND_T_BLACK
+#define BG_CYAN BACKGROUND_color_t::BACKGROUND_T_CYAN
 
 //보스 데미지 텍스트 관련
 constexpr int MAX_BOSS_DAMAGE_TEXTS{ 10 }, MAX_MISSILES{ 5 };
@@ -59,35 +62,35 @@ static const color_character_t pBoss_malakh_sprite_data[BOSS_SPRITE_HEIGHT][BOSS
     //0              1              2              3              4              5              6              7              8              9              10             11             12             13             14             15             16             17             18             19
     { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //1
-    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_YELLOW, FG_YELLOW }, { L'█', FG_YELLOW, FG_YELLOW }, { L'█', FG_YELLOW, FG_YELLOW }, { L'█', FG_YELLOW, FG_YELLOW }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_YELLOW, FG_YELLOW }, { L'█', BG_YELLOW, FG_YELLOW }, { L'█', BG_YELLOW, FG_YELLOW }, { L'█', BG_YELLOW, FG_YELLOW }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //2
-    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_YELLOW, FG_YELLOW }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_YELLOW, FG_YELLOW }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_YELLOW, FG_YELLOW }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_YELLOW, FG_YELLOW }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //3
-    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_BLUE, FG_BLUE }, { L'█', FG_YELLOW, FG_YELLOW }, { L'█', FG_YELLOW, FG_YELLOW }, { L'█', FG_BLUE, FG_BLUE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_BLUE, FG_BLUE }, { L'█', BG_YELLOW, FG_YELLOW }, { L'█', BG_YELLOW, FG_YELLOW }, { L'█', BG_BLUE, FG_BLUE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //4
-    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //5
-    { { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { L'█', FG_CYAN, FG_CYAN }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█',BG_BLACK,BG_BLACK }, { L'█', FG_RED, FG_RED }, { L'█',BG_BLACK,BG_BLACK }, { L'█',BG_BLACK,BG_BLACK }, { L'█', FG_RED, FG_RED }, { L'█',BG_BLACK,BG_BLACK }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { L'█', FG_CYAN, FG_CYAN }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { L'█', BG_CYAN, FG_CYAN }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_RED, FG_RED }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_RED, FG_RED }, { L'█', BG_BLACK, FG_BLACK }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { L'█', BG_CYAN, FG_CYAN }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //6
-    { { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_BLACK, BG_BLACK }, { L'█',BG_BLACK,BG_BLACK }, { L'█',BG_BLACK,BG_BLACK }, { L'█',BG_BLACK,BG_BLACK }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_BLACK, FG_BLACK }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 } },
     //7
-    { { L'█', FG_WHITE, FG_WHITE }, { L'█', FG_WHITE, FG_WHITE }, { L'█', FG_CYAN, FG_CYAN }, { L'█', FG_WHITE, FG_WHITE }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_BLACK, BG_BLACK }, { L'█', BG_BLACK, BG_BLACK }, { L'█',FG_YELLOW,FG_YELLOW }, { L'█',FG_YELLOW,FG_YELLOW }, { L'█',BG_BLACK,BG_BLACK }, { L'█',BG_BLACK,BG_BLACK }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { L'█', FG_WHITE, FG_WHITE }, { L'█', FG_CYAN, FG_CYAN }, { L'█', FG_WHITE, FG_WHITE }, { L'█', FG_WHITE, FG_WHITE } },
+    { { L'█', BG_WHITE, FG_WHITE }, { L'█', BG_WHITE, FG_WHITE }, { L'█', BG_CYAN, FG_CYAN }, { L'█', BG_WHITE, FG_WHITE }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_YELLOW, FG_YELLOW }, { L'█', BG_YELLOW, FG_YELLOW }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_BLACK, FG_BLACK }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { L'█', BG_WHITE, FG_WHITE }, { L'█', BG_CYAN, FG_CYAN }, { L'█', BG_WHITE, FG_WHITE }, { L'█', BG_WHITE, FG_WHITE } },
     //8
-    { { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, BG_WHITE }, { L'█', FG_CYAN, FG_CYAN }, { L'█', BG_WHITE, BG_WHITE }, { L'█', BG_WHITE, BG_WHITE }, { ' ', 0, 0 }, { L'█', BG_BLACK, BG_BLACK }, { L'█', BG_BLACK, BG_BLACK }, { L'█',FG_RED,FG_RED }, { L'█',FG_RED,FG_RED }, { L'█',BG_BLACK,BG_BLACK }, { L'█',BG_BLACK,BG_BLACK }, { ' ', 0, 0 }, { L'█', BG_WHITE, BG_WHITE }, { L'█', FG_WHITE, FG_WHITE }, { L'█', FG_CYAN, FG_CYAN }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { L'█', BG_CYAN, FG_CYAN }, { L'█', BG_WHITE, FG_WHITE }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_RED, FG_RED }, { L'█', BG_RED, FG_RED }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_BLACK, FG_BLACK }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { L'█', BG_WHITE, FG_WHITE }, { L'█', BG_CYAN, FG_CYAN }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //9
-    { { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_BLACK, BG_BLACK }, { L'█',BG_BLACK,BG_BLACK }, { L'█',BG_BLACK,BG_BLACK }, { L'█',BG_BLACK,BG_BLACK }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_BLACK, FG_BLACK }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 } },
     //10
-    { { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█',BG_BLACK,BG_BLACK }, { L'█', FG_RED, FG_RED }, { L'█',BG_BLACK,BG_BLACK }, { L'█',BG_BLACK,BG_BLACK }, { L'█', FG_RED, FG_RED }, { L'█',BG_BLACK,BG_BLACK }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█',FG_WHITE,FG_WHITE } },
+    { { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_RED, FG_RED }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_BLACK, FG_BLACK }, { L'█', BG_RED, FG_RED }, { L'█', BG_BLACK, FG_BLACK }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE } },
     //11
     { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //12
-    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //13
-    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //14
-    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //15
-    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', FG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
+    { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { L'█', BG_WHITE, FG_WHITE }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //16
     { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //17
@@ -419,22 +422,25 @@ void boss_update(void) {
 //미사일 렌더링
 static void boss_render_missiles(void) {
     const color_character_t character = { '*', BG_BLACK, FG_RED };
+    const COORD &size{ console::size() };
 
     for (int i = 0; i < MAX_MISSILES; ++i)
         if (pBoss_missiles[i].is_active) {
             const COORD missile_position = {
-                (SHORT)(console_size.X / 2 + (pBoss_missiles[i].x - player.x) * BOSS_DRAW_SCALE),
-                (SHORT)(console_size.Y / 2 + (pBoss_missiles[i].y - player.y) * BOSS_DRAW_SCALE)
+                (SHORT)(size.X / 2 + (pBoss_missiles[i].x - player.x) * BOSS_DRAW_SCALE),
+                (SHORT)(size.Y / 2 + (pBoss_missiles[i].y - player.y) * BOSS_DRAW_SCALE)
             };
 
-            if (missile_position.X >= 0 && missile_position.X < console_size.X &&
-                missile_position.Y >= 0 && missile_position.Y < console_size.Y)
-                console_print_color_character(character, missile_position);
+            if (missile_position.X >= 0 && missile_position.X < size.X &&
+                missile_position.Y >= 0 && missile_position.Y < size.Y)
+                console::print(character, missile_position);
         }
 }
 
 //패턴 렌더링 함수
 static void boss_render_pattern(void) {
+    const COORD &size{ console::size() };
+
     //미사일 렌더링
     boss_render_missiles();
 
@@ -455,11 +461,11 @@ static void boss_render_pattern(void) {
 
         for (int i = 0; i < 3; ++i) {
             COORD laser_position = {
-                .Y = (SHORT)(console_size.Y / 2 + ((boss.current_horizontal_laser_y + i) - player.y) * BOSS_DRAW_SCALE)
+                .Y = (SHORT)(size.Y / 2 + ((boss.current_horizontal_laser_y + i) - player.y) * BOSS_DRAW_SCALE)
             };
 
-            for (; laser_position.X < console_size.X; ++laser_position.X)
-                console_print_color_character(character, laser_position);
+            for (; laser_position.X < size.X; ++laser_position.X)
+                console::print(character, laser_position);
         }
     }
 
@@ -487,20 +493,22 @@ static void boss_render_pattern(void) {
 
         for (int i = 0; i < 3; ++i) {
             COORD laser_position = {
-                .X = (SHORT)(console_size.X / 2 + ((boss.current_vertical_laser_x + (boss.is_vertical_laser_from_left ? -i : i)) - player.x) * BOSS_DRAW_SCALE)
+                .X = (SHORT)(size.X / 2 + ((boss.current_vertical_laser_x + (boss.is_vertical_laser_from_left ? -i : i)) - player.x) * BOSS_DRAW_SCALE)
             };
 
-            for (; laser_position.Y < console_size.Y; ++laser_position.Y)
-                console_print_color_character(character, laser_position);
+            for (; laser_position.Y < size.Y; ++laser_position.Y)
+                console::print(character, laser_position);
         }
     }
 }
 
 //보스 대미지 텍스트 렌더링 함수
 static void boss_render_damage_texts(void) {
+    const COORD &size{ console::size() };
+
     const COORD center_position = {
-        .X = console_size.X / 2,
-        .Y = console_size.Y / 2
+        .X = static_cast<SHORT>(size.X / 2),
+        .Y = static_cast<SHORT>(size.Y / 2)
     };
 
     for (int i = 0; i < MAX_BOSS_DAMAGE_TEXTS; ++i) {
@@ -510,7 +518,7 @@ static void boss_render_damage_texts(void) {
                 .Y = (SHORT)(center_position.Y + (pBoss_damage_texts[i].precise_y - player.y))
             };
 
-            console_fprint_string("Attack! -%d", draw_position, BACKGROUND_T_BLACK, FOREGROUND_T_WHITE, pBoss_damage_texts[i].damage_value);
+            console::print(std::format("Attack! -{}", pBoss_damage_texts[i].damage_value), draw_position, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE);
         }
     }
 }
@@ -520,8 +528,9 @@ void boss_render(void) {
     if (boss.state == E_BOSS_STATE_DEFEATED)
         return;
 
-    const int boss_screen_base_x = console_size.X / 2 + (boss.x - player.x) * BOSS_DRAW_SCALE,
-              boss_screen_base_y = console_size.Y / 2 + (boss.y - player.y) * BOSS_DRAW_SCALE;
+    const COORD &size{ console::size() };
+    const int boss_screen_base_x = size.X / 2 + (boss.x - player.x) * BOSS_DRAW_SCALE,
+              boss_screen_base_y = size.Y / 2 + (boss.y - player.y) * BOSS_DRAW_SCALE;
 
     //스프라이트 렌더링
     for (int y_offset = 0; y_offset < BOSS_SPRITE_HEIGHT; ++y_offset)
@@ -532,11 +541,11 @@ void boss_render(void) {
                         .X = (SHORT)(boss_screen_base_x + (x_offset * BOSS_DRAW_SCALE) + px),
                         .Y = (SHORT)(boss_screen_base_y + (y_offset * BOSS_DRAW_SCALE) + py)
                     };
-                    if (character_position.X >= 0 && character_position.X < console_size.X &&
-                        character_position.Y >= 0 && character_position.Y < console_size.Y) {
+                    if (character_position.X >= 0 && character_position.X < size.X &&
+                        character_position.Y >= 0 && character_position.Y < size.Y) {
                         const color_character_t char_to_print = boss.pSprite_data[y_offset][x_offset];
                         if (char_to_print.character != L' ')
-                            console_print_color_character(char_to_print, character_position);
+                            console::print(char_to_print, character_position);
                     }
                 }
 
@@ -550,7 +559,7 @@ void boss_render(void) {
         hp_position.X = 0;
     if (hp_position.Y < 0)
         hp_position.Y = 0;
-    console_fprint_string(text.c_str(), hp_position, BACKGROUND_T_BLACK, FOREGROUND_T_WHITE);
+    console::print(text, hp_position, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE);
 
     //패턴 렌더링
     boss_render_pattern();

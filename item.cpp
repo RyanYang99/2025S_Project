@@ -5,13 +5,13 @@
 #include "player.hpp"
 
 static const color_character_t pHealth_potion[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { ' ', BACKGROUND_T_TRANSPARENT, 0 }, { ' ', BACKGROUND_T_WHITE, 0 }, { ' ', BACKGROUND_T_TRANSPARENT, 0 } },
-    { { ' ', BACKGROUND_T_RED, 0 }, { ' ', BACKGROUND_T_RED, 0 }, { ' ', BACKGROUND_T_RED, 0 } },
-    { { ' ', BACKGROUND_T_RED, 0 }, { ' ', BACKGROUND_T_RED, 0 }, { ' ', BACKGROUND_T_RED, 0 } },
+    { { ' ', BACKGROUND_color_t::BACKGROUND_T_TRANSPARENT, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_WHITE, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_TRANSPARENT, 0 } },
+    { { ' ', BACKGROUND_color_t::BACKGROUND_T_RED, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_RED, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_RED, 0 } },
+    { { ' ', BACKGROUND_color_t::BACKGROUND_T_RED, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_RED, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_RED, 0 } },
 }, pApple[TEXTURE_SIZE][TEXTURE_SIZE] = {
-    { { ' ', BACKGROUND_T_TRANSPARENT, 0 }, { ' ', BACKGROUND_T_GREEN, 0 }, { ' ', BACKGROUND_T_TRANSPARENT, 0 } },
-    { { ' ', BACKGROUND_T_RED, 0 }, { ' ', BACKGROUND_T_RED, 0 }, { ' ', BACKGROUND_T_RED, 0 } },
-    { { ' ', BACKGROUND_T_RED, 0 }, { ' ', BACKGROUND_T_RED, 0 }, { ' ', BACKGROUND_T_RED, 0 } },
+    { { ' ', BACKGROUND_color_t::BACKGROUND_T_TRANSPARENT, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_GREEN, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_TRANSPARENT, 0 } },
+    { { ' ', BACKGROUND_color_t::BACKGROUND_T_RED, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_RED, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_RED, 0 } },
+    { { ' ', BACKGROUND_color_t::BACKGROUND_T_RED, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_RED, 0 }, { ' ', BACKGROUND_color_t::BACKGROUND_T_RED, 0 } },
 };
 
 const bool item_use(const item_t item) {

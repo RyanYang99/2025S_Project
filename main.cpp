@@ -11,7 +11,7 @@
 #include "item_database.hpp"
 
 static bool force_old_console(void) {
-    if (console_is_new_windows_terminal()) {
+    if (console::is_new_windows_terminal()) {
         printf_s("Attempting to launch in conhost.exe.\n");
 
         int argc = 0;
@@ -63,14 +63,14 @@ int main(void) {
 
     database_initialize(false);
     crafting_UI_initialize();
-    console_initialize(true, false);
+    console::initialize();
     sound_initialize();
 
     while (true) {
-        const main_menu_state_t main_menu_state = main_menu();
-        if (main_menu_state == MAIN_MENU_STATE_QUIT)
+        const main_menu_state main_menu_state = main_menu();
+        if (main_menu_state == main_menu_state::quit)
             break;
-        else if (main_menu_state == MAIN_MENU_STATE_LOAD_GAME) {
+        else if (main_menu_state == main_menu_state::load) {
             if (!main_menu_load_menu())
                 continue;
         } else
@@ -85,6 +85,6 @@ int main(void) {
 
     database_destroy();
     sound_destroy();
-    console_destroy();
+    console::destroy();
     return EXIT_SUCCESS;
 }

@@ -2,6 +2,7 @@
 #include "inventory.hpp"
 
 #include <string>
+#include <format>
 
 #include "game.hpp"
 #include "direction.hpp"
@@ -13,11 +14,11 @@
 #include "delta_time.hpp"
 #include "console.hpp"
 
-#define INVENTORY_BACKGROUND BACKGROUND_T_BLACK
-#define INVENTORY_FOREGROUND FOREGROUND_T_WHITE
-#define INVENTORY_FOREGROUND_DARK FOREGROUND_T_GRAY
-#define INVENTORY_FOREGROUND_BLINK FOREGROUND_T_WHITE
-#define INVENTORY_FOREGROUND_IN_HOTBAR FOREGROUND_T_GREEN
+#define INVENTORY_BACKGROUND BACKGROUND_color_t::BACKGROUND_T_BLACK
+#define INVENTORY_FOREGROUND FOREGROUND_color_t::FOREGROUND_T_WHITE
+#define INVENTORY_FOREGROUND_DARK FOREGROUND_color_t::FOREGROUND_T_GRAY
+#define INVENTORY_FOREGROUND_BLINK FOREGROUND_color_t::FOREGROUND_T_WHITE
+#define INVENTORY_FOREGROUND_IN_HOTBAR FOREGROUND_color_t::FOREGROUND_T_GREEN
 
 #define HOTBAR_SIZE_IN_CHARACTERS_X (TEXTURE_SIZE * HOTBAR_COUNT + HOTBAR_COUNT + 1)
 #define HOTBAR_SIZE_IN_CHARACTERS_Y (TEXTURE_SIZE + 2)
@@ -138,30 +139,30 @@ static void render_item(const int y,
         foreground = INVENTORY_FOREGROUND_BLINK;
 
     if (selected)
-        position.X += (SHORT)console_fprint_string("> ", position, INVENTORY_BACKGROUND, foreground);
+        position.X += (SHORT)console::print("> ", position, INVENTORY_BACKGROUND, foreground);
 
     if (pItem->item_DB_index) {
         const item_information_t * const pItem_info = database_find_item_by_index(pItem->item_DB_index);
         if (!pItem_info)
             return;
 
-        position.X += (SHORT)console_fprint_string("[ %s", position, INVENTORY_BACKGROUND, foreground, pItem_info->name);
+        position.X += (SHORT)console::print(std::format("[ {}", pItem_info->name), position, INVENTORY_BACKGROUND, foreground);
 
         if (pItem_info->max_stack > 1)
-            position.X += (SHORT)console_fprint_string(" (x%d)", position, INVENTORY_BACKGROUND, foreground, pItem->quantity);
+            position.X += (SHORT)console::print(std::format(" (x{})", pItem->quantity), position, INVENTORY_BACKGROUND, foreground);
 
         if (pItem_info->type == ITEM_TYPE_TOOL || pItem_info->type == ITEM_TYPE_ARMOR)
-            position.X += (SHORT)console_fprint_string(" (Durability: %d/%d)", position, INVENTORY_BACKGROUND, foreground, pItem->durability, pItem_info->base_durability);
+            position.X += (SHORT)console::print(std::format(" (Durability: {} / {})", pItem->durability, pItem_info->base_durability), position, INVENTORY_BACKGROUND, foreground);
 
-        position.X += (SHORT)console_fprint_string(" ]", position, INVENTORY_BACKGROUND, foreground);
+        position.X += (SHORT)console::print(" ]", position, INVENTORY_BACKGROUND, foreground);
 
         for (int i = 0; i < max_hotbar_index; ++i)
             if (inventory.pHotbar[i].index_in_inventory == inventory_index)
-                console_fprint_string(" [%d] ", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND_IN_HOTBAR, i + 1);
+                console::print(std::format(" [{}] ", i + 1), position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND_IN_HOTBAR);
 
 
     } else
-        console_fprint_string("[ Empty ]", position, INVENTORY_BACKGROUND, foreground);
+        console::print("[ Empty ]", position, INVENTORY_BACKGROUND, foreground);
 }
 
 static void render_hotbar(void) {
@@ -169,8 +170,8 @@ static void render_hotbar(void) {
               slot_height = TEXTURE_SIZE + 2; //테두리 포함 세로 크기
 
     COORD position = {
-        .X = (SHORT)(console_size.X / 2 - (HOTBAR_COUNT * slot_width) / 2),
-        .Y = (SHORT)(console_size.Y - slot_height - 1) //화면 하단 위치 (필요에 따라 조정)
+        .X = (SHORT)(console::size().X / 2 - (HOTBAR_COUNT * slot_width) / 2),
+        .Y = (SHORT)(console::size().Y - slot_height - 1) //화면 하단 위치 (필요에 따라 조정)
     };
 
     if (position.X < 0 || position.Y < 0)
@@ -184,13 +185,13 @@ static void render_hotbar(void) {
         name_render_timer += delta_time_t::delta_time;
 
         const item_information_t *pInformation = database_find_item_by_index(inventory.pHotbar[inventory.selected_hotbar_index].pPlayer_Item->item_DB_index);
-        console_print_center("%s", position.Y - 2, BACKGROUND_T_BLACK, FOREGROUND_T_WHITE, pInformation->name);
+        console::print_center(pInformation->name, position.Y - 2, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE);
     }
 
     for (int i = 0; i < HOTBAR_COUNT; ++i) {
         const bool is_selected = (inventory.selected_hotbar_index == i);
         //테두리 색상 (선택 시 밝게, 아니면 어둡게)
-        const WORD border_background = static_cast<WORD>(is_selected ? BACKGROUND_T_WHITE : BACKGROUND_T_DARKGRAY);
+        const WORD border_background = static_cast<WORD>(is_selected ? BACKGROUND_color_t::BACKGROUND_T_WHITE : BACKGROUND_color_t::BACKGROUND_T_DARKGRAY);
 
         /*
             1. 테두리 영역 출력
@@ -204,14 +205,14 @@ static void render_hotbar(void) {
             위, 아래 가로줄 (빈칸 문자 + 테두리 배경색)
         */
         for (int tx = 0; tx < slot_width; ++tx) {
-            console_print_color_character(character, { (SHORT)(slot_start_x + tx), (SHORT)slot_start_y });
-            console_print_color_character(character, { (SHORT)(slot_start_x + tx), (SHORT)(slot_start_y + slot_height - 1) });
+            console::print(character, { (SHORT)(slot_start_x + tx), (SHORT)slot_start_y });
+            console::print(character, { (SHORT)(slot_start_x + tx), (SHORT)(slot_start_y + slot_height - 1) });
         }
 
         //좌, 우 세로줄
         for (int ty = 1; ty < slot_height - 1; ++ty) {
-            console_print_color_character(character, { (SHORT)(slot_start_x), (SHORT)(slot_start_y + ty) });
-            console_print_color_character(character, { (SHORT)(slot_start_x + slot_width - 1), (SHORT)(slot_start_y + ty) });
+            console::print(character, { (SHORT)(slot_start_x), (SHORT)(slot_start_y + ty) });
+            console::print(character, { (SHORT)(slot_start_x + slot_width - 1), (SHORT)(slot_start_y + ty) });
         }
 
         //2. 슬롯 내부 텍스처 출력 (기존 방식과 동일)
@@ -237,7 +238,7 @@ static void render_hotbar(void) {
                         texture_character = item_get_texture(static_cast<item_t>(item_index), texture_x, texture_y);
                 }
 
-                console_print_color_character(texture_character, { (SHORT)(slot_start_x + tx), (SHORT)(slot_start_y + ty) });
+                console::print(texture_character, { (SHORT)(slot_start_x + tx), (SHORT)(slot_start_y + ty) });
             }
     }
 }
@@ -260,14 +261,14 @@ void inventory_render(void) {
     }
 
     COORD position = { 0 };
-    console_fprint_string("=== Inventory (%d / %d) ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND, current_page_index + 1, MAX_PAGES);
+    console::print(std::format("=== Inventory ({} / {}) ===", current_page_index + 1, MAX_PAGES), position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
 
     const int start_index = current_page_index * ITEMS_PER_PAGE;
     for (int i = 0; i < ITEMS_PER_PAGE; ++i)
         render_item(++position.Y, start_index + i, i == current_selection_index, blink);
 
     ++position.Y;
-    console_fprint_string("=== [Up / Down]: Select, [Left / Right]: Page, [0 ~ 9]: Hotbar, [I]: Close ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
+    console::print("=== [Up / Down]: Select, [Left / Right]: Page, [0 ~ 9]: Hotbar, [I]: Close ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
 
     const player_item_t * const pItem = &inventory.item[start_index + current_selection_index];
     if (!pItem->item_DB_index)
@@ -275,7 +276,7 @@ void inventory_render(void) {
 
     const item_information_t * const pItem_info = database_find_item_by_index(pItem->item_DB_index);
     position.Y += 2;
-    position.X += (SHORT)console_fprint_string("%s", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND, pItem_info->name);
+    position.X += (SHORT)console::print(pItem_info->name, position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
 
     std::string description{};
     switch (pItem_info->type) {
@@ -288,7 +289,7 @@ void inventory_render(void) {
             break;
     }
 
-    console_fprint_string("%s", position, INVENTORY_BACKGROUND, FOREGROUND_T_YELLOW, description.c_str());
+    console::print(description, position, INVENTORY_BACKGROUND, FOREGROUND_color_t::FOREGROUND_T_YELLOW);
 }
 
 void inventory_destroy(void) {

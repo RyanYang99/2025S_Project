@@ -7,15 +7,15 @@
 #include "console.hpp"
 #include "callback.hpp"
 
-#define CALLBACK_MEMBER_INITIALIZE(name, return_type) Callback<name##_t, return_type> input::##name{}
+#define CALLBACK_MEMBER_INITIALIZE(name, return_type) Callback<name##_t, return_type> input:: name{}
 
 #define CALLBACK_METHODS_DEFINE(name) \
 void input::subscribe_##name(const name##_t callback) { \
-    name##.subscribe(callback); \
+    name.subscribe(callback); \
 } \
 \
 void input::unsubscribe_##name(const name##_t callback) noexcept { \
-    name##.unsubscribe(callback); \
+    name.unsubscribe(callback); \
 }
 
 bool input::keyboard_pressed_{};
@@ -32,14 +32,14 @@ CALLBACK_MEMBER_INITIALIZE(input_mouse_in_console, bool);
 LRESULT CALLBACK input::windows_callback(const int nCode, const WPARAM wParam, const LPARAM lParam) {
     if (nCode == HC_ACTION) {
         const POINT point{ reinterpret_cast<MSLLHOOKSTRUCT *>(lParam)->pt };
-        input_mouse_position.call(console_convert_from_monitor(point));
+        input_mouse_position.call(console::convert_from_monitor(point));
 
         if (wParam == WM_LBUTTONUP)
             input_mouse_click.call(true);
         else if (wParam == WM_RBUTTONUP)
             input_mouse_click.call(false);
 
-        input_mouse_in_console.call(console_is_cursor_inside(point));
+        input_mouse_in_console.call(console::is_cursor_inside(point));
     }
 
     return CallNextHookEx(NULL, nCode, wParam, lParam);

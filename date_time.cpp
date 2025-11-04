@@ -69,12 +69,12 @@ void date_time::render(void) {
     const std::string sDay{ std::format("Day {}", day_) },
                       time{ std::format("{}{}{}", hour_, blink_character, minute_) };
 
-    COORD position = { static_cast<SHORT>(console_size.X - sDay.length()), 0 };
-    console_fprint_string(sDay.c_str(), position, BACKGROUND_T_BLACK, FOREGROUND_T_WHITE);
+    COORD position = { static_cast<SHORT>(console::size().X - sDay.length()), 0};
+    console::print(sDay, position, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE);
 
-    position.X = static_cast<SHORT>(console_size.X - time.length());
+    position.X = static_cast<SHORT>(console::size().X - time.length());
     ++position.Y;
-    console_fprint_string(time.c_str(), position, BACKGROUND_T_BLACK, FOREGROUND_T_WHITE);
+    console::print(time, position, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE);
 }
 
 bool date_time::is_night(void) const noexcept {

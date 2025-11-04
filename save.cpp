@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <string>
+#include <format>
 
 #include <ShlObj_core.h>
 #include "game.hpp"
@@ -113,14 +114,14 @@ void save_render(void) {
         pMessage = "";
     }
 
-    int y = console_size.Y / 2 - (MAX_SAVE_SPOTS + 2 + has_message) / 2;
-    console_print_center("=== Save ===", y++, BACKGROUND_T_BLACK, FOREGROUND_T_BLUE);
+    int y = console::size().Y / 2 - (MAX_SAVE_SPOTS + 2 + has_message) / 2;
+    console::print_center("=== Save ===", y++, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_BLUE);
     if (has_message)
-        console_print_center("%s", y++, BACKGROUND_T_BLACK, FOREGROUND_T_CYAN, pMessage.c_str());
-    console_print_center("[1 ~ 3]: Save, [ESC]: Close [Q]: Main Menu", y++, BACKGROUND_T_BLACK, FOREGROUND_T_BLUE);
+        console::print_center(pMessage, y++, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_CYAN);
+    console::print_center("[1 ~ 3]: Save, [ESC]: Close [Q]: Main Menu", y++, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_BLUE);
 
     for (int i = 0; i < MAX_SAVE_SPOTS; ++i)
-        console_print_center("%d. %s", y++, BACKGROUND_T_BLACK, FOREGROUND_T_BLUE, i + 1, pUsed[i] ? "In Use (Overwrite)" : "Empty");
+        console::print_center(std::format("{}. {}", i + 1, pUsed[i] ? "In Use (Overwrite)" : "Empty"), y++, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_BLUE);
 }
 
 void save_instantiate(void) {

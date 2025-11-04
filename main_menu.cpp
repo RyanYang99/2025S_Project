@@ -12,17 +12,16 @@
 #include "save.hpp"
 #include "sound.hpp"
 #include "date_time.hpp"
-#include "formatter.hpp"
 
 #define PRINT_SELECTION(string, y, index, background, foreground) \
-    console_print_center("%s%s%s", y + index, background, foreground, selection == index ? selected_left : "", string, selection == index ? selected_right : "")
+    console::print_center(std::format("{}{}{}", selection == index ? selected_left : "", string, selection == index ? selected_right : ""), y + index, background, foreground)
 
 static const char * const selected_left = "> ",
                   * const selected_right = " <";
 
 static date_time menu_time{};
 
-const main_menu_state_t main_menu(void) {
+main_menu_state main_menu(void) {
     const char *ppLogoSmall[1] = { "TerraCraft" },
                *ppLogoMedium[4] = {
                    "### ### #### ####   #    ## ####   #   ### ###",
@@ -48,45 +47,45 @@ const main_menu_state_t main_menu(void) {
        * const pLoad_game = "Load save",
        * const pQuit = "Quit";
 
-    console_clear();
+    console::clear();
     sound_play_BGM("main_menu");
 
     int selection = 0;
     while (true) {
         const char **ppLogo = ppLogoSmall;
         int lines = 1;
-        if (console_size.Y >= 4 + 3) {
+        if (console::size().Y >= 4 + 3) {
             ppLogo = ppLogoMedium;
             lines = 4;
         }
-        if (console_size.Y >= 11 + 3) {
+        if (console::size().Y >= 11 + 3) {
             ppLogo = ppLogoLarge;
             lines = 11;
         }
 
         const float margin = 0.25f;
         const int center_lines = 4;
-        int top = (int)(console_size.Y * margin), bottom = console_size.Y - top;
+        int top = (int)(console::size().Y * margin), bottom = console::size().Y - top;
         int offset = center_lines;
         if (top < offset) {
             top = 0;
             offset = 0;
         }
-        if (bottom + center_lines - 1 >= console_size.Y)
-            bottom = console_size.Y - center_lines;
+        if (bottom + center_lines - 1 >= console::size().Y)
+            bottom = console::size().Y - center_lines;
 
         menu_time.set_local_time();
-        console_fill(map_get_block_texture(BLOCK_AIR, 0, 0, menu_time.hour()));
+        console::fill(map_get_block_texture(BLOCK_AIR, 0, 0, menu_time.hour()));
 
         for (int i = 0; i < lines; ++i)
-            console_print_center(ppLogo[i], i + top - offset, BACKGROUND_T_BLACK, FOREGROUND_T_GREEN);
+            console::print_center(ppLogo[i], i + top - offset, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_GREEN);
 
-        PRINT_SELECTION(pControls, bottom, -1, BACKGROUND_T_BLACK, FOREGROUND_T_WHITE);
-        PRINT_SELECTION(pNew_game, bottom, 0, BACKGROUND_T_BLACK, FOREGROUND_T_DARKGREEN);
-        PRINT_SELECTION(pLoad_game, bottom, 1, BACKGROUND_T_BLACK, FOREGROUND_T_CYAN);
-        PRINT_SELECTION(pQuit, bottom, 2, BACKGROUND_T_BLACK, FOREGROUND_T_DARKRED);
+        PRINT_SELECTION(pControls, bottom, -1, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_WHITE);
+        PRINT_SELECTION(pNew_game, bottom, 0, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_DARKGREEN);
+        PRINT_SELECTION(pLoad_game, bottom, 1, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_CYAN);
+        PRINT_SELECTION(pQuit, bottom, 2, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_DARKRED);
 
-        console_update();
+        console::update();
 
         if (_kbhit()) {
             switch (tolower(_getch())) {
@@ -102,38 +101,38 @@ const main_menu_state_t main_menu(void) {
 
                 case ' ':
                     if (selection == 0)
-                        return MAIN_MENU_STATE_NEW_GAME;
+                        return main_menu_state::new_game;
                     else if (selection == 1)
-                        return MAIN_MENU_STATE_LOAD_GAME;
+                        return main_menu_state::load;
                     else if (selection == 2)
-                        return MAIN_MENU_STATE_QUIT;
+                        return main_menu_state::quit;
                     break;
             }
 
-            console_clear();
+            console::clear();
         }
     }
 
-    return main_menu_state_t::MAIN_MENU_STATE_NEW_GAME;
+    return main_menu_state::new_game;
 }
 
-const bool main_menu_load_menu(void) {
+bool main_menu_load_menu(void) {
     const bool * const pUsed = get_save_spots();
     const int half = (MAX_SAVE_SPOTS + 2) / 2;
 
-    console_clear();
+    console::clear();
 
     int selection = 0;
     while (true) {
-        int y = console_size.Y / 2 - half;
+        int y = console::size().Y / 2 - half;
 
-        console_print_center("Load Save", y++, BACKGROUND_T_BLACK, FOREGROUND_T_CYAN);
-        console_print_center("[Space]: Load, [ESC]: Back", y++, BACKGROUND_T_BLACK, FOREGROUND_T_CYAN);
+        console::print_center("Load Save", y++, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_CYAN);
+        console::print_center("[Space]: Load, [ESC]: Back", y++, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_CYAN);
 
         for (int i = 0; i < MAX_SAVE_SPOTS; ++i) {
             const std::string string{ std::format("Save Slot {}: {}", i, pUsed[i] ? "Used" : "Empty") };
 
-            PRINT_SELECTION(string.c_str(), y, i, BACKGROUND_T_BLACK, FOREGROUND_T_CYAN);
+            PRINT_SELECTION(string.c_str(), y, i, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_CYAN);
         }
 
         if (_kbhit()) {
@@ -159,10 +158,10 @@ const bool main_menu_load_menu(void) {
                     return false;
             }
 
-            console_clear();
+            console::clear();
         }
 
-        console_update();
+        console::update();
     }
 
     return false;

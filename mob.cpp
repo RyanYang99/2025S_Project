@@ -2,6 +2,7 @@
 #include "mob.hpp"
 
 #include <time.h>
+#include <format>
 
 #include "game.hpp"
 #include "save.hpp"
@@ -17,17 +18,17 @@
 #include "block_control.hpp"
 
 #define GRAVITY 25.0f
-#define BG_BLACK BACKGROUND_T_BLACK
-#define FG_WHITE FOREGROUND_T_WHITE
-#define FG_YELLOW FOREGROUND_T_YELLOW
-#define FG_CYAN FOREGROUND_T_CYAN
-#define FG_MAGENTA FOREGROUND_T_MAGENTA
-#define FG_RED FOREGROUND_T_RED
-#define FG_GREEN FOREGROUND_T_GREEN
-#define FG_DARKYELLOW FOREGROUND_T_DARKYELLOW
-#define FG_DARKGREEN FOREGROUND_T_DARKGREEN
-#define FG_BLACK FOREGROUND_T_BLACK
-#define FG_GRAY FOREGROUND_T_GRAY
+#define BG_BLACK BACKGROUND_color_t::BACKGROUND_T_BLACK
+#define FG_WHITE FOREGROUND_color_t::FOREGROUND_T_WHITE
+#define FG_YELLOW FOREGROUND_color_t::FOREGROUND_T_YELLOW
+#define FG_CYAN FOREGROUND_color_t::FOREGROUND_T_CYAN
+#define FG_MAGENTA FOREGROUND_color_t::FOREGROUND_T_MAGENTA
+#define FG_RED FOREGROUND_color_t::FOREGROUND_T_RED
+#define FG_GREEN FOREGROUND_color_t::FOREGROUND_T_GREEN
+#define FG_DARKYELLOW FOREGROUND_color_t::FOREGROUND_T_DARKYELLOW
+#define FG_DARKGREEN FOREGROUND_color_t::FOREGROUND_T_DARKGREEN
+#define FG_BLACK FOREGROUND_color_t::FOREGROUND_T_BLACK
+#define FG_GRAY FOREGROUND_color_t::FOREGROUND_T_GRAY
 
 #define MOB_SPRITE_WIDTH 5
 #define MOB_SPRITE_HEIGHT 5
@@ -406,33 +407,33 @@ void mob_update(void) {
 //몬스터 대미지 텍스트 렌더링 함수
 static void render_mob_damage_texts(void) {
     const COORD center_pos = {
-        .X = console_size.X / 2,
-        .Y = console_size.Y / 2
+        .X = static_cast<SHORT>(console::size().X / 2),
+        .Y = static_cast<SHORT>(console::size().Y / 2)
     };
 
     for (int i = 0; i < MAX_MOB_DAMAGE_TEXTS; ++i)
         if (pMob_damage_texts[i].active) {
             const COORD draw_pos = {
-                .X = center_pos.X + 8,
+                .X = (SHORT)(center_pos.X + 8),
                 .Y = (SHORT)(center_pos.Y - (PLAYER_SPRITE_HEIGHT / 2) - 1 - (player.precise_y - pMob_damage_texts[i].precise_y))
             };
 
-            console_fprint_string("Attack %d HP!", draw_pos, BACKGROUND_T_BLACK, FOREGROUND_T_YELLOW, pMob_damage_texts[i].damage_value);
+            console::print(std::format("Attack {} HP!", pMob_damage_texts[i].damage_value), draw_pos, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_YELLOW);
         }
 }
 
 void mob_render(void) {
     const COORD center_m = {
-        .X = console_size.X / 2,
-        .Y = console_size.Y / 2,
+        .X = (SHORT)(console::size().X / 2),
+        .Y = (SHORT)(console::size().Y / 2),
     };
 
     for (int i = 0; i < mob_count; i++) {
         const int screen_x = center_m.X + (mobs[i].x * TEXTURE_SIZE - player.x * TEXTURE_SIZE),
             screen_y = center_m.Y + (mobs[i].y * TEXTURE_SIZE - player.y * TEXTURE_SIZE) - MOB_SPRITE_HEIGHT / 2;
 
-        if (screen_x < 0 || screen_x + MOB_SPRITE_WIDTH >= console_size.X ||
-            screen_y < 0 || screen_y >= console_size.Y)
+        if (screen_x < 0 || screen_x + MOB_SPRITE_WIDTH >= console::size().X ||
+            screen_y < 0 || screen_y >= console::size().Y)
             continue;
 
         //몬스터가 죽어가는 상태가 아니면 체력바 렌더링
@@ -441,7 +442,7 @@ void mob_render(void) {
                 .X = (SHORT)screen_x,
                 .Y = (SHORT)(screen_y - 1)
             };
-            console_fprint_string("HP: %d", hp_pos, BACKGROUND_T_BLACK, FOREGROUND_T_RED, mobs[i].HP);
+            console::print(std::format("HP: {}", mobs[i].HP), hp_pos, BACKGROUND_color_t::BACKGROUND_T_BLACK, FOREGROUND_color_t::FOREGROUND_T_RED);
         }
 
         // 몬스터 상태에 따라 스프라이트 선택
@@ -462,10 +463,10 @@ void mob_render(void) {
                     .Y = (SHORT)(screen_y + j)
                 };
 
-                if (current_position.X >= 0 && current_position.X < console_size.X &&
-                    current_position.Y >= 0 && current_position.Y < console_size.Y &&
+                if (current_position.X >= 0 && current_position.X < console::size().X &&
+                    current_position.Y >= 0 && current_position.Y < console::size().Y &&
                     mob_pixel.character != ' ')
-                    console_print_color_character(mob_pixel, current_position);
+                    console::print(mob_pixel, current_position);
             }
     }
 

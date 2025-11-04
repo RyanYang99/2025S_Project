@@ -1,12 +1,10 @@
 ﻿#pragma once
 
-#include <stdbool.h>
+enum class main_menu_state {
+    new_game,
+    load,
+    quit
+};
 
-typedef enum {
-    MAIN_MENU_STATE_NEW_GAME,
-    MAIN_MENU_STATE_LOAD_GAME,
-    MAIN_MENU_STATE_QUIT
-} main_menu_state_t;
-
-const main_menu_state_t main_menu(void);
-const bool main_menu_load_menu(void);
+main_menu_state main_menu(void);
+bool main_menu_load_menu(void);
