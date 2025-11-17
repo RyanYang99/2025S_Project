@@ -2,14 +2,16 @@
 #include "console.hpp"
 
 #include <string>
+#include <vector>
+#include <algorithm>
 
 COORD console::size_{};
 
 int console::current_buffer{};
 HANDLE console::buffer[2]{};
 
-int console::buffer_count{};
-PCHAR_INFO console::character_buffer{};
+//int console::buffer_count{};
+std::vector<CHAR_INFO> console::character_buffer{};
 SMALL_RECT console::written{};
 
 HANDLE console::handle{};
@@ -21,18 +23,22 @@ const COORD console::calculate_size(const HANDLE size_handle) {
     CONSOLE_SCREEN_BUFFER_INFO csbi{};
     GetConsoleScreenBufferInfo(size_handle, &csbi);
 
-    COORD console_size_new{};
-    console_size_new.X = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-    console_size_new.Y = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
-    return console_size_new;
+    return {
+        static_cast<SHORT>(csbi.srWindow.Right - csbi.srWindow.Left + 1),
+        static_cast<SHORT>(csbi.srWindow.Bottom - csbi.srWindow.Top + 1)
+    };
 }
 
-void console::hide_cursor(const HANDLE cursor_handle) {
+void console::hide_cursor(const HANDLE cursor_handle) noexcept {
     CONSOLE_CURSOR_INFO cci{};
     GetConsoleCursorInfo(cursor_handle, &cci);
 
     cci.bVisible = false;
     SetConsoleCursorInfo(cursor_handle, &cci);
+}
+
+void console::resize_buffer(void) {
+    character_buffer.resize(size_.X * size_.Y);
 }
 
 void console::initialize_double_buffering(void) {
@@ -48,9 +54,6 @@ void console::initialize_double_buffering(void) {
 
         buffer[i] = new_handle;
     }
-
-    buffer_count = size_.X * size_.Y;
-    character_buffer = new CHAR_INFO[buffer_count];
 }
 
 void console::initialize(void) {
@@ -62,15 +65,13 @@ void console::initialize(void) {
     dpi_scale = static_cast<float>(GetDpiForWindow(window)) / 96.0f;
 
     initialize_double_buffering();
+    resize_buffer();
 }
 
 void console::resize(const HANDLE size_handle) {
-    SMALL_RECT rect = {
-        .Left = 0,
-        .Top = 0,
-        .Right = 1,
-        .Bottom = 1
-    };
+    SMALL_RECT rect{};
+    rect.Right = 1;
+    rect.Bottom = 1;
 
     const bool maximized{ static_cast<bool>(IsZoomed(window)) };
     if (maximized)
@@ -88,21 +89,13 @@ void console::resize(const HANDLE size_handle) {
 }
 
 bool console::update_size(void) {
-    HANDLE current_handle = handle;
-    current_handle = buffer[current_buffer];
-    const COORD new_size{ calculate_size(current_handle) };
+    const COORD new_size{ calculate_size(buffer[current_buffer]) };
 
     if (size_.X == new_size.X && size_.Y == new_size.Y)
         return false;
 
     size_ = new_size;
-
-    buffer_count = size_.X * size_.Y;
-    if (!buffer_count) {
-        delete[] character_buffer;
-        character_buffer = nullptr;
-    } else 
-        character_buffer = static_cast<CHAR_INFO *>(realloc(character_buffer, sizeof(CHAR_INFO) * buffer_count));
+    resize_buffer();
 
     written.Right = size_.X - 1;
     written.Bottom = size_.Y - 1;
@@ -113,10 +106,10 @@ bool console::update_size(void) {
 }
 
 void console::flip_double_buffer(void) {
-    if (!character_buffer)
+    if (character_buffer.empty())
         return;
 
-    WriteConsoleOutput(buffer[current_buffer], character_buffer, size_, {}, &written);
+    WriteConsoleOutput(buffer[current_buffer], &character_buffer[0], size_, {}, &written);
     SetConsoleActiveScreenBuffer(buffer[current_buffer]);
 
     if (!current_buffer)
@@ -136,11 +129,11 @@ void console::write(const COORD &position, const wchar_t character, const WORD a
         ReadConsoleOutputAttribute(handle, &new_attribute, 1, position, &read);
     }
 
-    if (!character_buffer)
+    if (character_buffer.empty())
         return;
 
     const int i{ index(position.X, position.Y) };
-    if (i >= buffer_count || i < 0)
+    if (i < 0 || i >= character_buffer.size())
         return;
 
     character_buffer[i].Char.UnicodeChar = character;
@@ -166,7 +159,7 @@ bool console::is_new_windows_terminal(void) {
 }
 
 const COORD console::convert_from_monitor(const POINT &point) {
-    POINT client_point = { point.x, point.y };
+    POINT client_point{ point.x, point.y };
     ScreenToClient(window, &client_point);
 
     CONSOLE_FONT_INFO font{};
@@ -188,18 +181,18 @@ bool console::is_cursor_inside(const POINT &point) {
 }
 
 void console::clear(void) {
-    if (!character_buffer)
+    if (character_buffer.empty())
         return;
 
-    memset(character_buffer, 0, sizeof(CHAR_INFO) * size_.X * size_.Y);
+    std::fill(character_buffer.begin(), character_buffer.end(), CHAR_INFO{});
 }
 
 void console::fill(const color_character_t &character) {
-    const WORD attribute = (WORD)character.background | (WORD)character.foreground;
-    if (!character_buffer)
+    const WORD attribute = static_cast<WORD>(character.background) | static_cast<WORD>(character.foreground);
+    if (character_buffer.empty())
         return;
 
-    for (int i{}; i < buffer_count; ++i) {
+    for (int i{}; i < character_buffer.size(); ++i) {
         character_buffer[i].Char.UnicodeChar = character.character;
         character_buffer[i].Attributes = attribute;
     }
@@ -243,9 +236,4 @@ void console::destroy(void) {
             CloseHandle(buffer[i]);
             buffer[i] = nullptr;
         }
-
-    if (character_buffer) {
-        delete[] character_buffer;
-        character_buffer = nullptr;
-    }
 }

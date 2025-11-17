@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <string>
+#include <vector>
 
 #include <Windows.h>
 
@@ -91,8 +92,7 @@ private:
     static int current_buffer;
     static HANDLE buffer[2];
 
-    static int buffer_count;
-    static PCHAR_INFO character_buffer;
+    static std::vector<CHAR_INFO> character_buffer;
     static SMALL_RECT written;
 
     static HANDLE handle;
@@ -101,8 +101,9 @@ private:
     static float dpi_scale;
 
     static const COORD calculate_size(const HANDLE size_handle);
+    static void resize_buffer(void);
     static void initialize_double_buffering(void);
-    static void hide_cursor(const HANDLE cursor_handle);
+    static void hide_cursor(const HANDLE cursor_handle) noexcept;
     static bool update_size(void);
     static void resize(const HANDLE size_handle);
     static void flip_double_buffer(void);
