@@ -134,10 +134,10 @@ static void craft_selected_recipe(void) {
 }
 
 void crafting_UI_input(void) {
-    if (!input::keyboard_pressed())
+    if (!Input::keyboard_pressed())
         return;
 
-    const char lower = (char)tolower(input::input_character()), input_special_character{ input::input_special_character() };
+    const char lower = (char)tolower(Input::input_character()), input_special_character{ Input::input_special_character() };
     if (input_special_character == static_cast<char>(direction::up) && selected_recipe_index > 0)
         --selected_recipe_index;
     else if (input_special_character == static_cast<char>(direction::down) && selected_recipe_index < (is_workbench_nearby() ? recipe_count - 1 : without_workbench_count - 1))
@@ -155,13 +155,13 @@ void crafting_UI_input(void) {
 void crafting_UI_render(void) {
     if (!is_crafting_open)
         return;
-    console::clear();
+    Console::clear();
 
     COORD position = {
         .X = 1,
         .Y = 1
     };
-    console::print("[ Craftable Items ]", position, BG::black, FG::yellow);
+    Console::print("[ Craftable Items ]", position, BG::black, FG::yellow);
     ++position.Y;
 
     const BG background = BG::black;
@@ -176,14 +176,14 @@ void crafting_UI_render(void) {
         const bool selected = i == selected_recipe_index;
         const FG foreground = selected ? FG::white : FG::gray;
 
-        const SHORT length{ static_cast<SHORT>(console::print(formatter::vformat(selected ? "> {} x{} " : "  {} x{} ",
+        const SHORT length{ static_cast<SHORT>(Console::print(formatter::vformat(selected ? "> {} x{} " : "  {} x{} ",
                                                                                  pItem ? pItem->name : "???",
                                                                                  pRecipe->result_count),
                                                               position, background, foreground)) };
         
         const bool craftable = can_craft(pRecipe);
         position.X += length;
-        console::print(std::format("[{}]", craftable ? 'O' : 'X'), position, background, craftable ? FG::green : FG::red);
+        Console::print(std::format("[{}]", craftable ? 'O' : 'X'), position, background, craftable ? FG::green : FG::red);
         position.X -= length;
         ++position.Y;
 
@@ -197,7 +197,7 @@ void crafting_UI_render(void) {
 
             const item_information_t * const pIngredient_item = database_find_item_by_index(pRecipe->pIngredient_indices[j]);
             //재료명 + (가지고있는수량/필요한수량) 표시
-            console::print(std::format("    - {} ({} / {})",
+            Console::print(std::format("    - {} ({} / {})",
                                        pIngredient_item ? pIngredient_item->name : "???",
                                        inventory_get_count(pRecipe->pIngredient_indices[j]),
                                        pRecipe->pIngredient_counts[j]),
@@ -208,5 +208,5 @@ void crafting_UI_render(void) {
         }
     }
 
-    console::print("[Up / Down]: Select [E]: Craft [C]: Close", position, BG::black, FG::green);
+    Console::print("[Up / Down]: Select [E]: Craft [C]: Close", position, BG::black, FG::green);
 }

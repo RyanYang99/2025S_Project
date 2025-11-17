@@ -75,15 +75,15 @@ void inventory_initialize(void) {
         }
     }
 
-    input::subscribe_input_mouse_click(handle_mouse_click);
+    Input::subscribe_input_mouse_click(handle_mouse_click);
 }
 
 //I키 입력시 인벤토리 호출
 void inventory_input(void) {
-    if (!input::keyboard_pressed())
+    if (!Input::keyboard_pressed())
         return;
 
-    int number = input::input_character() - '0';
+    int number = Input::input_character() - '0';
     const bool is_number = number >= 0 && number <= 9;
     if (number == 0)
         number = max_hotbar_index;
@@ -96,13 +96,13 @@ void inventory_input(void) {
         name_render_timer = 0.0f;
     }
 
-    if (tolower(input::input_character()) == 'i')
+    if (tolower(Input::input_character()) == 'i')
         is_inventory_open = !is_inventory_open;
 
     if (!is_inventory_open)
         return;
 
-    const char input_special_character{ input::input_special_character() };
+    const char input_special_character{ Input::input_special_character() };
     if (input_special_character == static_cast<char>(direction::up) && current_selection_index > 0)
         --current_selection_index;
     else if (input_special_character == static_cast<char>(direction::down) && current_selection_index < max_selection_index)
@@ -139,30 +139,30 @@ static void render_item(const int y,
         foreground = INVENTORY_FOREGROUND_BLINK;
 
     if (selected)
-        position.X += (SHORT)console::print("> ", position, INVENTORY_BACKGROUND, foreground);
+        position.X += (SHORT)Console::print("> ", position, INVENTORY_BACKGROUND, foreground);
 
     if (pItem->item_DB_index) {
         const item_information_t * const pItem_info = database_find_item_by_index(pItem->item_DB_index);
         if (!pItem_info)
             return;
 
-        position.X += (SHORT)console::print(std::format("[ {}", pItem_info->name), position, INVENTORY_BACKGROUND, foreground);
+        position.X += (SHORT)Console::print(std::format("[ {}", pItem_info->name), position, INVENTORY_BACKGROUND, foreground);
 
         if (pItem_info->max_stack > 1)
-            position.X += (SHORT)console::print(std::format(" (x{})", pItem->quantity), position, INVENTORY_BACKGROUND, foreground);
+            position.X += (SHORT)Console::print(std::format(" (x{})", pItem->quantity), position, INVENTORY_BACKGROUND, foreground);
 
         if (pItem_info->type == ITEM_TYPE_TOOL || pItem_info->type == ITEM_TYPE_ARMOR)
-            position.X += (SHORT)console::print(std::format(" (Durability: {} / {})", pItem->durability, pItem_info->base_durability), position, INVENTORY_BACKGROUND, foreground);
+            position.X += (SHORT)Console::print(std::format(" (Durability: {} / {})", pItem->durability, pItem_info->base_durability), position, INVENTORY_BACKGROUND, foreground);
 
-        position.X += (SHORT)console::print(" ]", position, INVENTORY_BACKGROUND, foreground);
+        position.X += (SHORT)Console::print(" ]", position, INVENTORY_BACKGROUND, foreground);
 
         for (int i = 0; i < max_hotbar_index; ++i)
             if (inventory.pHotbar[i].index_in_inventory == inventory_index)
-                console::print(std::format(" [{}] ", i + 1), position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND_IN_HOTBAR);
+                Console::print(std::format(" [{}] ", i + 1), position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND_IN_HOTBAR);
 
 
     } else
-        console::print("[ Empty ]", position, INVENTORY_BACKGROUND, foreground);
+        Console::print("[ Empty ]", position, INVENTORY_BACKGROUND, foreground);
 }
 
 static void render_hotbar(void) {
@@ -170,8 +170,8 @@ static void render_hotbar(void) {
               slot_height = TEXTURE_SIZE + 2; //테두리 포함 세로 크기
 
     COORD position = {
-        .X = (SHORT)(console::size().X / 2 - (HOTBAR_COUNT * slot_width) / 2),
-        .Y = (SHORT)(console::size().Y - slot_height - 1) //화면 하단 위치 (필요에 따라 조정)
+        .X = (SHORT)(Console::size().X / 2 - (HOTBAR_COUNT * slot_width) / 2),
+        .Y = (SHORT)(Console::size().Y - slot_height - 1) //화면 하단 위치 (필요에 따라 조정)
     };
 
     if (position.X < 0 || position.Y < 0)
@@ -185,7 +185,7 @@ static void render_hotbar(void) {
         name_render_timer += delta_time_t::delta_time;
 
         const item_information_t *pInformation = database_find_item_by_index(inventory.pHotbar[inventory.selected_hotbar_index].pPlayer_Item->item_DB_index);
-        console::print_center(pInformation->name, position.Y - 2, BG::black, FG::white);
+        Console::print_center(pInformation->name, position.Y - 2, BG::black, FG::white);
     }
 
     for (int i = 0; i < HOTBAR_COUNT; ++i) {
@@ -197,7 +197,7 @@ static void render_hotbar(void) {
             1. 테두리 영역 출력
             위, 아래 가로줄 (빈칸 문자 + 테두리 배경색)
         */
-        const color_character_t character { ' ', border_background };
+        const cchar character { ' ', border_background };
         const int slot_start_x = position.X + i * slot_width, slot_start_y = position.Y;
 
         /*
@@ -205,20 +205,20 @@ static void render_hotbar(void) {
             위, 아래 가로줄 (빈칸 문자 + 테두리 배경색)
         */
         for (int tx = 0; tx < slot_width; ++tx) {
-            console::print(character, { (SHORT)(slot_start_x + tx), (SHORT)slot_start_y });
-            console::print(character, { (SHORT)(slot_start_x + tx), (SHORT)(slot_start_y + slot_height - 1) });
+            Console::print(character, { (SHORT)(slot_start_x + tx), (SHORT)slot_start_y });
+            Console::print(character, { (SHORT)(slot_start_x + tx), (SHORT)(slot_start_y + slot_height - 1) });
         }
 
         //좌, 우 세로줄
         for (int ty = 1; ty < slot_height - 1; ++ty) {
-            console::print(character, { (SHORT)(slot_start_x), (SHORT)(slot_start_y + ty) });
-            console::print(character, { (SHORT)(slot_start_x + slot_width - 1), (SHORT)(slot_start_y + ty) });
+            Console::print(character, { (SHORT)(slot_start_x), (SHORT)(slot_start_y + ty) });
+            Console::print(character, { (SHORT)(slot_start_x + slot_width - 1), (SHORT)(slot_start_y + ty) });
         }
 
         //2. 슬롯 내부 텍스처 출력 (기존 방식과 동일)
         for (int ty = 1; ty < slot_height - 1; ++ty)
             for (int tx = 1; tx < slot_width - 1; ++tx) {
-                color_character_t texture_character { ' ' };
+                cchar texture_character { ' ' };
 
                 if (inventory.pHotbar[i].pPlayer_Item) {
                     const int item_index = inventory.pHotbar[i].pPlayer_Item->item_DB_index;
@@ -231,14 +231,14 @@ static void render_hotbar(void) {
                     const int texture_x = tx - 1, texture_y = ty - 1;
 
                     if (item_type == ITEM_TYPE_MATERIAL)
-                        texture_character = map_get_block_texture(static_cast<block_t>(item_index), texture_x, texture_y, game::instance()->elapsed_since_start().hour());
+                        texture_character = map_get_block_texture(static_cast<block_t>(item_index), texture_x, texture_y, Game::instance()->elapsed_since_start().hour());
                     else if (item_type == ITEM_TYPE_TOOL)
                         texture_character = tool_get_texture(static_cast<tool_t>(item_index), texture_x, texture_y);
                     else if (item_type == ITEM_TYPE_MISC)
                         texture_character = item_get_texture(static_cast<item_t>(item_index), texture_x, texture_y);
                 }
 
-                console::print(texture_character, { (SHORT)(slot_start_x + tx), (SHORT)(slot_start_y + ty) });
+                Console::print(texture_character, { (SHORT)(slot_start_x + tx), (SHORT)(slot_start_y + ty) });
             }
     }
 }
@@ -261,14 +261,14 @@ void inventory_render(void) {
     }
 
     COORD position = { 0 };
-    console::print(std::format("=== Inventory ({} / {}) ===", current_page_index + 1, MAX_PAGES), position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
+    Console::print(std::format("=== Inventory ({} / {}) ===", current_page_index + 1, MAX_PAGES), position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
 
     const int start_index = current_page_index * ITEMS_PER_PAGE;
     for (int i = 0; i < ITEMS_PER_PAGE; ++i)
         render_item(++position.Y, start_index + i, i == current_selection_index, blink);
 
     ++position.Y;
-    console::print("=== [Up / Down]: Select, [Left / Right]: Page, [0 ~ 9]: Hotbar, [I]: Close ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
+    Console::print("=== [Up / Down]: Select, [Left / Right]: Page, [0 ~ 9]: Hotbar, [I]: Close ===", position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
 
     const player_item_t * const pItem = &inventory.item[start_index + current_selection_index];
     if (!pItem->item_DB_index)
@@ -276,7 +276,7 @@ void inventory_render(void) {
 
     const item_information_t * const pItem_info = database_find_item_by_index(pItem->item_DB_index);
     position.Y += 2;
-    position.X += (SHORT)console::print(pItem_info->name, position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
+    position.X += (SHORT)Console::print(pItem_info->name, position, INVENTORY_BACKGROUND, INVENTORY_FOREGROUND);
 
     std::string description{};
     switch (pItem_info->type) {
@@ -289,11 +289,11 @@ void inventory_render(void) {
             break;
     }
 
-    console::print(description, position, INVENTORY_BACKGROUND, FG::yellow);
+    Console::print(description, position, INVENTORY_BACKGROUND, FG::yellow);
 }
 
 void inventory_destroy(void) {
-    input::unsubscribe_input_mouse_click(handle_mouse_click);
+    Input::unsubscribe_input_mouse_click(handle_mouse_click);
 }
 
 const int inventory_get_count(const int item_DB_index) {

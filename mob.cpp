@@ -39,7 +39,7 @@ static int mob_count = 0, mob_level = 1;
 static mob_t mobs[MAX_MOB] = { 0 };
 
 //idle 상태
-const static color_character_t pZombie_sprite_data[MOB_SPRITE_HEIGHT][MOB_SPRITE_WIDTH] = {
+const static cchar pZombie_sprite_data[MOB_SPRITE_HEIGHT][MOB_SPRITE_WIDTH] = {
     { { ' ', 0, 0 }, { L'▀', BG::black, FG::red }, { L'▀', BG::black, FG::red }, { L'▀', BG::black, FG::red }, { ' ', 0, 0 } },
     { { ' ', 0, 0 }, { 'o', BG::black, FG::white }, { ' ', 0, 0 }, { 'o', BG::black, FG::white }, { ' ', 0, 0 } },
     { { L'█', BG::black, FG::dark_green }, { L'█', BG::black, FG::dark_green }, { L'█', BG::black, FG::dark_green }, { L'█', BG::black, FG::dark_green }, { L'█', BG::black, FG::dark_green } },
@@ -136,7 +136,7 @@ void mob_initialize(void) {
     } else
         mob_count = 0;
 
-    input::subscribe_input_mouse_click(handle_mob_click);
+    Input::subscribe_input_mouse_click(handle_mob_click);
     map_subscribe_offset_change(update_mob_offset);
 }
 
@@ -197,7 +197,7 @@ static void mob_spawn(void) {
 static void mob_spawn_manager(void) {
     // 보스가 없을 때만 몬스터 생성
     if (boss.state == E_BOSS_STATE_DEFEATED) {
-        if (game::instance()->elapsed_since_start().is_night()) {
+        if (Game::instance()->elapsed_since_start().is_night()) {
             static float mob_spawn_timer = 0.0f;
             const float mob_spawn_cool_time = 2.0f;
 
@@ -396,8 +396,8 @@ void mob_update(void) {
 //몬스터 대미지 텍스트 렌더링 함수
 static void render_mob_damage_texts(void) {
     const COORD center_pos = {
-        .X = static_cast<SHORT>(console::size().X / 2),
-        .Y = static_cast<SHORT>(console::size().Y / 2)
+        .X = static_cast<SHORT>(Console::size().X / 2),
+        .Y = static_cast<SHORT>(Console::size().Y / 2)
     };
 
     for (int i = 0; i < MAX_MOB_DAMAGE_TEXTS; ++i)
@@ -407,22 +407,22 @@ static void render_mob_damage_texts(void) {
                 .Y = (SHORT)(center_pos.Y - (PLAYER_SPRITE_HEIGHT / 2) - 1 - (player.precise_y - pMob_damage_texts[i].precise_y))
             };
 
-            console::print(std::format("Attack {} HP!", pMob_damage_texts[i].damage_value), draw_pos, BG::black, FG::yellow);
+            Console::print(std::format("Attack {} HP!", pMob_damage_texts[i].damage_value), draw_pos, BG::black, FG::yellow);
         }
 }
 
 void mob_render(void) {
     const COORD center_m = {
-        .X = (SHORT)(console::size().X / 2),
-        .Y = (SHORT)(console::size().Y / 2),
+        .X = (SHORT)(Console::size().X / 2),
+        .Y = (SHORT)(Console::size().Y / 2),
     };
 
     for (int i = 0; i < mob_count; i++) {
         const int screen_x = center_m.X + (mobs[i].x * TEXTURE_SIZE - player.x * TEXTURE_SIZE),
             screen_y = center_m.Y + (mobs[i].y * TEXTURE_SIZE - player.y * TEXTURE_SIZE) - MOB_SPRITE_HEIGHT / 2;
 
-        if (screen_x < 0 || screen_x + MOB_SPRITE_WIDTH >= console::size().X ||
-            screen_y < 0 || screen_y >= console::size().Y)
+        if (screen_x < 0 || screen_x + MOB_SPRITE_WIDTH >= Console::size().X ||
+            screen_y < 0 || screen_y >= Console::size().Y)
             continue;
 
         //몬스터가 죽어가는 상태가 아니면 체력바 렌더링
@@ -431,11 +431,11 @@ void mob_render(void) {
                 .X = (SHORT)screen_x,
                 .Y = (SHORT)(screen_y - 1)
             };
-            console::print(std::format("HP: {}", mobs[i].HP), hp_pos, BG::black, FG::red);
+            Console::print(std::format("HP: {}", mobs[i].HP), hp_pos, BG::black, FG::red);
         }
 
         // 몬스터 상태에 따라 스프라이트 선택
-        const color_character_t(*sprite_to_render)[MOB_SPRITE_WIDTH];
+        const cchar(*sprite_to_render)[MOB_SPRITE_WIDTH];
 
         if (mobs[i].is_dead)
             sprite_to_render = pDead_zombie_sprite_data;
@@ -446,16 +446,16 @@ void mob_render(void) {
 
         for (int j = 0; j < MOB_SPRITE_HEIGHT; ++j)
             for (int k = 0; k < MOB_SPRITE_WIDTH; ++k) {
-                const color_character_t mob_pixel = sprite_to_render[j][k];
+                const cchar mob_pixel = sprite_to_render[j][k];
                 const COORD current_position = {
                     .X = (SHORT)(screen_x + k),
                     .Y = (SHORT)(screen_y + j)
                 };
 
-                if (current_position.X >= 0 && current_position.X < console::size().X &&
-                    current_position.Y >= 0 && current_position.Y < console::size().Y &&
+                if (current_position.X >= 0 && current_position.X < Console::size().X &&
+                    current_position.Y >= 0 && current_position.Y < Console::size().Y &&
                     mob_pixel.character != ' ')
-                    console::print(mob_pixel, current_position);
+                    Console::print(mob_pixel, current_position);
             }
     }
 
@@ -463,7 +463,7 @@ void mob_render(void) {
 }
 
 void mob_destroy(void) {
-    input::unsubscribe_input_mouse_click(handle_mob_click);
+    Input::unsubscribe_input_mouse_click(handle_mob_click);
     map_unsubscribe_offset_change(update_mob_offset);
 }
 

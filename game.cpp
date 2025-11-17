@@ -4,13 +4,12 @@
 #include "mob.hpp"
 #include "map.hpp"
 #include "save.hpp"
-#include "delta_time.hpp"
-#include "astar.hpp"
 #include "sound.hpp"
 #include "input.hpp"
 #include "player.hpp"
 #include "inventory.hpp"
 #include "date_time.hpp"
+#include "delta_time.hpp"
 #include "crafting_UI.hpp"
 #include "boss_malakh.hpp"
 #include "block_control.hpp"
@@ -22,33 +21,33 @@
 #include "console.hpp"
 #endif
 
-game *game::instance_{};
+Game *Game::instance_{};
 
 #if _DEBUG
 static void render_debug_text(void) {
     const BG background{ BG::black };
     const FG foreground{ FG::white };
 
-    const COORD &size{ console::size() };
+    const COORD &size{ Console::size() };
     COORD position = { 0, static_cast<SHORT>(size.Y - 4) };
 
     int fps{ -1 };
     if (delta_time_t::delta_time > 0.0f)
         fps = static_cast<int>(1.0f / delta_time_t::delta_time);
-    console::print(std::format("FPS: {}", fps), position, background, foreground);
+    Console::print(std::format("FPS: {}", fps), position, background, foreground);
     ++position.Y;
 
-    console::print(std::format("Player: ({}, {})", player.x, player.y), position, background, foreground);
+    Console::print(std::format("Player: ({}, {})", player.x, player.y), position, background, foreground);
     ++position.Y;
 
-    console::print(std::format("Mouse: ({}, {})", block_control_selected_x, block_control_selected_y), position, background, foreground);
+    Console::print(std::format("Mouse: ({}, {})", block_control_selected_x, block_control_selected_y), position, background, foreground);
     ++position.Y;
 
-    console::print(std::format("Boss Spawned: {}", boss_spawned), position, background, foreground);
+    Console::print(std::format("Boss Spawned: {}", boss_spawned), position, background, foreground);
 }
 #endif
 
-void game::render(void) {
+void Game::render(void) {
     map_render();
     if (boss_spawned)
         boss_render();
@@ -67,7 +66,7 @@ void game::render(void) {
 #endif
 }
 
-void game::update_BGM(void) {
+void Game::update_BGM(void) {
     if (boss_spawned) {
         if (current_BGM_state != BGM::boss) {
             sound_play_BGM("boss");
@@ -92,11 +91,11 @@ void game::update_BGM(void) {
     }
 }
 
-game *game::instance(void) noexcept {
+Game *Game::instance(void) noexcept {
     return instance_;
 }
 
-game::game(void) {
+Game::Game(void) {
     instance_ = this;
 
     if (pSave_current)
@@ -111,20 +110,20 @@ game::game(void) {
     save_free();
 }
 
-const date_time &game::elapsed_since_start(void) const noexcept {
+const date_time &Game::elapsed_since_start(void) const noexcept {
     return elapsed_since_start_;
 }
 
-void game::exit(const bool _exit) noexcept {
+void Game::exit(const bool _exit) noexcept {
     exit_ = _exit;
 }
 
-void game::update(void) {
+void Game::update(void) {
     while (!exit_) {
         delta_time_t::update();
 
-        console::update();
-        input::update();
+        Console::update();
+        Input::update();
         elapsed_since_start_.update();
         update_BGM();
 
@@ -143,7 +142,7 @@ void game::update(void) {
     }
 }
 
-game::~game(void) {
+Game::~Game(void) {
     instance_ = nullptr;
 
     mob_destroy();

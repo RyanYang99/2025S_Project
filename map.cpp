@@ -26,7 +26,7 @@ static int total_offsets = 0;
 static int offset_callback_count = 0;
 static offset_changed_t *pOffset_callbacks = NULL;
 
-static const color_character_t pAir_midnight[TEXTURE_SIZE][TEXTURE_SIZE] = {
+static const cchar pAir_midnight[TEXTURE_SIZE][TEXTURE_SIZE] = {
     { { ' ' , BG::black, 0 }, { ' ', BG::black, 0 }, { ' ', BG::black, 0 } },
     { { ' ' , BG::black, 0 }, { ' ', BG::black, 0 }, { ' ', BG::black, 0 } },
     { { ' ' , BG::black, 0 }, { ' ', BG::black, 0 }, { ' ', BG::black, 0 } }
@@ -114,17 +114,17 @@ static COORD render_block(const POINT map_position, const COORD console_position
                 .X = static_cast<SHORT>(console_position.X + (SHORT)(ltr ? tx : -tx)),
                 .Y = static_cast<SHORT>(console_position.Y + (SHORT)(utd ? ty : -ty)) };
 
-            exit = (position.X < 0 || position.X >= console::size().X) && (position.Y < 0 || position.Y >= console::size().Y);
-            if (position.X < 0 || position.X >= console::size().X || position.Y < 0 || position.Y >= console::size().Y)
+            exit = (position.X < 0 || position.X >= Console::size().X) && (position.Y < 0 || position.Y >= Console::size().Y);
+            if (position.X < 0 || position.X >= Console::size().X || position.Y < 0 || position.Y >= Console::size().Y)
                 break;
 
             size.X = (SHORT)tx + 1;
             size.Y = (SHORT)ty + 1;
 
-            console::print(map_get_block_texture(map.ppBlocks[map_position.y][map_position.x].type,
+            Console::print(map_get_block_texture(map.ppBlocks[map_position.y][map_position.x].type,
                                                  ltr ? tx : (TEXTURE_SIZE - tx - 1),
                                                  utd ? ty : (TEXTURE_SIZE - ty - 1),
-                                                 game::instance()->elapsed_since_start().hour()),
+                                                 Game::instance()->elapsed_since_start().hour()),
                            position);
         }
 
@@ -143,7 +143,7 @@ static COORD render_aft_or_forward(const COORD console_position_half, COORD cons
             texture_size = render_block({ x, y }, console_position, forward, true);
             console_position.Y += texture_size.Y;
 
-            if (console_position.Y >= console::size().Y)
+            if (console_position.Y >= Console::size().Y)
                 break;
         }
 
@@ -158,7 +158,7 @@ static COORD render_aft_or_forward(const COORD console_position_half, COORD cons
 
         console_position.X += forward ? texture_size.X : -texture_size.X;
         console_position.Y = console_position_half.Y;
-        if ((forward && console_position.X >= console::size().X) || (!forward && console_position.X < 0))
+        if ((forward && console_position.X >= Console::size().X) || (!forward && console_position.X < 0))
             break;
     }
 
@@ -375,11 +375,11 @@ static void resize_map(const bool right) {
 }
 
 void map_render(void) {
-    const COORD console_position_half = { static_cast<SHORT>(console::size().X / 2),
-                                          static_cast<SHORT>(console::size().Y / 2) };
+    const COORD console_position_half = { static_cast<SHORT>(Console::size().X / 2),
+                                          static_cast<SHORT>(Console::size().Y / 2) };
 
     COORD console_position = render_aft_or_forward(console_position_half, console_position_half, true);
-    if (console_position.X != console::size().X)
+    if (console_position.X != Console::size().X)
         resize_map(true);
 
     console_position.X = console_position_half.X - 1;
@@ -463,7 +463,7 @@ const bool map_damage_block(const int x, const int y, const int damage) {
     return false;
 }
 
-const color_character_t map_get_block_texture(const block_t block, const int x, const int y, const int hour) {
+const cchar map_get_block_texture(const block_t block, const int x, const int y, const int hour) {
     if (map_is_air_or_star(block)) {
         if (hour >= 0 && hour <= 4 ||
             hour >= 20 && hour <= 24) {

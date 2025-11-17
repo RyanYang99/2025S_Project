@@ -43,7 +43,7 @@ static damage_text_t pDamage_texts[MAX_DAMAGE_TEXTS] = { 0 };
     2개의 애니메이션 프레임
     프레임 1: 기본 서 있는 자세
 */
-static const color_character_t pPlayer_sprite_stand[PLAYER_SPRITE_HEIGHT][PLAYER_SPRITE_WIDTH] = {
+static const cchar pPlayer_sprite_stand[PLAYER_SPRITE_HEIGHT][PLAYER_SPRITE_WIDTH] = {
     //머리 (위:머리카락, 아래:피부)
     { { ' ', 0, 0 }, { L'▄', BG::dark_yellow, FG::dark_yellow }, { L'▄', BG::dark_yellow, FG::dark_yellow }, { L'▄', BG::dark_yellow, FG::dark_yellow }, { ' ', 0, 0 } },
     //몸통과 팔
@@ -172,7 +172,7 @@ void player_initialize(void) {
     player.facing_direction = 1;
 
     //마우스 클릭
-    input::subscribe_input_mouse_click(handle_player_actions);
+    Input::subscribe_input_mouse_click(handle_player_actions);
     map_subscribe_offset_change(update_player_offset);
 }
 
@@ -197,7 +197,7 @@ static const bool is_walkable(const int x, const int y) {
 
 static void movement(void) {
     //점프 키 확인
-    if (input::is_key_down(VK_SPACE) && player.is_on_ground) {
+    if (Input::is_key_down(VK_SPACE) && player.is_on_ground) {
         player.velocity_y = JUMP_STRENGTH;
         player.is_on_ground = false;
     }
@@ -205,7 +205,7 @@ static void movement(void) {
     //쿨다운 타이머 업데이트
     player.move_cool_down_timer += delta_time_t::delta_time;
 
-    const bool is_a_down = input::is_key_down('A'), is_d_down = input::is_key_down('D');
+    const bool is_a_down = Input::is_key_down('A'), is_d_down = Input::is_key_down('D');
 
     //키가 눌렸는지 여부에 따라 애니메이션 상태 설정
     player.is_moving = is_a_down || is_d_down;
@@ -322,8 +322,8 @@ void player_update(void) {
 
 static void render_damage_texts(void) {
     const COORD center_position = {
-        .X = static_cast<SHORT>(console::size().X / 2),
-        .Y = static_cast<SHORT>(console::size().Y / 2)
+        .X = static_cast<SHORT>(Console::size().X / 2),
+        .Y = static_cast<SHORT>(Console::size().Y / 2)
     };
 
     for (int i = 0; i < MAX_DAMAGE_TEXTS; ++i) {
@@ -335,7 +335,7 @@ static void render_damage_texts(void) {
 
             const std::string text{ std::format(" Hit - {} ", pDamage_texts[i].damage_value) };
             draw_position.X -= (SHORT)(text.length() / 2);
-            console::print(text, draw_position, BG::black, FG::red);
+            Console::print(text, draw_position, BG::black, FG::red);
         }
     }
 }
@@ -343,8 +343,8 @@ static void render_damage_texts(void) {
 void player_render(void) {
     // 플레이어의 중심이 될 콘솔 위치 (화면 중앙)
     const COORD center_position = {
-        .X = static_cast<SHORT>(console::size().X / 2),
-        .Y = static_cast<SHORT>(console::size().Y / 2)
+        .X = static_cast<SHORT>(Console::size().X / 2),
+        .Y = static_cast<SHORT>(Console::size().Y / 2)
     };
 
     //1. 장착한 아이템 확인
@@ -359,7 +359,7 @@ void player_render(void) {
     }
 
     //2. 상태에 맞는 스프라이트 선택
-    const color_character_t(* pCurrent_sprite)[PLAYER_SPRITE_WIDTH];
+    const cchar(* pCurrent_sprite)[PLAYER_SPRITE_WIDTH];
     if (is_tool_equipped)
         pCurrent_sprite = player.is_moving ? pPlayer_sprite_walk_armed[player.current_frame] : pPlayer_sprite_stand_armed;
     else
@@ -368,7 +368,7 @@ void player_render(void) {
     //3. 플레이어 스프라이트 렌더링 (좌우 반전 적용)
     for (int y = 0; y < PLAYER_SPRITE_HEIGHT; ++y) {
         for (int x = 0; x < PLAYER_SPRITE_WIDTH; ++x) {
-            color_character_t pixel = pCurrent_sprite[y][(player.facing_direction == 1) ? x : (PLAYER_SPRITE_WIDTH - 1 - x)];
+            cchar pixel = pCurrent_sprite[y][(player.facing_direction == 1) ? x : (PLAYER_SPRITE_WIDTH - 1 - x)];
 
             if (pixel.character == ' ' && pixel.background == BG::black)
                 continue;
@@ -378,9 +378,9 @@ void player_render(void) {
                 .Y = (SHORT)(center_position.Y + y - (PLAYER_SPRITE_HEIGHT / 2))
             };
 
-            if (draw_position.X >= 0 && draw_position.X < console::size().X &&
-                draw_position.Y >= 0 && draw_position.Y < console::size().Y) {
-                console::print(pixel, draw_position);
+            if (draw_position.X >= 0 && draw_position.X < Console::size().X &&
+                draw_position.Y >= 0 && draw_position.Y < Console::size().Y) {
+                Console::print(pixel, draw_position);
             }
         }
     }
@@ -404,7 +404,7 @@ void player_render(void) {
         for (int y = 0; y < TEXTURE_SIZE; ++y)
             for (int x = 0; x < TEXTURE_SIZE; ++x) {
                 int source_x = (player.facing_direction == 1) ? x : (TEXTURE_SIZE - 1 - x);
-                color_character_t tool_pixel{};
+                cchar tool_pixel{};
                 if (player.is_swinging) {
                     //스윙 중일 때는 스윙 텍스처를 가져옴
                     tool_pixel = tool_get_swing_texture((tool_t)pToolInfo->index, source_x, y);
@@ -420,9 +420,9 @@ void player_render(void) {
                     (SHORT)(center_position.Y + (tool_hand_offset_y - PLAYER_SPRITE_HEIGHT / 2) + y)
                 };
 
-                if (draw_pos.X >= 0 && draw_pos.X < console::size().X &&
-                    draw_pos.Y >= 0 && draw_pos.Y < console::size().Y) {
-                    console::print(tool_pixel, draw_pos);
+                if (draw_pos.X >= 0 && draw_pos.X < Console::size().X &&
+                    draw_pos.Y >= 0 && draw_pos.Y < Console::size().Y) {
+                    Console::print(tool_pixel, draw_pos);
                 }
             }
     }
@@ -437,31 +437,31 @@ void player_render(void) {
               empty = bar_width - filled;
 
     COORD position = {
-        .X = (SHORT)(console::size().X - (bar_width + 22)), //오른쪽 끝에서 약간 여유
+        .X = (SHORT)(Console::size().X - (bar_width + 22)), //오른쪽 끝에서 약간 여유
         .Y = 2
     };
 
-    console::print("[", position, BG::white, FG::transparent);
+    Console::print("[", position, BG::white, FG::transparent);
     position.X += 1;
 
     for (int i = 0; i < filled; ++i) {
-        console::print(" ", position, BG::red, FG::black); //빨간 체력 바
+        Console::print(" ", position, BG::red, FG::black); //빨간 체력 바
         position.X += 1;
     }
 
     for (int i = 0; i < empty; ++i) {
-        console::print(" ", position, BG::dark_gray, FG::black); //회색 빈 바
+        Console::print(" ", position, BG::dark_gray, FG::black); //회색 빈 바
         position.X += 1;
     }
 
-    console::print("]", position, BG::white, FG::transparent);
+    Console::print("]", position, BG::white, FG::transparent);
     position.X += 2;
 
-    console::print(std::format("HP: {} / {}", current_HP, max_HP), position, BG::black, FG::yellow);
+    Console::print(std::format("HP: {} / {}", current_HP, max_HP), position, BG::black, FG::yellow);
 }
 
 void player_destroy(void) {
-    input::unsubscribe_input_mouse_click(handle_player_actions);
+    Input::unsubscribe_input_mouse_click(handle_player_actions);
     map_unsubscribe_offset_change(update_player_offset);
 }
 

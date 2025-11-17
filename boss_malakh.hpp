@@ -36,7 +36,7 @@ struct boss_malakh_t {
         current_horizontal_laser_y, current_vertical_laser_x{};
     float horizontal_laser_damage_cool_time, vertical_laser_damage_cool_time{};
 
-    color_character_t pSprite_data[BOSS_SPRITE_HEIGHT][BOSS_SPRITE_WIDTH]{};
+    cchar pSprite_data[BOSS_SPRITE_HEIGHT][BOSS_SPRITE_WIDTH]{};
 };
 
 extern bool boss_spawned;

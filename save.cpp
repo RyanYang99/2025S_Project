@@ -63,10 +63,10 @@ static void write_save(LPCWSTR const pPath) {
 }
 
 void save_input(void) {
-    if (!input::keyboard_pressed())
+    if (!Input::keyboard_pressed())
         return;
 
-    const char input_character{ input::input_character() };
+    const char input_character{ Input::input_character() };
     if (input_character == VK_ESCAPE) {
         if (!should_render_save_menu)
             get_save_spots();
@@ -75,12 +75,12 @@ void save_input(void) {
         pMessage = "";
     } else if (should_render_save_menu) {
         if (tolower(input_character) == 'q')
-            game::instance()->exit(true);
+            Game::instance()->exit(true);
         else {
             const int number = input_character - '0';
 
             if (number >= 1 && number <= MAX_SAVE_SPOTS) {
-                game::instance()->elapsed_since_start().save();
+                Game::instance()->elapsed_since_start().save();
                 player_save();
                 inventory_save();
                 map_save();
@@ -114,14 +114,14 @@ void save_render(void) {
         pMessage = "";
     }
 
-    int y = console::size().Y / 2 - (MAX_SAVE_SPOTS + 2 + has_message) / 2;
-    console::print_center("=== Save ===", y++, BG::black, FG::blue);
+    int y = Console::size().Y / 2 - (MAX_SAVE_SPOTS + 2 + has_message) / 2;
+    Console::print_center("=== Save ===", y++, BG::black, FG::blue);
     if (has_message)
-        console::print_center(pMessage, y++, BG::black, FG::cyan);
-    console::print_center("[1 ~ 3]: Save, [ESC]: Close [Q]: Main Menu", y++, BG::black, FG::blue);
+        Console::print_center(pMessage, y++, BG::black, FG::cyan);
+    Console::print_center("[1 ~ 3]: Save, [ESC]: Close [Q]: Main Menu", y++, BG::black, FG::blue);
 
     for (int i = 0; i < MAX_SAVE_SPOTS; ++i)
-        console::print_center(std::format("{}. {}", i + 1, pUsed[i] ? "In Use (Overwrite)" : "Empty"), y++, BG::black, FG::blue);
+        Console::print_center(std::format("{}. {}", i + 1, pUsed[i] ? "In Use (Overwrite)" : "Empty"), y++, BG::black, FG::blue);
 }
 
 void save_instantiate(void) {

@@ -32,7 +32,7 @@ typedef void (*input_mouse_position_t)(const COORD position);
 typedef void (*input_mouse_in_console_t)(const bool in_console);
 
 //윈도우 콜백을 사용해야 하기 때문에 static 클래스 사용
-class input {
+class Input {
 private:
     static bool keyboard_pressed_;
     static char input_character_, input_special_character_;

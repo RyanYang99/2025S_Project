@@ -42,7 +42,7 @@ static boss_missile_t pBoss_missiles[MAX_MISSILES]{};
 static boss_damage_text_t pBoss_damage_texts[MAX_BOSS_DAMAGE_TEXTS]{};
 
 //보스 스프라이트 데이터 (생략)
-static const color_character_t pBoss_malakh_sprite_data[BOSS_SPRITE_HEIGHT][BOSS_SPRITE_WIDTH] = {
+static const cchar pBoss_malakh_sprite_data[BOSS_SPRITE_HEIGHT][BOSS_SPRITE_WIDTH] = {
     //0              1              2              3              4              5              6              7              8              9              10             11             12             13             14             15             16             17             18             19
     { { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 }, { ' ', 0, 0 } },
     //1
@@ -186,7 +186,7 @@ void boss_initialize(const int start_x, const int start_y, const int hp, const i
     for (int i = 0; i < MAX_BOSS_DAMAGE_TEXTS; ++i)
         pBoss_damage_texts[i].active = false;
 
-    input::subscribe_input_mouse_click(boss_handle_player_attack);
+    Input::subscribe_input_mouse_click(boss_handle_player_attack);
     map_subscribe_offset_change(boss_handle_offset);
 }
 
@@ -405,8 +405,8 @@ void boss_update(void) {
 
 //미사일 렌더링
 static void boss_render_missiles(void) {
-    const color_character_t character = { '*', BG::black, FG::red };
-    const COORD &size{ console::size() };
+    const cchar character = { '*', BG::black, FG::red };
+    const COORD &size{ Console::size() };
 
     for (int i = 0; i < MAX_MISSILES; ++i)
         if (pBoss_missiles[i].is_active) {
@@ -417,13 +417,13 @@ static void boss_render_missiles(void) {
 
             if (missile_position.X >= 0 && missile_position.X < size.X &&
                 missile_position.Y >= 0 && missile_position.Y < size.Y)
-                console::print(character, missile_position);
+                Console::print(character, missile_position);
         }
 }
 
 //패턴 렌더링 함수
 static void boss_render_pattern(void) {
-    const COORD &size{ console::size() };
+    const COORD &size{ Console::size() };
 
     //미사일 렌더링
     boss_render_missiles();
@@ -441,7 +441,7 @@ static void boss_render_pattern(void) {
             boss.is_horizontal_laser_active = false;
 
         //3줄 레이저를 한번에 출력
-        const color_character_t character = { L'═', BG::black, FG::red };
+        const cchar character = { L'═', BG::black, FG::red };
 
         for (int i = 0; i < 3; ++i) {
             COORD laser_position = {
@@ -449,7 +449,7 @@ static void boss_render_pattern(void) {
             };
 
             for (; laser_position.X < size.X; ++laser_position.X)
-                console::print(character, laser_position);
+                Console::print(character, laser_position);
         }
     }
 
@@ -473,7 +473,7 @@ static void boss_render_pattern(void) {
         }
 
         //3줄 레이저를 한번에 출력
-        const color_character_t character = { L'║', BG::black, FG::red };
+        const cchar character = { L'║', BG::black, FG::red };
 
         for (int i = 0; i < 3; ++i) {
             COORD laser_position = {
@@ -481,14 +481,14 @@ static void boss_render_pattern(void) {
             };
 
             for (; laser_position.Y < size.Y; ++laser_position.Y)
-                console::print(character, laser_position);
+                Console::print(character, laser_position);
         }
     }
 }
 
 //보스 대미지 텍스트 렌더링 함수
 static void boss_render_damage_texts(void) {
-    const COORD &size{ console::size() };
+    const COORD &size{ Console::size() };
 
     const COORD center_position = {
         .X = static_cast<SHORT>(size.X / 2),
@@ -502,7 +502,7 @@ static void boss_render_damage_texts(void) {
                 .Y = (SHORT)(center_position.Y + (pBoss_damage_texts[i].precise_y - player.y))
             };
 
-            console::print(std::format("Attack! -{}", pBoss_damage_texts[i].damage_value), draw_position, BG::black, FG::white);
+            Console::print(std::format("Attack! -{}", pBoss_damage_texts[i].damage_value), draw_position, BG::black, FG::white);
         }
     }
 }
@@ -512,7 +512,7 @@ void boss_render(void) {
     if (boss.state == E_BOSS_STATE_DEFEATED)
         return;
 
-    const COORD &size{ console::size() };
+    const COORD &size{ Console::size() };
     const int boss_screen_base_x = size.X / 2 + (boss.x - player.x) * BOSS_DRAW_SCALE,
               boss_screen_base_y = size.Y / 2 + (boss.y - player.y) * BOSS_DRAW_SCALE;
 
@@ -527,9 +527,9 @@ void boss_render(void) {
                     };
                     if (character_position.X >= 0 && character_position.X < size.X &&
                         character_position.Y >= 0 && character_position.Y < size.Y) {
-                        const color_character_t char_to_print = boss.pSprite_data[y_offset][x_offset];
+                        const cchar char_to_print = boss.pSprite_data[y_offset][x_offset];
                         if (char_to_print.character != L' ')
-                            console::print(char_to_print, character_position);
+                            Console::print(char_to_print, character_position);
                     }
                 }
 
@@ -543,7 +543,7 @@ void boss_render(void) {
         hp_position.X = 0;
     if (hp_position.Y < 0)
         hp_position.Y = 0;
-    console::print(text, hp_position, BG::black, FG::white);
+    Console::print(text, hp_position, BG::black, FG::white);
 
     //패턴 렌더링
     boss_render_pattern();
@@ -551,6 +551,6 @@ void boss_render(void) {
 }
 
 void boss_destroy(void) {
-    input::subscribe_input_mouse_click(boss_handle_player_attack);
+    Input::subscribe_input_mouse_click(boss_handle_player_attack);
     map_unsubscribe_offset_change(boss_handle_offset);
 }

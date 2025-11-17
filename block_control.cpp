@@ -101,7 +101,7 @@ static void handle_mouse_click(const bool left) {
 
 //마우스 이동 시 최신 위치 갱신
 static void handle_mouse_move(const COORD position) noexcept {
-    const COORD &size{ console::size() };
+    const COORD &size{ Console::size() };
 
     const float screen_x = static_cast<float>(size.X) / 2.0f,
                 screen_y = static_cast<float>(size.Y) / 2.0f,
@@ -120,9 +120,9 @@ static void handle_in_console(const bool in_console) noexcept {
 
 //초기화 및 해제
 void block_control_initialize(void) {
-    input::subscribe_input_mouse_click(handle_mouse_click);
-    input::subscribe_input_mouse_position(handle_mouse_move);
-    input::subscribe_input_mouse_in_console(handle_in_console);
+    Input::subscribe_input_mouse_click(handle_mouse_click);
+    Input::subscribe_input_mouse_position(handle_mouse_move);
+    Input::subscribe_input_mouse_in_console(handle_in_console);
 }
 
 //가상 커서 렌더링 (모서리 스타일)
@@ -140,17 +140,17 @@ void block_control_render(void) {
     } else if (cursor_out_of_range)
         color = FG::red;
 
-    const color_character_t character { L'■', BG::black, color };
+    const cchar character { L'■', BG::black, color };
 
     //각 모서리에 문자를 출력
-    console::print(character, { static_cast<SHORT>(draw_x), static_cast<SHORT>(draw_y) });
-    console::print(character, { static_cast<SHORT>(draw_x + TEXTURE_SIZE - 1), static_cast<SHORT>(draw_y) });
-    console::print(character, { static_cast<SHORT>(draw_x), static_cast<SHORT>(draw_y + TEXTURE_SIZE - 1) });
-    console::print(character, { static_cast<SHORT>(draw_x + TEXTURE_SIZE - 1), static_cast<SHORT>(draw_y + TEXTURE_SIZE - 1) });
+    Console::print(character, { static_cast<SHORT>(draw_x), static_cast<SHORT>(draw_y) });
+    Console::print(character, { static_cast<SHORT>(draw_x + TEXTURE_SIZE - 1), static_cast<SHORT>(draw_y) });
+    Console::print(character, { static_cast<SHORT>(draw_x), static_cast<SHORT>(draw_y + TEXTURE_SIZE - 1) });
+    Console::print(character, { static_cast<SHORT>(draw_x + TEXTURE_SIZE - 1), static_cast<SHORT>(draw_y + TEXTURE_SIZE - 1) });
 }
 
 void block_control_destroy(void) noexcept {
-    input::unsubscribe_input_mouse_click(handle_mouse_click);
-    input::unsubscribe_input_mouse_position(handle_mouse_move);
-    input::unsubscribe_input_mouse_in_console(handle_in_console);
+    Input::unsubscribe_input_mouse_click(handle_mouse_click);
+    Input::unsubscribe_input_mouse_position(handle_mouse_move);
+    Input::unsubscribe_input_mouse_in_console(handle_in_console);
 }

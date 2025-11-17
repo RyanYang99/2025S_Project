@@ -5,21 +5,20 @@
 #include <vector>
 #include <algorithm>
 
-COORD console::size_{};
+COORD Console::size_{};
 
-int console::current_buffer{};
-HANDLE console::buffer[2]{};
+int Console::current_buffer{};
+HANDLE Console::buffer[2]{};
 
-//int console::buffer_count{};
-std::vector<CHAR_INFO> console::character_buffer{};
-SMALL_RECT console::written{};
+std::vector<CHAR_INFO> Console::character_buffer{};
+SMALL_RECT Console::written{};
 
-HANDLE console::handle{};
+HANDLE Console::handle{};
 
-HWND console::window{};
-float console::dpi_scale{};
+HWND Console::window{};
+float Console::dpi_scale{};
 
-const COORD console::calculate_size(const HANDLE size_handle) {
+const COORD Console::calculate_size(const HANDLE size_handle) {
     CONSOLE_SCREEN_BUFFER_INFO csbi{};
     GetConsoleScreenBufferInfo(size_handle, &csbi);
 
@@ -29,7 +28,7 @@ const COORD console::calculate_size(const HANDLE size_handle) {
     };
 }
 
-void console::hide_cursor(const HANDLE cursor_handle) noexcept {
+void Console::hide_cursor(const HANDLE cursor_handle) noexcept {
     CONSOLE_CURSOR_INFO cci{};
     GetConsoleCursorInfo(cursor_handle, &cci);
 
@@ -37,11 +36,11 @@ void console::hide_cursor(const HANDLE cursor_handle) noexcept {
     SetConsoleCursorInfo(cursor_handle, &cci);
 }
 
-void console::resize_buffer(void) {
+void Console::resize_buffer(void) {
     character_buffer.resize(size_.X * size_.Y);
 }
 
-void console::initialize_double_buffering(void) {
+void Console::initialize_double_buffering(void) {
     for (int i{}; i < 2; ++i) {
         const HANDLE new_handle{ CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, nullptr, CONSOLE_TEXTMODE_BUFFER, nullptr) };
         SetConsoleScreenBufferSize(new_handle, size_);
@@ -56,7 +55,7 @@ void console::initialize_double_buffering(void) {
     }
 }
 
-void console::initialize(void) {
+void Console::initialize(void) {
     handle = GetStdHandle(STD_OUTPUT_HANDLE);
     size_ = calculate_size(handle);
     window = GetConsoleWindow();
@@ -68,7 +67,7 @@ void console::initialize(void) {
     resize_buffer();
 }
 
-void console::resize(const HANDLE size_handle) {
+void Console::resize(const HANDLE size_handle) {
     SMALL_RECT rect{};
     rect.Right = 1;
     rect.Bottom = 1;
@@ -88,7 +87,7 @@ void console::resize(const HANDLE size_handle) {
         ShowWindow(window, SW_MAXIMIZE);
 }
 
-bool console::update_size(void) {
+bool Console::update_size(void) {
     const COORD new_size{ calculate_size(buffer[current_buffer]) };
 
     if (size_.X == new_size.X && size_.Y == new_size.Y)
@@ -105,7 +104,7 @@ bool console::update_size(void) {
     return true;
 }
 
-void console::flip_double_buffer(void) {
+void Console::flip_double_buffer(void) {
     if (character_buffer.empty())
         return;
 
@@ -118,11 +117,11 @@ void console::flip_double_buffer(void) {
         current_buffer = 0;
 }
 
-int console::index(const int x, const int y) {
+int Console::index(const int x, const int y) {
     return x + y * size_.X;
 }
 
-void console::write(const COORD &position, const wchar_t character, const WORD attribute) {
+void Console::write(const COORD &position, const wchar_t character, const WORD attribute) {
     WORD new_attribute{ attribute };
     if (attribute == static_cast<WORD>(-1)) {
         DWORD read{};
@@ -140,25 +139,25 @@ void console::write(const COORD &position, const wchar_t character, const WORD a
     character_buffer[i].Attributes = new_attribute;
 }
 
-void console::update(void) {
+void Console::update(void) {
     if (update_size())
         clear();
 
     flip_double_buffer();
 }
 
-const COORD &console::size(void) noexcept {
+const COORD &Console::size(void) noexcept {
     return size_;
 }
 
-bool console::is_new_windows_terminal(void) {
+bool Console::is_new_windows_terminal(void) {
     CONSOLE_FONT_INFO font{};
     GetCurrentConsoleFont(GetStdHandle(STD_OUTPUT_HANDLE), false, &font);
 
     return font.dwFontSize.X <= 0;
 }
 
-const COORD console::convert_from_monitor(const POINT &point) {
+const COORD Console::convert_from_monitor(const POINT &point) {
     POINT client_point{ point.x, point.y };
     ScreenToClient(window, &client_point);
 
@@ -169,7 +168,7 @@ const COORD console::convert_from_monitor(const POINT &point) {
              static_cast<SHORT>(client_point.y / (font.dwFontSize.Y * dpi_scale)) };
 }
 
-bool console::is_cursor_inside(const POINT &point) {
+bool Console::is_cursor_inside(const POINT &point) {
     RECT window_rect{};
     GetWindowRect(window, &window_rect);
 
@@ -180,14 +179,14 @@ bool console::is_cursor_inside(const POINT &point) {
            GetForegroundWindow() == window;
 }
 
-void console::clear(void) {
+void Console::clear(void) {
     if (character_buffer.empty())
         return;
 
     std::fill(character_buffer.begin(), character_buffer.end(), CHAR_INFO{});
 }
 
-void console::fill(const color_character_t &character) {
+void Console::fill(const cchar &character) {
     const WORD attribute = static_cast<WORD>(character.background) | static_cast<WORD>(character.foreground);
     if (character_buffer.empty())
         return;
@@ -198,7 +197,7 @@ void console::fill(const color_character_t &character) {
     }
 }
 
-void console::print(const color_character_t &character, const COORD &position) {
+void Console::print(const cchar &character, const COORD &position) {
     WORD attribute{ static_cast<WORD>(-1) };
     if (character.background != BG::transparent)
         attribute = static_cast<WORD>(character.background) | static_cast<WORD>(character.foreground);
@@ -206,7 +205,7 @@ void console::print(const color_character_t &character, const COORD &position) {
     write(position, character.character, attribute);
 }
 
-size_t console::print(const std::string &string,
+size_t Console::print(const std::string &string,
                       COORD position,
                       const BG background,
                       const FG foreground) {
@@ -218,7 +217,7 @@ size_t console::print(const std::string &string,
     return string.size();
 }
 
-void console::print_center(const std::string &string,
+void Console::print_center(const std::string &string,
                            const int y,
                            const BG background,
                            const FG foreground) {
@@ -230,7 +229,7 @@ void console::print_center(const std::string &string,
     print(string, position, background, foreground);
 }
 
-void console::destroy(void) {
+void Console::destroy(void) {
     for (int i{}; i < 2; ++i)
         if (buffer[i]) {
             CloseHandle(buffer[i]);

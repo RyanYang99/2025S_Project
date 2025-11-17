@@ -53,7 +53,7 @@ const block_info_t map_get_block_info(const int x, const int y);
 const bool map_set_block(const int x, const int y, const block_t type);
 const bool map_damage_block(const int x, const int y, const int damage);
 
-const color_character_t map_get_block_texture(const block_t block, const int x, const int y, const int hour);
+const cchar map_get_block_texture(const block_t block, const int x, const int y, const int hour);
 
 const bool map_is_air_or_star(const block_t block);
 

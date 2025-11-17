@@ -1,46 +1,46 @@
 ﻿#include "leak.hpp"
 
-#include <stdio.h>
+#include <string>
+#include <iostream>
+#include <Windows.h>
 
 #include "save.hpp"
 #include "game.hpp"
 #include "input.hpp"
 #include "sound.hpp"
+#include "console.hpp"
 #include "main_menu.hpp"
 #include "crafting_UI.hpp"
 #include "item_database.hpp"
 
 static bool force_old_console(void) {
-    if (console::is_new_windows_terminal()) {
-        printf_s("Attempting to launch in conhost.exe.\n");
+    if (Console::is_new_windows_terminal()) {
+        std::cout << "Attempting to launch in conhost.exe." << std::endl;
 
-        int argc = 0;
+        int argc{};
+        LPWSTR *argv{ CommandLineToArgvW(GetCommandLine(), &argc) };
+        if (!argv)
+            return false;
 
-        LPWSTR *pArgv = CommandLineToArgvW(GetCommandLine(), &argc);
+        STARTUPINFO startup_info {};
+        startup_info.cb = sizeof(startup_info);
+        PROCESS_INFORMATION process_information{};
 
-        STARTUPINFO startup_info = {
-            .cb = sizeof(startup_info)
-        };
-        PROCESS_INFORMATION process_information = { 0 };
+        std::wstring argument{ L"-- " };
+        argument += argv[0];
 
-        const int path_character = (int)wcslen(pArgv[0]) + 4, path_size = sizeof(WCHAR) * path_character;
-        LPWSTR pArgument = static_cast<LPWSTR>(calloc(path_size, sizeof(WCHAR)));
-        wcscat_s(pArgument, path_size, L"-- ");
-        wcscat_s(pArgument, path_size, pArgv[0]);
+        const BOOL success{ CreateProcess(TEXT("C:\\Windows\\System32\\conhost.exe"),
+                                          &argument[0],
+                                          nullptr,
+                                          nullptr,
+                                          false,
+                                          0,
+                                          nullptr,
+                                          nullptr,
+                                          &startup_info,
+                                          &process_information) };
 
-        const BOOL success = CreateProcess(TEXT("C:\\Windows\\System32\\conhost.exe"),
-                                           pArgument,
-                                           NULL,
-                                           NULL,
-                                           false,
-                                           0,
-                                           NULL,
-                                           NULL,
-                                           &startup_info,
-                                           &process_information);
-
-        LocalFree(pArgv);
-        free(pArgument);
+        LocalFree(argv);
         if (success) {
             WaitForSingleObject(process_information.hProcess, INFINITE);
             CloseHandle(process_information.hProcess);
@@ -63,11 +63,11 @@ int main(void) {
 
     database_initialize(false);
     crafting_UI_initialize();
-    console::initialize();
+    Console::initialize();
     sound_initialize();
 
     while (true) {
-        const main_menu_state main_menu_state = main_menu();
+        const main_menu_state main_menu_state{ main_menu() };
         if (main_menu_state == main_menu_state::quit)
             break;
         else if (main_menu_state == main_menu_state::load) {
@@ -76,15 +76,16 @@ int main(void) {
         } else
             save_free();
 
-        input::initialize();
+        Input::initialize();
 
-        game game_{};
+        Game game_{};
         game_.update();
-        input::destroy();
+
+        Input::destroy();
     }
 
     database_destroy();
     sound_destroy();
-    console::destroy();
+    Console::destroy();
     return EXIT_SUCCESS;
 }

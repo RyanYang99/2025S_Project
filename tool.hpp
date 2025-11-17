@@ -12,5 +12,5 @@ const bool tool_can_place_block(const int x, const int y);
 
 const int tool_get_damage_to_mob(const tool_t tool);
 
-const color_character_t tool_get_texture(const tool_t tool, const int x, const int y);
-const color_character_t tool_get_swing_texture(const tool_t tool, const int x, const int y);
+const cchar tool_get_texture(const tool_t tool, const int x, const int y);
+const cchar tool_get_swing_texture(const tool_t tool, const int x, const int y);

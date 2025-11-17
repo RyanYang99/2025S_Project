@@ -29,63 +29,63 @@ enum class name { \
 DEFINE_COLORS(BG, BACKGROUND);
 DEFINE_COLORS(FG, FOREGROUND);
 
-struct color_character_t {
+struct cchar {
     wchar_t character{};
     BG background{};
     FG foreground{};
 
-    color_character_t(void) = default;
+    cchar(void) = default;
 
-    color_character_t(char character_) noexcept : character(character_) {}
+    cchar(char character_) noexcept : character(character_) {}
 
-    color_character_t(wchar_t character_) noexcept : character(character_) {}
+    cchar(wchar_t character_) noexcept : character(character_) {}
 
-    color_character_t(char character_, BG background_) noexcept  : character(character_), background(background_) {}
+    cchar(char character_, BG background_) noexcept  : character(character_), background(background_) {}
 
-    color_character_t(wchar_t character_, BG background_) noexcept : character(character_), background(background_) {}
+    cchar(wchar_t character_, BG background_) noexcept : character(character_), background(background_) {}
 
-    color_character_t(char character_, int background_) noexcept : character(character_), background(static_cast<BG>(background_)) {}
+    cchar(char character_, int background_) noexcept : character(character_), background(static_cast<BG>(background_)) {}
 
-    color_character_t(wchar_t character_, int background_) noexcept : character(character_), background(static_cast<BG>(background_)) {}
+    cchar(wchar_t character_, int background_) noexcept : character(character_), background(static_cast<BG>(background_)) {}
 
-    color_character_t(char character_,
-                      BG background_,
-                      FG foreground_) noexcept : character(character_),
-                                                                 background(background_),
-                                                                 foreground(foreground_) {}
+    cchar(char character_,
+          BG background_,
+          FG foreground_) noexcept : character(character_),
+                                     background(background_),
+                                     foreground(foreground_) {}
 
-    color_character_t(wchar_t character_,
-                      BG background_,
-                      FG foreground_) noexcept : character(character_),
-                                                                 background(background_),
-                                                                 foreground(foreground_) {}
+    cchar(wchar_t character_,
+          BG background_,
+          FG foreground_) noexcept : character(character_),
+                                                     background(background_),
+                                                     foreground(foreground_) {}
 
-    color_character_t(char character_,
-                      BG background_,
-                      int foreground_) noexcept : character(character_),
-                                                  background(background_),
-                                                  foreground(static_cast<FG>(foreground_)) {}
+    cchar(char character_,
+          BG background_,
+          int foreground_) noexcept : character(character_),
+                                      background(background_),
+                                      foreground(static_cast<FG>(foreground_)) {}
 
-    color_character_t(wchar_t character_,
-                      BG background_,
-                      int foreground_) noexcept : character(character_),
-                                                  background(background_),
-                                                  foreground(static_cast<FG>(foreground_)) {}
+    cchar(wchar_t character_,
+          BG background_,
+          int foreground_) noexcept : character(character_),
+                                      background(background_),
+                                      foreground(static_cast<FG>(foreground_)) {}
 
-    color_character_t(char character_,
-                      int background_,
-                      int foreground_) noexcept : character(character_),
-                                                  background(static_cast<BG>(background_)),
-                                                  foreground(static_cast<FG>(foreground_)) {}
+    cchar(char character_,
+          int background_,
+          int foreground_) noexcept : character(character_),
+                                      background(static_cast<BG>(background_)),
+                                      foreground(static_cast<FG>(foreground_)) {}
 
-    color_character_t(wchar_t character_,
-                      int background_,
-                      int foreground_) noexcept : character(character_),
-                                                  background(static_cast<BG>(background_)),
-                                                  foreground(static_cast<FG>(foreground_)) {}
+    cchar(wchar_t character_,
+          int background_,
+          int foreground_) noexcept : character(character_),
+                                      background(static_cast<BG>(background_)),
+                                      foreground(static_cast<FG>(foreground_)) {}
 };
 
-class console {
+class Console {
 private:
     static COORD size_;
 
@@ -122,8 +122,8 @@ public:
 
     static void clear(void);
 
-    static void fill(const color_character_t &character);
-    static void print(const color_character_t &character, const COORD &position);
+    static void fill(const cchar &character);
+    static void print(const cchar &character, const COORD &position);
     static size_t print(const std::string &string,
                         COORD position,
                         const BG background,

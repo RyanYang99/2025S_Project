@@ -9,7 +9,7 @@
 #include "inventory.hpp"
 #include "item_database.hpp"
 
-static const color_character_t pWooden_sword[TEXTURE_SIZE][TEXTURE_SIZE] = {
+static const cchar pWooden_sword[TEXTURE_SIZE][TEXTURE_SIZE] = {
     { { ' ', BG::black, FG::transparent }, { ' ', BG::yellow, FG::black }, { ' ', BG::transparent, FG::black } },
     { { ' ', BG::black, FG::transparent }, { ' ', BG::yellow, FG::black }, { ' ', BG::transparent, FG::black } },
     { { ' ', BG::black, FG::transparent }, { ' ', BG::dark_yellow, FG::black }, { ' ', BG::transparent, FG::black } }
@@ -230,7 +230,7 @@ const int tool_get_damage_to_mob(const tool_t tool) {
     return 0;
 }
 
-const color_character_t tool_get_texture(const tool_t tool, const int x, const int y) {
+const cchar tool_get_texture(const tool_t tool, const int x, const int y) {
     switch (tool) {
         case TOOL_WOODEN_SWORD:
             return pWooden_sword[y][x];
@@ -273,7 +273,7 @@ const color_character_t tool_get_texture(const tool_t tool, const int x, const i
 }
 
 //스윙 텍스처 반환
-const color_character_t tool_get_swing_texture(const tool_t tool, const int x, const int y) {
+const cchar tool_get_swing_texture(const tool_t tool, const int x, const int y) {
     switch (tool) {
         case TOOL_WOODEN_SWORD:
             return pWooden_sword_swing[y][x];

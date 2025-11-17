@@ -9,4 +9,4 @@ typedef enum {
 } item_t;
 
 const bool item_use(const item_t item);
-const color_character_t item_get_texture(const item_t item, const int x, const int y);
+const cchar item_get_texture(const item_t item, const int x, const int y);
