@@ -195,7 +195,7 @@ static void generate_strip(const int x, const biome_t biome, const bool override
         }
 
         const float px = (float)x - total_offsets,
-                    noise = perlin_noise(px * f1) + perlin_noise(px * f2) * a;
+                    noise = Perlin::noise(px * f1) + Perlin::noise(px * f2) * a;
         height = (int)(map.size.y * ((noise + 1.0f) / 2.0f));
     }
 
@@ -279,7 +279,7 @@ static biome_t generate_map(const int old_width, const bool right) {
             generate_strip(x,
                            biome,
                            true,
-                           (int)roundf(perlin_lerp((float)(right ? target_1 : target_2), (float)(right ? target_2 : target_1), (float)i / blend_width)));
+                           (int)roundf(Perlin::lerp((float)(right ? target_1 : target_2), (float)(right ? target_2 : target_1), (float)i / blend_width)));
 
     return biome;
 }
@@ -402,8 +402,7 @@ void map_destroy(void) {
 
 void map_create(void) {
     if (pSave_current) {
-        for (int i = 0; i < PERLIN_SIZE; ++i)
-            pPermutation_table[i] = pSave_current->pPermuation_table[i];
+        Perlin::permutation_table(pSave_current->pPermuation_table);
 
         map.size.x = pSave_current->map_x;
         map.size.y = pSave_current->map_y;
@@ -413,7 +412,7 @@ void map_create(void) {
             for (int x = 0; x < map.size.x; ++x)
                 map.ppBlocks[y][x] = pSave_current->pBlocks[y * map.size.x + x];
     } else {
-        perlin_fill_table((int)time(NULL));
+        Perlin::fill((int)time(NULL));
 
         map.size.x = 0;
         map.size.y = MAP_MAX_Y;
@@ -551,8 +550,8 @@ void map_save(void) {
     if (!pSave_current)
         save_instantiate();
 
-    for (int i = 0; i < PERLIN_SIZE; ++i)
-        pSave_current->pPermuation_table[i] = pPermutation_table[i];
+    for (size_t i{}; i < Perlin::perlin_size; ++i)
+        pSave_current->pPermuation_table[i] = Perlin::at(i);
 
     pSave_current->map_x = map.size.x;
     pSave_current->map_y = map.size.y;

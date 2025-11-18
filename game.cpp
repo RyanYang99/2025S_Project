@@ -1,6 +1,7 @@
 ﻿#include "leak.hpp"
 #include "game.hpp"
 
+#include "BGM.hpp"
 #include "mob.hpp"
 #include "map.hpp"
 #include "save.hpp"
@@ -13,7 +14,6 @@
 #include "crafting_UI.hpp"
 #include "boss_malakh.hpp"
 #include "block_control.hpp"
-#include "ambient_BGM_state.hpp"
 
 #if _DEBUG
 #include <format>
@@ -29,7 +29,7 @@ static void render_debug_text(void) {
     const FG foreground{ FG::white };
 
     const COORD &size{ Console::size() };
-    COORD position = { 0, static_cast<SHORT>(size.Y - 4) };
+    COORD position{ 0, static_cast<SHORT>(size.Y - 4) };
 
     int fps{ -1 };
     if (delta_time_t::delta_time > 0.0f)

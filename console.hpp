@@ -89,9 +89,11 @@ class Console {
 private:
     static COORD size_;
 
+    //더블 버퍼링
     static int current_buffer;
     static HANDLE buffer[2];
 
+    //문자 버퍼
     static std::vector<CHAR_INFO> character_buffer;
     static SMALL_RECT written;
 
@@ -100,14 +102,14 @@ private:
     static HWND window;
     static float dpi_scale;
 
-    static const COORD calculate_size(const HANDLE size_handle);
+    static const COORD calculate_size(const HANDLE size_handle) noexcept;
     static void resize_buffer(void);
-    static void initialize_double_buffering(void);
+    static void initialize_double_buffering(void) noexcept;
     static void hide_cursor(const HANDLE cursor_handle) noexcept;
     static bool update_size(void);
-    static void resize(const HANDLE size_handle);
-    static void flip_double_buffer(void);
-    static int index(const int x, const int y);
+    static void resize(const HANDLE size_handle) noexcept;
+    static void flip_double_buffer(void) noexcept;
+    static int index(const int x, const int y) noexcept;
     static void write(const COORD &position, const wchar_t character, const WORD attribute);
 
 public:
@@ -116,13 +118,13 @@ public:
 
     static const COORD &size(void) noexcept;
 
-    static bool is_new_windows_terminal(void);
-    static const COORD convert_from_monitor(const POINT &point);
-    static bool is_cursor_inside(const POINT &point);
+    static bool is_new_windows_terminal(void) noexcept;
+    static const COORD convert_from_monitor(const POINT &point) noexcept;
+    static bool is_cursor_inside(const POINT &point) noexcept;
 
     static void clear(void);
 
-    static void fill(const cchar &character);
+    static void fill(const cchar &character) noexcept;
     static void print(const cchar &character, const COORD &position);
     static size_t print(const std::string &string,
                         COORD position,
@@ -133,5 +135,5 @@ public:
                              const BG background,
                              const FG foreground);
 
-    static void destroy(void);
+    static void destroy(void) noexcept;
 };

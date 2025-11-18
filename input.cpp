@@ -29,7 +29,7 @@ CALLBACK_MEMBER_INITIALIZE(input_mouse_click, bool);
 CALLBACK_MEMBER_INITIALIZE(input_mouse_position, COORD);
 CALLBACK_MEMBER_INITIALIZE(input_mouse_in_console, bool);
 
-LRESULT CALLBACK Input::windows_callback(const int nCode, const WPARAM wParam, const LPARAM lParam) {
+LRESULT CALLBACK Input::windows_callback(const int nCode, const WPARAM wParam, const LPARAM lParam) noexcept {
     if (nCode == HC_ACTION) {
         const POINT point{ reinterpret_cast<MSLLHOOKSTRUCT *>(lParam)->pt };
         input_mouse_position.call(Console::convert_from_monitor(point));

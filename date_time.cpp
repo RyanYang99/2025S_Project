@@ -69,7 +69,7 @@ void date_time::render(void) {
     const std::string sDay{ std::format("Day {}", day_) },
                       time{ std::format("{}{}{}", hour_, blink_character, minute_) };
 
-    COORD position = { static_cast<SHORT>(Console::size().X - sDay.length()), 0};
+    COORD position{ static_cast<SHORT>(Console::size().X - sDay.length()), 0};
     Console::print(sDay, position, BG::black, FG::white);
 
     position.X = static_cast<SHORT>(Console::size().X - time.length());
@@ -81,7 +81,7 @@ bool date_time::is_night(void) const noexcept {
     return hour_ >= 21 || hour_ <= 6;
 }
 
-void date_time::save(void) const noexcept {
+void date_time::save(void) const {
     if (!pSave_current)
         save_instantiate();
 

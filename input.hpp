@@ -45,7 +45,7 @@ private:
     static CALLBACK_MEMBER(input_mouse_position, COORD);
     static CALLBACK_MEMBER(input_mouse_in_console, bool);
 
-    static LRESULT CALLBACK windows_callback(const int nCode, const WPARAM wParam, const LPARAM lParam);
+    static LRESULT CALLBACK windows_callback(const int nCode, const WPARAM wParam, const LPARAM lParam) noexcept;
 
 public:
     static void initialize(void) noexcept;

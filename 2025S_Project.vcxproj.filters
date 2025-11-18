@@ -138,7 +138,7 @@
     <ClInclude Include="direction.hpp">
       <Filter>Header File</Filter>
     </ClInclude>
-    <ClInclude Include="ambient_BGM_state.hpp">
+    <ClInclude Include="BGM.hpp">
       <Filter>Header File</Filter>
     </ClInclude>
   </ItemGroup>

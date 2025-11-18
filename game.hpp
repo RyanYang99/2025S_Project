@@ -1,7 +1,7 @@
 ﻿#pragma once
 
+#include "BGM.hpp"
 #include "date_time.hpp"
-#include "ambient_BGM_state.hpp"
 
 class Game {
 private:

@@ -127,7 +127,7 @@
     <ClCompile Include="tool.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ambient_BGM_state.hpp" />
+    <ClInclude Include="BGM.hpp" />
     <ClInclude Include="astar.hpp" />
     <ClInclude Include="block_control.hpp" />
     <ClInclude Include="boss_malakh.hpp" />

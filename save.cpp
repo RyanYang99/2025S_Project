@@ -51,7 +51,7 @@ static void write_save(LPCWSTR const pPath) {
     fwrite(&pSave_current->max_HP, sizeof(pSave_current->max_HP), 1, pFile);
     fwrite(pSave_current->pInventory, sizeof(player_item_t), INVENTORY_SIZE, pFile);
     fwrite(pSave_current->pHotbar_linked_index, sizeof(int), HOTBAR_COUNT, pFile);
-    fwrite(pSave_current->pPermuation_table, sizeof(int), PERLIN_SIZE, pFile);
+    fwrite(pSave_current->pPermuation_table, sizeof(int), Perlin::perlin_size, pFile);
     fwrite(&pSave_current->map_x, sizeof(pSave_current->map_x), 1, pFile);
     fwrite(&pSave_current->map_y, sizeof(pSave_current->map_y), 1, pFile);
     fwrite(pSave_current->pBlocks, sizeof(block_info_t), pSave_current->map_x * pSave_current->map_y, pFile);
@@ -164,7 +164,7 @@ static save_t *load_save(LPCWSTR const pPath) {
     fread(&pSave->max_HP, sizeof(pSave->max_HP), 1, pFile);
     fread(pSave->pInventory, sizeof(player_item_t), INVENTORY_SIZE, pFile);
     fread(pSave->pHotbar_linked_index, sizeof(int), HOTBAR_COUNT, pFile);
-    fread(pSave->pPermuation_table, sizeof(int), PERLIN_SIZE, pFile);
+    fread(pSave->pPermuation_table, sizeof(int), Perlin::perlin_size, pFile);
     fread(&pSave->map_x, sizeof(pSave->map_x), 1, pFile);
     fread(&pSave->map_y, sizeof(pSave->map_y), 1, pFile);
 

@@ -18,7 +18,7 @@ HANDLE Console::handle{};
 HWND Console::window{};
 float Console::dpi_scale{};
 
-const COORD Console::calculate_size(const HANDLE size_handle) {
+const COORD Console::calculate_size(const HANDLE size_handle) noexcept {
     CONSOLE_SCREEN_BUFFER_INFO csbi{};
     GetConsoleScreenBufferInfo(size_handle, &csbi);
 
@@ -37,10 +37,10 @@ void Console::hide_cursor(const HANDLE cursor_handle) noexcept {
 }
 
 void Console::resize_buffer(void) {
-    character_buffer.resize(size_.X * size_.Y);
+    character_buffer.resize(static_cast<size_t>(size_.X) * static_cast<size_t>(size_.Y));
 }
 
-void Console::initialize_double_buffering(void) {
+void Console::initialize_double_buffering(void) noexcept {
     for (int i{}; i < 2; ++i) {
         const HANDLE new_handle{ CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, nullptr, CONSOLE_TEXTMODE_BUFFER, nullptr) };
         SetConsoleScreenBufferSize(new_handle, size_);
@@ -67,7 +67,7 @@ void Console::initialize(void) {
     resize_buffer();
 }
 
-void Console::resize(const HANDLE size_handle) {
+void Console::resize(const HANDLE size_handle) noexcept {
     SMALL_RECT rect{};
     rect.Right = 1;
     rect.Bottom = 1;
@@ -104,7 +104,7 @@ bool Console::update_size(void) {
     return true;
 }
 
-void Console::flip_double_buffer(void) {
+void Console::flip_double_buffer(void) noexcept {
     if (character_buffer.empty())
         return;
 
@@ -117,7 +117,7 @@ void Console::flip_double_buffer(void) {
         current_buffer = 0;
 }
 
-int Console::index(const int x, const int y) {
+int Console::index(const int x, const int y) noexcept {
     return x + y * size_.X;
 }
 
@@ -132,7 +132,7 @@ void Console::write(const COORD &position, const wchar_t character, const WORD a
         return;
 
     const int i{ index(position.X, position.Y) };
-    if (i < 0 || i >= character_buffer.size())
+    if (i < 0 || i >= static_cast<int>(character_buffer.size()))
         return;
 
     character_buffer[i].Char.UnicodeChar = character;
@@ -150,14 +150,14 @@ const COORD &Console::size(void) noexcept {
     return size_;
 }
 
-bool Console::is_new_windows_terminal(void) {
+bool Console::is_new_windows_terminal(void) noexcept {
     CONSOLE_FONT_INFO font{};
     GetCurrentConsoleFont(GetStdHandle(STD_OUTPUT_HANDLE), false, &font);
 
     return font.dwFontSize.X <= 0;
 }
 
-const COORD Console::convert_from_monitor(const POINT &point) {
+const COORD Console::convert_from_monitor(const POINT &point) noexcept {
     POINT client_point{ point.x, point.y };
     ScreenToClient(window, &client_point);
 
@@ -168,7 +168,7 @@ const COORD Console::convert_from_monitor(const POINT &point) {
              static_cast<SHORT>(client_point.y / (font.dwFontSize.Y * dpi_scale)) };
 }
 
-bool Console::is_cursor_inside(const POINT &point) {
+bool Console::is_cursor_inside(const POINT &point) noexcept {
     RECT window_rect{};
     GetWindowRect(window, &window_rect);
 
@@ -186,12 +186,12 @@ void Console::clear(void) {
     std::fill(character_buffer.begin(), character_buffer.end(), CHAR_INFO{});
 }
 
-void Console::fill(const cchar &character) {
+void Console::fill(const cchar &character) noexcept {
     const WORD attribute = static_cast<WORD>(character.background) | static_cast<WORD>(character.foreground);
     if (character_buffer.empty())
         return;
 
-    for (int i{}; i < character_buffer.size(); ++i) {
+    for (size_t i{}; i < character_buffer.size(); ++i) {
         character_buffer[i].Char.UnicodeChar = character.character;
         character_buffer[i].Attributes = attribute;
     }
@@ -229,7 +229,7 @@ void Console::print_center(const std::string &string,
     print(string, position, background, foreground);
 }
 
-void Console::destroy(void) {
+void Console::destroy(void) noexcept {
     for (int i{}; i < 2; ++i)
         if (buffer[i]) {
             CloseHandle(buffer[i]);

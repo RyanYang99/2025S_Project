@@ -18,5 +18,5 @@ public:
 
     bool is_night(void) const noexcept;
 
-    void save(void) const noexcept;
+    void save(void) const;
 };
