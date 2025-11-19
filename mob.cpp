@@ -201,7 +201,7 @@ static void mob_spawn_manager(void) {
             static float mob_spawn_timer = 0.0f;
             const float mob_spawn_cool_time = 2.0f;
 
-            mob_spawn_timer += delta_time_t::delta_time;
+            mob_spawn_timer += DeltaTime::delta_time();
             if (mob_spawn_timer >= mob_spawn_cool_time) {
                 mob_spawn();
                 mob_spawn_timer = 0.0f;
@@ -214,10 +214,12 @@ static void mob_spawn_manager(void) {
 static void update_mob_damage_texts(void) {
     for (int i = 0; i < MAX_MOB_DAMAGE_TEXTS; ++i)
         if (pMob_damage_texts[i].active) {
+            const float delta{ DeltaTime::delta_time() };
+
             //위로 움직이는 효과
-            pMob_damage_texts[i].precise_y -= delta_time_t::delta_time * 5.0f;
+            pMob_damage_texts[i].precise_y -= delta * 5.0f;
             //타이머 감소
-            pMob_damage_texts[i].timer -= delta_time_t::delta_time;
+            pMob_damage_texts[i].timer -= delta;
             if (pMob_damage_texts[i].timer <= 0.0f)
                 pMob_damage_texts[i].active = false;
         }
@@ -242,16 +244,18 @@ static void update_mob_ai(void) {
                 else if (direction == astar::direction::none)
                     mobs[i].velocity_x = 0;
             } else
-                mobs[i].ai_timer += delta_time_t::delta_time;
+                mobs[i].ai_timer += DeltaTime::delta_time();
         }
 }
 
 static void mob_physics(void) {
+    const float delta{ DeltaTime::delta_time() };
+
     for (int i = 0; i < mob_count; ++i) {
         if (mobs[i].is_dead) {
             mobs[i].velocity_x = 0.0f;
-            mobs[i].velocity_y += GRAVITY * delta_time_t::delta_time;
-            mobs[i].precise_y += mobs[i].velocity_y * delta_time_t::delta_time;
+            mobs[i].velocity_y += GRAVITY * delta;
+            mobs[i].precise_y += mobs[i].velocity_y * delta;
             mobs[i].y = (int)mobs[i].precise_y;
             continue;
         }
@@ -271,9 +275,9 @@ static void mob_physics(void) {
                 mobs[i].velocity_y = 0.0f;
             mobs[i].precise_y = (float)mobs[i].y;
         } else
-            mobs[i].velocity_y += GRAVITY * delta_time_t::delta_time;
+            mobs[i].velocity_y += GRAVITY * delta;
 
-        const float new_precise_x = mobs[i].precise_x + mobs[i].velocity_x * delta_time_t::delta_time;
+        const float new_precise_x = mobs[i].precise_x + mobs[i].velocity_x * delta;
         const int new_x = (int)new_precise_x;
 
         bool can_move_horizontally = false;
@@ -285,13 +289,15 @@ static void mob_physics(void) {
         else
             mobs[i].velocity_x = 0.0f;
 
-        mobs[i].precise_y += mobs[i].velocity_y * delta_time_t::delta_time;
+        mobs[i].precise_y += mobs[i].velocity_y * delta;
         mobs[i].x = (int)mobs[i].precise_x;
         mobs[i].y = (int)mobs[i].precise_y;
     }
 }
 
 static void check_mob_player_collision(void) {
+    const float delta{ DeltaTime::delta_time() };
+
     for (int i = 0; i < mob_count; ++i) {
         if (mobs[i].is_dead)
             continue;
@@ -301,7 +307,7 @@ static void check_mob_player_collision(void) {
 
         if (collision_x && collision_y) {
             //충돌했을 때만 쿨타임
-            mobs[i].attack_cool_time_timer += delta_time_t::delta_time;
+            mobs[i].attack_cool_time_timer += delta;
 
             //쿨타임이 지났는지 확인
             if (mobs[i].attack_cool_time_timer >= MOB_ATK_COOLTIME) {
@@ -333,6 +339,8 @@ static void mob_check_if_dead(void) {
 }
 
 static void despawn_mob(void) {
+    const float delta{ DeltaTime::delta_time() };
+
     for (int i = 0; i < mob_count;) {
         //죽어가는 몬스터는 즉시 사라지지 않도록
         if (mobs[i].is_dead) {
@@ -341,7 +349,7 @@ static void despawn_mob(void) {
         }
 
         if (abs(mobs[i].x - player.x) > 70 || abs(mobs[i].y - player.y) > 70) {
-            mobs[i].despawn_timer += delta_time_t::delta_time;
+            mobs[i].despawn_timer += delta;
             if (mobs[i].despawn_timer >= 5.0f) {
                 for (int j = i; j < mob_count - 1; j++)
                     mobs[j] = mobs[j + 1];
@@ -360,8 +368,10 @@ void mob_update(void) {
     mob_spawn_manager();
     update_mob_damage_texts();
 
+    const float delta{ DeltaTime::delta_time() };
+
     static float levelUpTimer = 0.0f;
-    levelUpTimer += delta_time_t::delta_time;
+    levelUpTimer += delta;
     if (levelUpTimer >= 100.0f && mob_level < 10) {
         ++mob_level;
         levelUpTimer = 0.0f;
@@ -374,11 +384,11 @@ void mob_update(void) {
     //죽어갈때
     for (int i = 0; i < mob_count; ++i) {
         if (mobs[i].is_dead)
-            mobs[i].dying_timer -= delta_time_t::delta_time;
+            mobs[i].dying_timer -= delta;
 
         // 걷기 애니메이션
         if (mobs[i].velocity_x != 0.0f && !mobs[i].is_dead) {
-            mobs[i].animation_timer += delta_time_t::delta_time;
+            mobs[i].animation_timer += delta;
             if (mobs[i].animation_timer >= 0.5f) {
                 mobs[i].animation_timer = 0.0f;
                 mobs[i].current_frame = (mobs[i].current_frame + 1) % 2;

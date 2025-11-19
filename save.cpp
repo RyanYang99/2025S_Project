@@ -108,7 +108,7 @@ void save_render(void) {
 
     const bool has_message = strcmp(pMessage.c_str(), "");
     if (has_message)
-        timer += delta_time_t::delta_time;
+        timer += DeltaTime::delta_time();
     if (timer >= 2.0f) {
         timer = 0.0f;
         pMessage = "";

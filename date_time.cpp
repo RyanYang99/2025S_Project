@@ -34,8 +34,8 @@ void date_time::set_local_time(void) noexcept {
 }
 
 void date_time::update(void) noexcept {
-    //second_ += delta_time_t::delta_time * (86400.0f / 1200.0f); //1일당 게임 초 / 1일당 실제 초
-    second_ += delta_time_t::delta_time * (86400.0f / 60.0f);
+    //second_ += DeltaTime::delta_time() * (86400.0f / 1200.0f); //1일당 게임 초 / 1일당 실제 초
+    second_ += DeltaTime::delta_time() * (86400.0f / 60.0f);
 
     if (second_ >= 60.0f) {
         const int minutes = static_cast<int>(second_ / 60.0f);
@@ -59,7 +59,7 @@ void date_time::render(void) {
     static float blink{};
     static char blink_character{ ' ' };
 
-    blink += delta_time_t::delta_time;
+    blink += DeltaTime::delta_time();
     if (blink >= 2.0f) {
         blink = 0.0f;
         blink_character = ' ';

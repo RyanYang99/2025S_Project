@@ -32,8 +32,9 @@ static void render_debug_text(void) {
     COORD position{ 0, static_cast<SHORT>(size.Y - 4) };
 
     int fps{ -1 };
-    if (delta_time_t::delta_time > 0.0f)
-        fps = static_cast<int>(1.0f / delta_time_t::delta_time);
+    const float delta{ DeltaTime::delta_time() };
+    if (delta > 0.0f)
+        fps = static_cast<int>(1.0f / delta);
     Console::print(std::format("FPS: {}", fps), position, background, foreground);
     ++position.Y;
 
@@ -120,7 +121,7 @@ void Game::exit(const bool _exit) noexcept {
 
 void Game::update(void) {
     while (!exit_) {
-        delta_time_t::update();
+        DeltaTime::update();
 
         Console::update();
         Input::update();

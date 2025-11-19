@@ -1,8 +1,10 @@
 ﻿#pragma once
 
-class delta_time_t {
-public:
-    static float delta_time;
+class DeltaTime {
+private:
+    static float delta_time_;
 
+public:
+    static float delta_time(void) noexcept;
     static void update(void) noexcept;
 };

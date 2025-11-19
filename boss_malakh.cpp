@@ -232,9 +232,10 @@ static void boss_update_pattern(void) {
         return;
 
     //타이머 누적
-    boss.missile_timer += delta_time_t::delta_time;
-    boss.horizontal_laser_timer += delta_time_t::delta_time;
-    boss.vertical_laser_timer += delta_time_t::delta_time;
+    const float delta{ DeltaTime::delta_time() };
+    boss.missile_timer += delta;
+    boss.horizontal_laser_timer += delta;
+    boss.vertical_laser_timer += delta;
 
     //미사일 패턴 (모든 페이즈)
     if (boss.missile_timer >= boss.missile_attack_cool_time) {
@@ -271,8 +272,9 @@ static void boss_update_main(void) {
     if (boss.state == E_BOSS_STATE_DEFEATED)
         return;
 
-    boss.horizontal_laser_damage_cool_time -= delta_time_t::delta_time;
-    boss.vertical_laser_damage_cool_time -= delta_time_t::delta_time;
+    const float delta{ DeltaTime::delta_time() };
+    boss.horizontal_laser_damage_cool_time -= delta;
+    boss.vertical_laser_damage_cool_time -= delta;
 
     // 페이즈 전환 로직
     if (boss.hp <= boss.max_hp * 0.3f && boss.state < E_BOSS_STATE_PHASE_3) {
@@ -311,7 +313,7 @@ static void boss_update_main(void) {
 
     switch (boss.state) {
         case E_BOSS_STATE_DAMAGED:
-            boss.action_timer += delta_time_t::delta_time;
+            boss.action_timer += DeltaTime::delta_time();
 
             if (boss.action_timer >= 0.2f) {
                 if (boss.hp > boss.max_hp * 0.6)
@@ -345,7 +347,7 @@ static void boss_update_missiles(void) {
 
     for (int i = 0; i < MAX_MISSILES; ++i)
         if (pBoss_missiles[i].is_active) {
-            pBoss_missiles[i].move_timer += delta_time_t::delta_time;
+            pBoss_missiles[i].move_timer += DeltaTime::delta_time();
 
             //일정한 속도로 타일 이동
             if (pBoss_missiles[i].move_timer >= 1.0f / missile_speed) {
@@ -388,8 +390,10 @@ static void boss_update_missiles(void) {
 static void boss_update_damage_texts(void) {
     for (int i = 0; i < MAX_BOSS_DAMAGE_TEXTS; ++i)
         if (pBoss_damage_texts[i].active) {
-            pBoss_damage_texts[i].precise_y -= delta_time_t::delta_time * 5.0f;
-            pBoss_damage_texts[i].timer -= delta_time_t::delta_time;
+            const float delta{ DeltaTime::delta_time() };
+
+            pBoss_damage_texts[i].precise_y -= delta * 5.0f;
+            pBoss_damage_texts[i].timer -= delta;
 
             if (pBoss_damage_texts[i].timer <= 0.0f)
                 pBoss_damage_texts[i].active = false;
@@ -428,6 +432,8 @@ static void boss_render_pattern(void) {
     //미사일 렌더링
     boss_render_missiles();
 
+    const float delta{ DeltaTime::delta_time() };
+
     //페이즈 2: 가로 레이저
     if (boss.is_horizontal_laser_active) {
         //0.2초마다 한 줄씩 아래로 이동
@@ -436,7 +442,7 @@ static void boss_render_pattern(void) {
             boss.action_timer = 0.0f;
         }
 
-        boss.action_timer += delta_time_t::delta_time;
+        boss.action_timer += delta;
         if (boss.current_horizontal_laser_y > map.size.y)
             boss.is_horizontal_laser_active = false;
 
@@ -464,7 +470,7 @@ static void boss_render_pattern(void) {
 
             boss.action_timer = 0.0f;
         }
-        boss.action_timer += delta_time_t::delta_time;
+        boss.action_timer += delta;
 
         //화면을 벗어나면 패턴 종료
         if (boss.is_vertical_laser_from_left && boss.current_vertical_laser_x > map.size.x ||

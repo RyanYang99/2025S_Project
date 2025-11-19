@@ -182,7 +182,7 @@ static void render_hotbar(void) {
             should_render_name = false;
             name_render_timer = 0.0f;
         }
-        name_render_timer += delta_time_t::delta_time;
+        name_render_timer += DeltaTime::delta_time();
 
         const item_information_t *pInformation = database_find_item_by_index(inventory.pHotbar[inventory.selected_hotbar_index].pPlayer_Item->item_DB_index);
         Console::print_center(pInformation->name, position.Y - 2, BG::black, FG::white);
@@ -252,7 +252,7 @@ void inventory_render(void) {
     if (!is_inventory_open)
         return;
 
-    blink_time += delta_time_t::delta_time;
+    blink_time += DeltaTime::delta_time();
     if (blink_time >= 0.5f && blink_time < 1.0f)
         blink = true;
     else if (blink_time >= 1.0f) {
